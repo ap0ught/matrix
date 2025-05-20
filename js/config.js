@@ -69,7 +69,7 @@ const rgb = (...values) => ({ space: "rgb", values });
 
 const defaults = {
 	font: "matrixcode",
-	effect: "palette", // The name of the effect to apply at the end of the process— mainly handles coloration
+	effect: "mirror", // The name of the effect to apply at the end of the process— mainly handles coloration
 	baseTexture: null, // The name of the texture to apply to the base layer of the glyphs
 	glintTexture: null, // The name of the texture to apply to the glint layer of the glyphs
 	useCamera: false,
@@ -127,7 +127,7 @@ const defaults = {
 	isometric: false,
 	useHoloplay: false,
 	loops: false,
-	skipIntro: true,
+	skipIntro: false,
 	testFix: null,
 };
 
