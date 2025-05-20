@@ -1,3 +1,12 @@
+function getRandomVersion(versions) {
+  // Exclude aliases or undesired versions from random selection
+  const exclude = ["throwback", "updated", "1999", "2003", "2021"];
+  const keys = Object.keys(versions).filter(
+    v => !exclude.includes(v)
+  );
+  const randomKey = keys[Math.floor(Math.random() * keys.length)];
+  return versions[randomKey];
+}
 const fonts = {
 	coptic: {
 		// The script the Gnostic codices were written in
