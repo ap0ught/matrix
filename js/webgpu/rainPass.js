@@ -1,51 +1,162 @@
+/*
+ * Matrix Rain Pass - WebGPU Implementation
+ * 
+ * This is the heart of the Matrix digital rain effect using WebGPU rendering.
+ * Like the cascading green code Neo sees when he first perceives the Matrix's
+ * true nature, this pass generates the endless streams of falling glyphs.
+ * 
+ * The rain pass handles:
+ * - Glyph positioning and animation in columns
+ * - Multi-channel Signed Distance Field (MSDF) glyph rendering
+ * - Sawtooth wave functions for non-colliding raindrop behavior
+ * - Volumetric 3D effects with perspective depth
+ * - Interactive ripple effects for user input
+ */
+
 import { structs } from "../../lib/gpu-buffer.js";
 import { makeRenderTarget, loadTexture, loadShader, makeUniformBuffer, makeBindGroup, makePass } from "./utils.js";
 
+/*
+ * Ripple Effect Types
+ * 
+ * When the Matrix responds to external stimuli (like mouse clicks),
+ * it creates ripples that propagate through the digital rain.
+ * These ripples represent disturbances in the simulation's fabric.
+ */
 const rippleTypes = {
-	box: 0,
-	circle: 1,
+	box: 0,      // Square ripple effect - geometric, digital disturbance
+	circle: 1,   // Circular ripple effect - organic, natural disturbance
 };
 
+/*
+ * Geometry Constants
+ * 
+ * Each raindrop glyph is rendered as a quad (rectangle) made of two triangles.
+ * This constant defines how many vertices we need per quad for efficient
+ * GPU batch rendering.
+ */
 const numVerticesPerQuad = 2 * 3;
 
+/*
+ * Configuration Buffer Creation
+ * 
+ * This function creates a GPU buffer containing all the parameters needed
+ * to control the rain effect. It's like uploading the Matrix's operating
+ * parameters to the simulation's memory banks.
+ * 
+ * @param {GPUDevice} device - WebGPU device for buffer creation
+ * @param {Object} configUniforms - Uniform buffer layout specification
+ * @param {Object} config - User configuration parameters
+ * @param {number} density - Rain density multiplier for 3D effects
+ * @param {Array} gridSize - [width, height] of the glyph grid
+ * @param {Matrix} glyphTransform - Transformation matrix for glyph rotation/flipping
+ * @returns {GPUBuffer} Uniform buffer containing configuration data
+ */
 const makeConfigBuffer = (device, configUniforms, config, density, gridSize, glyphTransform) => {
+	/*
+	 * Configuration Data Assembly
+	 * 
+	 * Combine user configuration with computed values needed for rendering:
+	 * - Grid dimensions for proper raindrop column calculation
+	 * - Debug view toggle for development and troubleshooting
+	 * - Ripple parameters for interactive effects
+	 * - Slant calculations for angled rain (like wind in the Matrix)
+	 * - MSDF parameters for crisp glyph rendering
+	 * - Glyph transformation matrix for rotation and mirroring
+	 */
 	const configData = {
 		...config,
 		gridSize,
 		density,
-		showDebugView: config.effect === "none",
+		showDebugView: config.effect === "none",  // Debug mode shows raw rain structure
 		rippleType: config.rippleTypeName in rippleTypes ? rippleTypes[config.rippleTypeName] : -1,
+		/*
+		 * Slant Scale Compensation
+		 * When rain falls at an angle, we need to adjust the visual scale
+		 * to maintain consistent column spacing. This formula prevents
+		 * gaps or overlaps when the rain is tilted.
+		 */
 		slantScale: 1 / (Math.abs(Math.sin(2 * config.slant)) * (Math.sqrt(2) - 1) + 1),
 		slantVec: [Math.cos(config.slant), Math.sin(config.slant)],
-		msdfPxRange: 4,
+		msdfPxRange: 4,  // MSDF pixel range for distance field sampling
 		glyphTransform,
 	};
-	// console.table(configData);
+	
+	/* Uncomment for debugging configuration values:
+	   console.table(configData); */
 
 	return makeUniformBuffer(device, configUniforms, configData);
 };
 
+/*
+ * Rain Pass Factory Function
+ * 
+ * This function creates the complete Matrix rain rendering system.
+ * Like constructing the digital world from its fundamental code,
+ * this assembles all the components needed to generate the iconic
+ * cascading green glyphs.
+ * 
+ * @param {Object} params - Factory parameters
+ * @param {Object} params.config - Matrix configuration settings
+ * @param {GPUDevice} params.device - WebGPU device for GPU operations
+ * @param {GPUBuffer} params.timeBuffer - Time uniform for animation
+ * @returns {Object} Complete rain pass with render function
+ */
 export default ({ config, device, timeBuffer }) => {
+	/* Import glMatrix for 3D math operations */
 	const { mat2, mat4, vec2, vec3 } = glMatrix;
 
+	/*
+	 * Asset Loading Pipeline
+	 * 
+	 * Load all the resources needed for the Matrix rain:
+	 * - MSDF glyph texture: The actual Matrix symbols
+	 * - Glint texture: Highlights and special effects on glyphs
+	 * - Base texture: Optional surface material for glyphs
+	 * - Glint surface texture: Optional material for glyph highlights
+	 * - Shader code: GPU programs for rendering the rain
+	 */
 	const assets = [
-		loadTexture(device, config.glyphMSDFURL),
-		loadTexture(device, config.glintMSDFURL),
-		loadTexture(device, config.baseTextureURL, false, true),
-		loadTexture(device, config.glintTextureURL, false, true),
-		loadShader(device, "shaders/wgsl/rainPass.wgsl"),
+		loadTexture(device, config.glyphMSDFURL),         // Main glyph texture
+		loadTexture(device, config.glintMSDFURL),         // Glyph highlight texture
+		loadTexture(device, config.baseTextureURL, false, true),  // Optional base material
+		loadTexture(device, config.glintTextureURL, false, true), // Optional glint material
+		loadShader(device, "shaders/wgsl/rainPass.wgsl"), // Rain rendering shader
 	];
 
-	// The volumetric mode multiplies the number of columns
-	// to reach the desired density, and then overlaps them
+	/*
+	 * Volumetric Density Calculation
+	 * 
+	 * In 3D volumetric mode, we multiply the number of columns to create
+	 * depth layers that overlap, simulating raindrops at different distances.
+	 * This creates the illusion that the code extends infinitely into
+	 * the screen, just like Neo's perception in the construct loading program.
+	 */
 	const density = config.volumetric && config.effect !== "none" ? config.density : 1;
 	const gridSize = [Math.floor(config.numColumns * density), config.numColumns];
 	const numCells = gridSize[0] * gridSize[1];
 
-	// The volumetric mode requires us to create a grid of quads,
-	// rather than a single quad for our geometry
+	/*
+	 * Geometry Generation Strategy
+	 * 
+	 * - 2D Mode: Single fullscreen quad that samples the rain texture
+	 * - 3D Mode: Grid of quads positioned at different depths in space
+	 * 
+	 * The volumetric mode requires individual quads for each column/row
+	 * combination so they can be positioned independently in 3D space.
+	 */
 	const numQuads = config.volumetric ? numCells : 1;
 
+	/*
+	 * Glyph Transformation Matrix
+	 * 
+	 * This matrix handles user-requested glyph modifications:
+	 * - Horizontal flipping (mirroring) for alternate aesthetics
+	 * - Rotation for angled or upside-down code effects
+	 * 
+	 * The transformations are applied in matrix multiplication order:
+	 * scaling first (for flipping), then rotation.
+	 */
 	const glyphTransform = mat2.fromScaling(mat2.create(), vec2.fromValues(config.glyphFlip ? -1 : 1, 1));
 	mat2.rotate(glyphTransform, glyphTransform, (config.glyphRotation * Math.PI) / 180);
 

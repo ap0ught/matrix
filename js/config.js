@@ -1,5 +1,34 @@
+/*
+ * Matrix Configuration System
+ * 
+ * This module defines all the configurable aspects of the Matrix digital rain effect.
+ * Like the Architect's precise control over the simulation's parameters, this system
+ * allows fine-tuning of every visual aspect from glyph fonts to color palettes.
+ * 
+ * The configuration handles multiple Matrix "versions" representing different eras:
+ * - Classic: The iconic green rain from the original trilogy
+ * - Resurrections: Updated glyphs from the 2021 film
+ * - Paradise/Nightmare: Speculative earlier Matrix versions
+ * - Custom variants: Artistic interpretations and thematic variations
+ */
+
+/*  
+ * Random Version Selection Utility
+ * 
+ * Sometimes the best way to experience the Matrix is to let the system
+ * choose for you - like following the white rabbit down an unknown path.
+ * This function selects a random Matrix version while excluding aliases
+ * and deprecated version names.
+ * 
+ * @param {Object} versions - Available version configurations
+ * @returns {Object} Randomly selected version configuration
+ */
 function getRandomVersion(versions) {
-  // Exclude aliases or undesired versions from random selection
+  /*
+   * Version Exclusion List
+   * These are aliases or deprecated version names that shouldn't
+   * appear in random selection to avoid confusion or broken experiences
+   */
   const exclude = ["throwback", "updated", "1999", "2003", "2021"];
   const keys = Object.keys(versions).filter(
     v => !exclude.includes(v)
@@ -7,97 +36,200 @@ function getRandomVersion(versions) {
   const randomKey = keys[Math.floor(Math.random() * keys.length)];
   return versions[randomKey];
 }
+
+/*
+ * Font Definitions - The Languages of the Matrix  
+ * 
+ * Each font represents different script systems used across Matrix versions.
+ * The glyphs are stored as Multi-channel Signed Distance Fields (MSDF) which
+ * preserve crisp vector-like quality at any scale - essential for the Matrix's
+ * precise geometric appearance.
+ * 
+ * Key properties:
+ * - glyphMSDFURL: Path to the MSDF texture containing all glyphs
+ * - glyphSequenceLength: Total number of unique glyphs in the font
+ * - glyphTextureGridSize: [width, height] grid layout of glyphs in the texture
+ * - glintMSDFURL: Optional separate texture for glyph highlights/glints
+ */
 const fonts = {
 	coptic: {
-		// The script the Gnostic codices were written in
+		/*
+		 * Coptic Script - Language of the Paradise Matrix
+		 * The script the Gnostic codices were written in, representing
+		 * the idealistic predecessor Matrix that was "too perfect"
+		 */
 		glyphMSDFURL: "assets/coptic_msdf.png",
 		glyphSequenceLength: 32,
 		glyphTextureGridSize: [8, 8],
 	},
 	gothic: {
-		// The script the Codex Argenteus was written in
+		/*
+		 * Gothic Script - Language of the Nightmare Matrix  
+		 * The script the Codex Argenteus was written in, representing
+		 * the harsh, Hobbesian predecessor that was "too brutal"
+		 */
 		glyphMSDFURL: "assets/gothic_msdf.png",
 		glyphSequenceLength: 27,
 		glyphTextureGridSize: [8, 8],
 	},
 	matrixcode: {
-		// The glyphs seen in the film trilogy
+		/*
+		 * Classic Matrix Code - The Iconic Green Rain
+		 * The authentic glyphs seen in the original film trilogy,
+		 * derived from katakana and Susan Kare's Chicago typeface
+		 */
 		glyphMSDFURL: "assets/matrixcode_msdf.png",
 		glyphSequenceLength: 57,
 		glyphTextureGridSize: [8, 8],
 	},
 	megacity: {
-		// The glyphs seen in the film trilogy
+		/*
+		 * Megacity Variant - Revolutions Special Edition
+		 * Includes the Megacity glyph as seen in the opening titles
+		 * of The Matrix Revolutions
+		 */
 		glyphMSDFURL: "assets/megacity_msdf.png",
 		glyphSequenceLength: 64,
 		glyphTextureGridSize: [8, 8],
 	},
 	resurrections: {
-		// The glyphs seen in the film trilogy
+		/*
+		 * Resurrections Code - The Evolved Matrix
+		 * Updated glyph set from The Matrix Resurrections (2021) featuring
+		 * 135 symbols - the most comprehensive Matrix font ever created.
+		 * Includes separate glint textures for enhanced visual effects.
+		 */
 		glyphMSDFURL: "assets/resurrections_msdf.png",
 		glintMSDFURL: "assets/resurrections_glint_msdf.png",
 		glyphSequenceLength: 135,
 		glyphTextureGridSize: [13, 12],
 	},
 	huberfishA: {
+		/*
+		 * Huberfish Alpha - Futuristic Variant A
+		 * Fictional alphabet designed for sci-fi aesthetics,
+		 * representing code from a utopian spacefaring civilization
+		 */
 		glyphMSDFURL: "assets/huberfish_a_msdf.png",
 		glyphSequenceLength: 34,
 		glyphTextureGridSize: [6, 6],
 	},
 	huberfishD: {
+		/*
+		 * Huberfish Delta - Futuristic Variant D
+		 * Alternative style of the Huberfish alphabet with
+		 * different geometric characteristics and spacing
+		 */
 		glyphMSDFURL: "assets/huberfish_d_msdf.png",
 		glyphSequenceLength: 34,
 		glyphTextureGridSize: [6, 6],
 	},
 	gtarg_tenretniolleh: {
+		/*
+		 * Gtarg Tenretniolleh - Experimental Font
+		 * Specialized glyph set for alternative Matrix interpretations
+		 * Name appears to be "hellointernetgtag" reversed - a digital easter egg
+		 */
 		glyphMSDFURL: "assets/gtarg_tenretniolleh_msdf.png",
 		glyphSequenceLength: 36,
 		glyphTextureGridSize: [6, 6],
 	},
 	gtarg_alientext: {
+		/*
+		 * Gtarg Alien Text - Xenolinguistic Matrix
+		 * Represents communication from non-human intelligences
+		 * within the Matrix simulation - the language of the machines themselves
+		 */
 		glyphMSDFURL: "assets/gtarg_alientext_msdf.png",
 		glyphSequenceLength: 38,
 		glyphTextureGridSize: [8, 5],
 	},
 	neomatrixology: {
+		/*
+		 * Neo-Matrixology - Minimalist Code
+		 * Reduced glyph set focusing on essential symbols,
+		 * representing the simplified truth Neo perceives after awakening
+		 */
 		glyphMSDFURL: "assets/neomatrixology_msdf.png",
 		glyphSequenceLength: 12,
 		glyphTextureGridSize: [4, 4],
 	},
 };
 
+/*
+ * Texture Assets - Surface Materials for the Digital World
+ * 
+ * These textures can be applied to glyphs to create different surface
+ * appearances, adding depth and variety to the Matrix's visual language.
+ * Each texture represents a different aspect of digital reality.
+ */
 const textureURLs = {
-	sand: "assets/sand.png",
-	pixels: "assets/pixel_grid.png",
-	mesh: "assets/mesh.png",
-	metal: "assets/metal.png",
+	sand: "assets/sand.png",         // Organic, natural texture - reality bleeding through
+	pixels: "assets/pixel_grid.png", // Raw digital structure - the Matrix's true form
+	mesh: "assets/mesh.png",         // Network connections - the web of the simulation  
+	metal: "assets/metal.png",       // Industrial reality - the machine world
 };
 
+/*
+ * Color Space Constructors
+ * 
+ * These utility functions create color specifications for different color spaces:
+ * - HSL: Human-intuitive (Hue, Saturation, Lightness) 
+ * - RGB: Machine-native (Red, Green, Blue)
+ * 
+ * HSL is often more convenient for creating pleasing color palettes,
+ * while RGB maps directly to display hardware capabilities.
+ */
 const hsl = (...values) => ({ space: "hsl", values });
 const rgb = (...values) => ({ space: "rgb", values });
 
+/*
+ * Default Configuration Values - The Matrix's Base Parameters
+ * 
+ * These settings define the fundamental characteristics of the digital rain effect.
+ * Like the Architect's carefully balanced equations, each parameter influences
+ * the overall behavior and appearance of the simulation.
+ * 
+ * Categories:
+ * - Visual: Colors, fonts, effects, and appearance
+ * - Animation: Speeds, timing, and movement parameters  
+ * - Rendering: Performance, quality, and technical settings
+ * - Interaction: Camera, input, and user interface options
+ */
 const defaults = {
-	font: "matrixcode",
-	effect: "mirror", // The name of the effect to apply at the end of the process— mainly handles coloration
-	baseTexture: null, // The name of the texture to apply to the base layer of the glyphs
-	glintTexture: null, // The name of the texture to apply to the glint layer of the glyphs
-	useCamera: false,
-	backgroundColor: hsl(0, 0, 0), // The color "behind" the glyphs
-	isolateCursor: true, // Whether the "cursor"— the brightest glyph at the bottom of a raindrop— has its own color
-	cursorColor: hsl(0.242, 1, 0.73), // The color of the cursor
-	cursorIntensity: 2, // The intensity of the cursor
-	isolateGlint: false, // Whether the "glint"— highlights on certain symbols in the font— should appear
-	glintColor: hsl(0, 0, 1), // The color of the glint
-	glintIntensity: 1, // The intensity of the glint
-	volumetric: false, // A mode where the raindrops appear in perspective
-	animationSpeed: 1, // The global rate that all animations progress
-	fps: 60, // The target frame rate (frames per second) of the effect
-	forwardSpeed: 0.25, // The speed volumetric rain approaches the eye
-	bloomStrength: 0.7, // The intensity of the bloom
-	bloomSize: 0.4, // The amount the bloom calculation is scaled
-	highPassThreshold: 0.1, // The minimum brightness that is still blurred
-	cycleSpeed: 0.03, // The speed glyphs change
-	cycleFrameSkip: 1, // The global minimum number of frames between glyphs cycling
+	/* === Font and Glyph Settings === */
+	font: "matrixcode",              // Default to classic Matrix typography
+	
+	/* === Visual Effects === */
+	effect: "mirror",                // Post-processing effect to apply (mirror, palette, etc.)
+	baseTexture: null,               // Optional texture applied to glyph base layer
+	glintTexture: null,              // Optional texture applied to glyph highlights
+	
+	/* === Camera and Interaction === */
+	useCamera: false,                // Enable webcam input for interactive effects
+	
+	/* === Color Configuration === */
+	backgroundColor: hsl(0, 0, 0),   // The void behind the glyphs - pure black
+	
+	/* === Cursor (Raindrop Leader) Settings === */
+	isolateCursor: true,             // Whether cursor has distinct appearance from other glyphs
+	cursorColor: hsl(0.242, 1, 0.73), // Cyan-green cursor color (classic Matrix accent)
+	cursorIntensity: 2,              // Brightness multiplier for cursor glow
+	
+	/* === Glint (Highlight) Settings === */
+	isolateGlint: false,             // Whether to render special glyph highlights
+	glintColor: hsl(0, 0, 1),        // Pure white glint color for maximum contrast
+	glintIntensity: 1,               // Brightness multiplier for glint effects
+	
+	/* === 3D and Perspective === */
+	volumetric: false,               // Enable 3D mode with depth and perspective
+	forwardSpeed: 0.25,              // Speed that 3D raindrops approach the viewer
+	
+	/* === Animation and Timing === */
+	animationSpeed: 1,               // Global multiplier for all animation speeds
+	fps: 60,                         // Target frame rate for smooth motion
+	cycleSpeed: 0.03,                // Rate at which glyphs change their symbols
+	cycleFrameSkip: 1,               // Minimum frames between glyph symbol changes
 	baseBrightness: -0.5, // The brightness of the glyphs, before any effects are applied
 	baseContrast: 1.1, // The contrast of the glyphs, before any effects are applied
 	glintBrightness: -1.5, // The brightness of the glints, before any effects are applied
