@@ -41,3 +41,15 @@ Append a section called `## 🧠 DEV_README` to the main `README.md`. This secti
 Make this repository a **teaching tool** as well as a working codebase.  
 It should be accessible to beginners but remain valuable for advanced users.  
 **Do not remove anything — enhance what’s already here.**
+## 🕶️ Matrix Movie Reference (Mandatory)
+
+📽️ You must include at least one direct reference to **The Matrix movie** in the `README.md` or `DEV_README`.
+
+You may reference:
+- Neo, Trinity, Morpheus, or the Oracle
+- Red pill / blue pill
+- The simulation / digital world
+- “There is no spoon” 🍴
+- Any iconic line or scene
+
+🎯 This is part of the project’s identity. Do not omit it.
