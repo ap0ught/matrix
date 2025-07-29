@@ -212,16 +212,94 @@ See `TODO.txt` for detailed development roadmap including:
 
 ## Debugging
 
-### Common Issues
-- **Performance problems**: Check hardware acceleration in browser settings
-- **WebGPU not working**: Verify browser support and feature flags
-- **Blank screen**: Check browser console for module loading errors
-- **Incorrect colors**: Verify color format (RGB vs HSL) in URL parameters
+### Browser Developer Tools
 
-### Debug Tools
-- Use `effect=none` URL parameter for debug view
-- Browser developer tools for performance profiling
-- WebGL/WebGPU inspector extensions for GPU debugging
+**Console Debugging:**
+- Open DevTools (F12) and check the Console tab for JavaScript errors
+- Look for module loading errors, WebGL context issues, or asset loading failures
+- Monitor for warnings about hardware acceleration or browser compatibility
+
+**Performance Analysis:**
+- Use the Performance tab to profile frame rates and identify bottlenecks
+- Monitor GPU memory usage in the Memory tab
+- Check the Network tab for slow-loading assets (MSDF textures, shaders)
+- Use Timeline to analyze rendering pipeline performance
+
+**Graphics Debugging:**
+- Install WebGL Inspector or WebGPU Inspector browser extensions
+- Use the Sources tab to set breakpoints in shader compilation code
+- Monitor WebGL/WebGPU state changes and draw calls
+
+### URL Parameters for Debugging
+
+**Visual Debugging:**
+- `?effect=none` - Shows raw rain without color effects (pure white on black)
+- `?effect=plain` - Basic palette effect without post-processing
+- `?effect=palette` - Standard palette rendering
+- `?once=true` - Renders only one frame, useful for inspecting static output
+- `?skipIntro=true` - Skip intro animation for faster debugging
+
+**Performance Testing:**
+- `?fps=30` - Set target frame rate (1-60) to test performance
+- `?resolution=0.5` - Scale rendering resolution (lower = better performance)
+- `?numColumns=40` - Reduce column count for performance testing
+- `?animationSpeed=0.1` - Slow down animations for frame-by-frame analysis
+- `?loops=false` - Disable animation loops
+
+**Renderer Selection:**
+- `?renderer=regl` - Force WebGL renderer (default)
+- `?renderer=webgpu` - Force WebGPU renderer (if supported)
+- `?suppressWarnings=true` - Hide hardware acceleration warnings
+
+**Test Fixes:**
+- `?testFix=fwidth_10_1_2022_A` - Enable specific compatibility fixes
+- `?testFix=fwidth_10_1_2022_B` - Alternative compatibility mode
+
+**Layout and Visual Testing:**
+- `?volumetric=true` - Enable 3D volumetric mode
+- `?camera=true` - Enable camera input for testing
+- `?glyphFlip=true` - Horizontally flip glyphs
+- `?slant=45` - Adjust rain angle (degrees)
+- `?palette=255,0,0,0,255,255,0,1` - Custom color palette (RGB values 0-255, alpha 0-1)
+
+### Common Debugging Scenarios
+
+**Performance Issues:**
+1. Check hardware acceleration: Navigate to `chrome://gpu/` in Chrome
+2. Test with reduced parameters: `?resolution=0.5&numColumns=40&fps=30`
+3. Profile in DevTools Performance tab during animation
+4. Monitor memory usage for leaks
+
+**Rendering Issues:**
+1. Start with `?effect=none` to isolate the base rain rendering
+2. Check browser console for WebGL context errors
+3. Test different renderers: `?renderer=regl` vs `?renderer=webgpu`
+4. Verify MSDF texture loading in Network tab
+
+**Animation Problems:**
+1. Use `?animationSpeed=0.1` to slow down animations
+2. Enable `?once=true` for static analysis
+3. Check timing with `?fps=1` for frame-by-frame debugging
+
+**Browser Compatibility:**
+1. Test with different browsers and versions
+2. Check WebGL/WebGPU support at `about://gpu/` or similar
+3. Use compatibility test fixes when needed
+4. Monitor console for extension-related warnings
+
+### Debug Tools and Extensions
+
+**Browser Extensions:**
+- **WebGL Inspector** - Captures WebGL calls and state
+- **WebGPU Inspector** - Debug WebGPU pipelines and shaders
+- **GPU Benchmark** - Test graphics performance
+- **Developer Tools** - Built-in performance profilers
+
+**Manual Testing Techniques:**
+- Test across different screen resolutions and pixel ratios
+- Verify behavior on mobile devices and touch interfaces
+- Check memory usage during extended sessions
+- Test with different Matrix versions: `?version=classic`, `?version=resurrections`
 
 ## Version History
 
