@@ -72,6 +72,46 @@ This is a web-based implementation of the iconic digital rain effect from **The 
 3. **Open in browser**
    Navigate to `http://localhost:8000`
 
+### GitHub Codespaces Development
+
+GitHub Codespaces provides a cloud-based development environment that's perfect for this project:
+
+1. **Open in Codespaces**
+   - Navigate to the repository on GitHub
+   - Click the green "Code" button
+   - Select "Codespaces" tab
+   - Click "Create codespace on main" (or your branch)
+
+2. **Start the development server**
+   Once your Codespace loads, open a terminal and run:
+   ```bash
+   python3 -m http.server 8000
+   ```
+
+3. **Access the application**
+   - Codespaces will automatically detect the running server on port 8000
+   - A popup will appear asking if you want to open the application
+   - Click "Open in Browser" to view the Matrix digital rain effect
+   - Alternatively, go to the "Ports" tab and click the globe icon next to port 8000
+
+4. **Development workflow**
+   - Edit files directly in the Codespaces VS Code interface
+   - Changes are automatically reflected when you refresh the browser
+   - The integrated terminal provides access to all development tools
+   - Git operations work seamlessly with GitHub integration
+
+5. **Port forwarding**
+   - Codespaces automatically forwards port 8000 as public by default
+   - You can share the forwarded URL with others for collaboration
+   - Access the Ports panel (View → Ports) to manage port visibility
+
+### Codespaces advantages for this project:
+- **No local setup required**: Everything works immediately
+- **Consistent environment**: Same setup across all contributors  
+- **Easy sharing**: Share running instances via forwarded URLs
+- **GitHub integration**: Seamless git operations and PR workflows
+- **Browser-based**: Perfect for a web-based graphics project
+
 ### No Build System Required
 This project runs directly in the browser with no compilation step. All modules are loaded as ES6 modules.
 
