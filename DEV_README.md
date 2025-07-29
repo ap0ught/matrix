@@ -51,7 +51,7 @@ This is a web-based implementation of the iconic digital rain effect from **The 
 1. **Clone the repository**
    ```bash
    git clone https://github.com/username/matrix-digital-rain.git
-   cd matrix
+   cd <project-directory>
    ```
 
 2. **Start a local HTTP server**
