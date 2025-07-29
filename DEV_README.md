@@ -4,7 +4,7 @@ This document contains technical information for developers working on the Matri
 
 ## Project Overview
 
-This is a web-based implementation of the Matrix digital rain effect, built with WebGL/WebGPU and JavaScript. The project focuses on accuracy to the films while providing extensive customization options.
+This is a web-based implementation of the iconic digital rain effect from **The Matrix** film series, built with WebGL/WebGPU and JavaScript. Inspired by the groundbreaking 1999 sci-fi film directed by the Wachowski sisters, this project recreates the mesmerizing green code that has become synonymous with the franchise's cyberpunk aesthetic. The implementation focuses on accuracy to the films while providing extensive customization options for different Matrix "versions" and visual variants.
 
 ## Architecture
 
