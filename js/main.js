@@ -15,6 +15,7 @@ let spotifyIntegration = null;
 let musicVisualizer = null;
 let spotifyUI = null;
 let musicIntegration = null;
+let matrixConfig = null;
 
 const supportsWebGPU = async () => {
 	return window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
@@ -29,14 +30,15 @@ const isRunningSwiftShader = () => {
 
 document.body.onload = async () => {
 	const urlParams = new URLSearchParams(window.location.search);
-	const config = makeConfig(Object.fromEntries(urlParams.entries()));
-	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(config.renderer?.toLowerCase());
+	matrixConfig = makeConfig(Object.fromEntries(urlParams.entries()));
+	
+	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(matrixConfig.renderer?.toLowerCase());
 	const solution = import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
 
 	// Initialize Spotify integration if enabled
-	initializeSpotifyIntegration(config);
+	initializeSpotifyIntegration(matrixConfig);
 
-	if (isRunningSwiftShader() && !config.suppressWarnings) {
+	if (isRunningSwiftShader() && !matrixConfig.suppressWarnings) {
 		const notice = document.createElement("notice");
 		notice.innerHTML = `<div class="notice">
 		<p>Wake up, Neo... you've got hardware acceleration disabled.</p>
@@ -47,17 +49,17 @@ document.body.onload = async () => {
 		canvas.style.display = "none";
 		document.body.appendChild(notice);
 		document.querySelector(".blue.pill").addEventListener("click", async () => {
-			config.suppressWarnings = true;
+			matrixConfig.suppressWarnings = true;
 			urlParams.set("suppressWarnings", true);
 			history.replaceState({}, "", "?" + unescape(urlParams.toString()));
 			const matrixRenderer = await solution;
-			startMatrix(matrixRenderer, canvas, config);
+			startMatrix(matrixRenderer, canvas, matrixConfig);
 			canvas.style.display = "unset";
 			document.body.removeChild(notice);
 		});
 	} else {
 		const matrixRenderer = await solution;
-		startMatrix(matrixRenderer, canvas, config);
+		startMatrix(matrixRenderer, canvas, matrixConfig);
 	}
 };
 
@@ -99,6 +101,11 @@ function initializeSpotifyIntegration(config) {
 	}
 	if (!uiConfig.visualizerEnabled) {
 		musicVisualizer.hide();
+	}
+	
+	// Set up regular config updates based on music (only if music sync is enabled)
+	if (uiConfig.musicSyncEnabled) {
+		window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100); // Update 10 times per second
 	}
 }
 
@@ -142,8 +149,17 @@ function setupSpotifyEventListeners(config) {
 		if (musicIntegration) {
 			if (enabled) {
 				musicIntegration.activate();
+				// Start updating config based on music
+				if (!window.musicUpdateInterval) {
+					window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100);
+				}
 			} else {
 				musicIntegration.deactivate();
+				// Stop updating config
+				if (window.musicUpdateInterval) {
+					clearInterval(window.musicUpdateInterval);
+					window.musicUpdateInterval = null;
+				}
 			}
 		}
 	});
@@ -154,17 +170,33 @@ function setupSpotifyEventListeners(config) {
 }
 
 /**
+ * Update Matrix configuration based on music data
+ */
+function updateMatrixConfigFromMusic() {
+	if (!musicIntegration || !musicIntegration.isActive || !matrixConfig) {
+		return;
+	}
+	
+	const modifiedConfig = musicIntegration.getModifiedConfig();
+	
+	// Update only the properties that can change dynamically
+	const dynamicProperties = [
+		'animationSpeed', 'fallSpeed', 'cycleSpeed', 
+		'baseBrightness', 'cursorIntensity', 'bloomStrength',
+		'palette', 'cursorColor', 'raindropLength'
+	];
+	
+	dynamicProperties.forEach(prop => {
+		if (modifiedConfig[prop] !== undefined) {
+			matrixConfig[prop] = modifiedConfig[prop];
+		}
+	});
+}
+
+/**
  * Start the Matrix renderer with music integration
  */
 function startMatrix(matrixRenderer, canvas, config) {
-	// Create a wrapper that can provide modified config based on music
-	const getConfig = () => {
-		if (musicIntegration && musicIntegration.isActive) {
-			return musicIntegration.getModifiedConfig();
-		}
-		return config;
-	};
-	
 	// Start the Matrix renderer
-	matrixRenderer.default(canvas, getConfig());
+	matrixRenderer.default(canvas, config);
 }

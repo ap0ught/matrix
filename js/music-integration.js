@@ -90,6 +90,11 @@ export default class MusicIntegration {
 			return this.baseConfig;
 		}
 
+		// Only proceed if we have valid audio features
+		if (!this.audioFeatures.energy || this.audioFeatures.energy === undefined) {
+			return this.baseConfig;
+		}
+
 		const modifiedConfig = { ...this.baseConfig };
 		const sensitivity = this.config.sensitivity;
 
