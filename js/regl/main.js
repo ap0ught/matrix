@@ -9,6 +9,7 @@ import makeQuiltPass from "./quiltPass.js";
 import makeMirrorPass from "./mirrorPass.js";
 import { setupCamera, cameraCanvas, cameraAspectRatio } from "../camera.js";
 import getLKG from "./lkgHelper.js";
+import { setupFullscreenToggle } from "../fullscreen.js";
 
 const effects = {
 	none: null,
@@ -43,19 +44,10 @@ export default async (canvas, config) => {
 		canvas.height = Math.ceil(canvas.clientHeight * devicePixelRatio * config.resolution);
 	};
 	window.onresize = resize;
-	if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
-		window.ondblclick = () => {
-			if (document.fullscreenElement == null) {
-				if (canvas.webkitRequestFullscreen != null) {
-					canvas.webkitRequestFullscreen();
-				} else {
-					canvas.requestFullscreen();
-				}
-			} else {
-				document.exitFullscreen();
-			}
-		};
-	}
+	
+	// Setup fullscreen toggle with proper cleanup
+	const cleanupFullscreen = setupFullscreenToggle(canvas);
+	
 	resize();
 
 	if (config.useCamera) {

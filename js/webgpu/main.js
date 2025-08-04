@@ -9,6 +9,7 @@ import makeImagePass from "./imagePass.js";
 import makeMirrorPass from "./mirrorPass.js";
 import makeEndPass from "./endPass.js";
 import { setupCamera, cameraCanvas, cameraAspectRatio, cameraSize } from "../camera.js";
+import { setupFullscreenToggle } from "../fullscreen.js";
 
 const loadJS = (src) =>
 	new Promise((resolve, reject) => {
@@ -35,19 +36,8 @@ const effects = {
 export default async (canvas, config) => {
 	await loadJS("lib/gl-matrix.js");
 
-	if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
-		window.ondblclick = () => {
-			if (document.fullscreenElement == null) {
-				if (canvas.webkitRequestFullscreen != null) {
-					canvas.webkitRequestFullscreen();
-				} else {
-					canvas.requestFullscreen();
-				}
-			} else {
-				document.exitFullscreen();
-			}
-		};
-	}
+	// Setup fullscreen toggle with proper cleanup
+	const cleanupFullscreen = setupFullscreenToggle(canvas);
 
 	if (config.useCamera) {
 		await setupCamera();
