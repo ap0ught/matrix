@@ -90,6 +90,12 @@
 		</style>
 	</head>
 	<body>
+		<script>
+			// Redirect to the default effect if no query string is present
+			if (!window.location.search) {
+				window.location.search = '?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0';
+			}
+		</script>
 		<!--
 			This is an implementation of the green code seen in The Matrix film and video game franchise.
 			This project demonstrates five concepts:
