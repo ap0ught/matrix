@@ -1,37 +1,37 @@
-[![Matrix screenshot](/screenshot.png?raw=true "Matrix's default appearance.")](https://rezmason.github.io/matrix)
+[![Matrix screenshot](/screenshot.png?raw=true "Matrix's default appearance.")](https://ap0ught.github.io/matrix)
 
-# [matrix](https://rezmason.github.io/matrix) (web-based green code rain, made with love)
+# [matrix](https://ap0ught.github.io/matrix) (web-based green code rain, made with love)
 
 **_News Update September 2022:_** this project was [featured in Vice Motherboard](https://www.vice.com/en/article/88qvn3/coder-makes-matrix-green-rain-simulator-that-lilly-wachowski-says-is-better-than-the-original), along with insight into the effect from Lilly Wachowski.
 
 ## Quick Links
 
-- [Classic Matrix code](https://rezmason.github.io/matrix)
-- [Starting from a blank screen (`skipIntro=false`)](https://rezmason.github.io/matrix/?skipIntro=false) (which some people really like, but isn't the default mode)
-- [3D mode](https://rezmason.github.io/matrix?version=3d)
-- Mirror mode, [with camera](https://rezmason.github.io/matrix/?version=updated&effect=mirror&camera=true) and [without](https://rezmason.github.io/matrix/?version=updated&effect=mirror). (Click to make ripples.)
-- [Matrix Resurrections updated code](https://rezmason.github.io/matrix?version=resurrections)
-- [Trinity mode](https://rezmason.github.io/matrix?version=trinity)
-- [Operator Matrix code (with ripple effects)](https://rezmason.github.io/matrix?version=operator)
-- [Megacity Mode, as seen in Revolutions](https://rezmason.github.io/matrix?version=megacity)
+- [Classic Matrix code](https://ap0ught.github.io/matrix)
+- [Starting from a blank screen (`skipIntro=false`)](https://ap0ught.github.io/matrix/?skipIntro=false) (which some people really like, but isn't the default mode)
+- [3D mode](https://ap0ught.github.io/matrix?version=3d)
+- Mirror mode, [with camera](https://ap0ught.github.io/matrix/?version=updated&effect=mirror&camera=true) and [without](https://ap0ught.github.io/matrix/?version=updated&effect=mirror). (Click to make ripples.)
+- [Matrix Resurrections updated code](https://ap0ught.github.io/matrix?version=resurrections)
+- [Trinity mode](https://ap0ught.github.io/matrix?version=trinity)
+- [Operator Matrix code (with ripple effects)](https://ap0ught.github.io/matrix?version=operator)
+- [Megacity Mode, as seen in Revolutions](https://ap0ught.github.io/matrix?version=megacity)
 
 *Variants*
 
-- [Code of the "Nightmare Matrix"](https://rezmason.github.io/matrix?version=nightmare)
+- [Code of the "Nightmare Matrix"](https://ap0ught.github.io/matrix?version=nightmare)
   - [(you know, this stuff).](http://matrix.wikia.com/wiki/Nightmare_Matrix)
-- [Code of the "Paradise Matrix"](https://rezmason.github.io/matrix?version=paradise)
+- [Code of the "Paradise Matrix"](https://ap0ught.github.io/matrix?version=paradise)
   - [(AKA this stuff).](http://matrix.wikia.com/wiki/Paradise_Matrix)
-- [A custom variant I call "Palimpsest"](https://rezmason.github.io/matrix?version=palimpsest)
-- [A custom variant I call "Twilight"](https://rezmason.github.io/matrix?version=twilight)
-- [Morpheus mode](https://rezmason.github.io/matrix?version=morpheus)
-- [Bugs mode](https://rezmason.github.io/matrix?version=bugs)
-- [Pride flag colors](https://rezmason.github.io/matrix/?effect=pride)
-- [Trans flag colors](https://rezmason.github.io/matrix/?effect=trans)
-- [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://rezmason.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
-- [Custom palette (`palette=R,G,B,%,R,G,B,%,R,G,B,%, etc`)](https://rezmason.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
-- [Custom image (`url=www.website.com/picture.jpg`)](https://rezmason.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
-- [Debug view (`effect=none`)](https://rezmason.github.io/matrix/?effect=none) (*epilepsy warning*: this once had lots of flickering)
-- [Holographic version](https://rezmason.github.io/matrix?version=holoplay) (requires a Looking Glass display; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing))
+- [A custom variant I call "Palimpsest"](https://ap0ught.github.io/matrix?version=palimpsest)
+- [A custom variant I call "Twilight"](https://ap0ught.github.io/matrix?version=twilight)
+- [Morpheus mode](https://ap0ught.github.io/matrix?version=morpheus)
+- [Bugs mode](https://ap0ught.github.io/matrix?version=bugs)
+- [Pride flag colors](https://ap0ught.github.io/matrix/?effect=pride)
+- [Trans flag colors](https://ap0ught.github.io/matrix/?effect=trans)
+- [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
+- [Custom palette (`palette=R,G,B,%,R,G,B,%,R,G,B,%, etc`)](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
+- [Custom image (`url=www.website.com/picture.jpg`)](https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
+- [Debug view (`effect=none`)](https://ap0ught.github.io/matrix/?effect=none) (*epilepsy warning*: this once had lots of flickering)
+- [Holographic version](https://ap0ught.github.io/matrix?version=holoplay) (requires a Looking Glass display; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing))
 
 *Typography*
 
@@ -83,7 +83,7 @@ The following criteria guided the development process:
 - **Get the glow and color right.** Matrix symbols aren't just some shade of phosphorous green; they're first given a bloom effect, and then get tone-mapped to the green color palette.
 - **Capture the proper rhythm of raindrops falling.** Multiple raindrops often occupy a column at the same time, and they may have different speeds, but they can never collide. This project achieves this with a [sawtooth wave](http://mathworld.wolfram.com/SawtoothWave.html), modulating the width of the teeth to keep things interesting. The tips of those teeth— the cells in the grid where the sawtooth dips— are where we put the "cursors" (or "tracers") at the bottom of each raindrop.
 - **Capture the glyph cycling sequence.** The symbols in *Reloaded* and *Revolutions*' opening titles, which were at one point the highest fidelity versions of the 2D effect, change according to a repeating sequence (see the [unofficial glyph database](https://docs.google.com/spreadsheets/d/1NRJP88EzQlj_ghBbtjkGi-NbluZzlWpAqVIAq1MDGJc)). This is only a technical detail, and no longer drives the glyph cycle in this project, but it can be used to analyze [promotional material](https://wwws.warnerbros.co.jp/matrix-movie/news/?id=5).
-- **Whip up some artistic license and imagine the "previous" Matrix versions.** The sequels describe [a paradisiacal predecessor](https://rezmason.github.io/matrix?version=paradise) to the Matrix that was too idyllic, [and another earlier, nightmarish Hobbesian version](https://rezmason.github.io/matrix?version=nightmare) that proved too campy. They depict some programs running older, differently colored code. So, this project dares to speculate how these old Matrix versions looked and acted.
+- **Whip up some artistic license and imagine the "previous" Matrix versions.** The sequels describe [a paradisiacal predecessor](https://ap0ught.github.io/matrix?version=paradise) to the Matrix that was too idyllic, [and another earlier, nightmarish Hobbesian version](https://ap0ught.github.io/matrix?version=nightmare) that proved too campy. They depict some programs running older, differently colored code. So, this project dares to speculate how these old Matrix versions looked and acted.
 - **Support a broad range of customization options, and use them to produce other noncanonical variants.** See the list of links above for the full set of available versions, and see the list below to see all the ways you can personalize the effect for yourself.
 - **Make it free, open source and web based.** The [MIT License](https://github.com/Rezmason/matrix/blob/master/LICENSE) permits distribution and modification of this project. Both are highly encouraged!
 - **Support as many browsers and devices as possible.** For all the flack it receives, the web is the most ubiquitous and accessible platform for sharing graphics, or anything really. This project is built on the web stack so it can reach wherever the web goes.
@@ -101,7 +101,7 @@ Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matr
 
 You can customize the digital rain quite a bit by stapling "URL variables" to its URL— by putting a '?' at the end of the link above, and then chaining together words, like this:
 
-[https://rezmason.github.io/matrix/?numColumns=100&fallSpeed=-0.1&slant=200&glyphRotation=180](https://rezmason.github.io/matrix/?numColumns=100&fallSpeed=-0.1&slant=200&glyphRotation=180)
+[https://ap0ught.github.io/matrix/?numColumns=100&fallSpeed=-0.1&slant=200&glyphRotation=180](https://ap0ught.github.io/matrix/?numColumns=100&fallSpeed=-0.1&slant=200&glyphRotation=180)
 
 Now you know link fu. Here's a list of customization options:
 
@@ -134,13 +134,9 @@ Now you know link fu. Here's a list of customization options:
 - `effect` - alternatives to the default post-processing effect. Can be "plain", "pride", "stripes", "none", "image" or "mirror".
   - ("none" displays the 'debug view', a behind-the-scenes look at the anatomy of the effect.)
 - `camera` - some effects, ie. the mirror effect, optionally support webcam input. Can be "true" or "false". Default is false.
-- `stripeColors` - if you set the effect to "stripes", you can specify the colors of vertical stripes as alternating *R,G,B* numeric values, like so: [https://rezmason.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0](https://rezmason.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
-- `palette` — with the normal "palette" effect, you can specify the colors and placement of the colors along the color grade as alternating *R,G,B,%* numeric values, like so: [https://rezmason.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1](https://rezmason.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
-- `backgroundColor`, `cursorColor`, `glintColor` — other *R,G,B* values that apply to the corresponding parts of the effect.
-- `paletteHSL`, `stripeHSL`, `backgroundHSL`, `cursorHSL`, and `glintHSL` — the same as the above, except they use *H,S,L* (hue, saturation, lightness) instead of *R,G,B*.
-- `cursorIntensity`, — the brightness of cursors' glow. Can be any number greater than zero. Default is 2.0.
-- `glintIntensity` — the brightness of glint glow, if there is any glint. Can be any number greater than zero. Default is 1.0.
-- `url` - if you set the effect to "image", this is how you specify which image to load. It doesn't work with any URL; I suggest grabbing them from Wikipedia: [https://rezmason.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg](https://rezmason.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
+- `stripeColors` - if you set the effect to "stripes", you can specify the colors of vertical stripes as alternating *R,G,B* numeric values, like so: [https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
+- `palette` — with the normal "palette" effect, you can specify the colors and placement of the colors along the color grade as alternating *R,G,B,%* numeric values, like so: [https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
+- `url` - if you set the effect to "image", this is how you specify which image to load. It doesn't work with any URL; I suggest grabbing them from Wikipedia: [https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg](https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
 - `loops` - (WIP) if set to "true", this causes the effect to loop, so that it can be converted into a looping video.
 - `fps` — the framerate of the effect. Can be any number between 0 and 60. Default is 60.
 - `suppressWarnings` - if set to "true", this suppresses any warnings that would otherwise appear— when viewing the project on a device with no GPU, for example.
