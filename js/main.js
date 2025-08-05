@@ -105,7 +105,6 @@ document.body.onload = async () => {
 	 * This mirrors the film's central metaphor about choosing between
 	 * comfortable ignorance and enlightening truth.
 	 */
-	if (isRunningSwiftShader() && !config.suppressWarnings) {
 	// Initialize Spotify integration if enabled
 	initializeSpotifyIntegration(matrixConfig);
 
