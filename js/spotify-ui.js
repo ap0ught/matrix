@@ -4,6 +4,38 @@
  */
 
 export default class SpotifyUI {
+	/**
+	 * Enable the visualizer toggle when Spotify connects
+	 */
+	enableVisualizerToggle() {
+		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		if (visualizerToggle) {
+			visualizerToggle.disabled = false;
+
+			// Restore saved state if available
+			const savedState = localStorage.getItem('visualizer_enabled');
+			if (savedState === 'true' && this.visualizer) {
+				visualizerToggle.checked = true;
+				this.visualizer.show();
+			}
+		}
+	}
+
+	/**
+	 * Disable the visualizer toggle when Spotify disconnects
+	 */
+	disableVisualizerToggle() {
+		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		if (visualizerToggle) {
+			visualizerToggle.disabled = true;
+			visualizerToggle.checked = false;
+
+			// Hide visualizer
+			if (this.visualizer) {
+				this.visualizer.hide();
+			}
+		}
+	}
 	constructor(config = {}) {
 		this.config = {
 			position: 'top-left',
@@ -77,7 +109,7 @@ export default class SpotifyUI {
 			min-width: 200px;
 			backdrop-filter: blur(5px);
 			transition: all 0.3s ease;
-			transform: translateX(-85%);
+			transform: translateX(-95%);
 		`;
 		
 		this.element.innerHTML = `
@@ -114,7 +146,7 @@ export default class SpotifyUI {
 						Sync Matrix with Music
 					</label>
 					<label style="display: block; margin-bottom: 5px;">
-						<input type="checkbox" class="visualizer-toggle" style="margin-right: 5px;" checked />
+						<input type="checkbox" class="visualizer-toggle" style="margin-right: 5px;" />
 						Show Visualizer
 					</label>
 				</div>
@@ -200,6 +232,9 @@ export default class SpotifyUI {
 		
 		// Visualizer toggle
 		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		visualizerToggle.checked = false; // Start unchecked
+		visualizerToggle.disabled = true;  // Disabled until connected (FIXED)
+
 		visualizerToggle.addEventListener('change', (e) => {
 			this.emit('visualizerToggle', e.target.checked);
 			if (this.visualizer) {
@@ -211,13 +246,7 @@ export default class SpotifyUI {
 			}
 			localStorage.setItem('visualizer_enabled', e.target.checked);
 		});
-		
-		// Load saved visualizer setting
-		const savedVisualizer = localStorage.getItem('visualizer_enabled');
-		if (savedVisualizer !== null) {
-			visualizerToggle.checked = savedVisualizer === 'true';
-		}
-		
+
 		// Visualizer position
 		const visualizerPosition = this.element.querySelector('.visualizer-position');
 		visualizerPosition.addEventListener('change', (e) => {
@@ -260,7 +289,7 @@ export default class SpotifyUI {
 			content.style.display = 'block';
 			icon.textContent = '♫';
 		} else {
-			this.element.style.transform = 'translateX(-85%)';
+			this.element.style.transform = 'translateX(-95%)';
 			content.style.display = 'none';
 			icon.textContent = '♪';
 		}
@@ -275,13 +304,24 @@ export default class SpotifyUI {
 		const connectBtn = this.element.querySelector('.connect-btn');
 		const disconnectBtn = this.element.querySelector('.disconnect-btn');
 		const currentTrack = this.element.querySelector('.current-track');
-		
+		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+
 		if (this.spotify && this.spotify.getConnectionStatus().isAuthenticated) {
 			indicator.style.background = '#00ff00';
 			statusText.textContent = 'Connected';
 			connectBtn.style.display = 'none';
 			disconnectBtn.style.display = 'inline-block';
-			
+
+			// Enable visualizer toggle first
+			visualizerToggle.disabled = true;
+
+			// Then apply saved state
+			const savedVisualizer = localStorage.getItem('visualizer_enabled');
+			if (savedVisualizer === 'true') {
+				visualizerToggle.checked = true;
+				if (this.visualizer) this.visualizer.show();
+			}
+
 			// Show current track if available
 			const trackInfo = this.spotify.getCurrentTrackInfo();
 			if (trackInfo && trackInfo.item) {
@@ -303,6 +343,9 @@ export default class SpotifyUI {
 			statusText.textContent = 'Disconnected';
 			connectBtn.style.display = 'inline-block';
 			disconnectBtn.style.display = 'none';
+			visualizerToggle.checked = false;
+			visualizerToggle.disabled = true;
+			if (this.visualizer) this.visualizer.hide();
 			currentTrack.style.display = 'none';
 		}
 	}

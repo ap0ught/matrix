@@ -271,6 +271,9 @@ function initializeSpotifyIntegration(config) {
 /**
  * Set up Spotify event listeners
  */
+/**
+ * Set up Spotify event listeners
+ */
 function setupSpotifyEventListeners() {
 	// Track changes
 	spotifyIntegration.on('trackChange', (data) => {
@@ -290,6 +293,13 @@ function setupSpotifyEventListeners() {
 	// Authentication changes
 	spotifyIntegration.on('authChange', (isAuthenticated) => {
 		console.log('Spotify authentication changed:', isAuthenticated);
+
+		// Enable/disable visualizer toggle based on authentication
+		if (isAuthenticated) {
+			spotifyUI.enableVisualizerToggle();
+		} else {
+			spotifyUI.disableVisualizerToggle();
+		}
 	});
 
 	// Errors
@@ -332,9 +342,7 @@ function setupSpotifyEventListeners() {
 			}
 		}
 	});
-
 }
-
 /**
  * Update Matrix configuration based on music data
  */
