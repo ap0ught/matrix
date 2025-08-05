@@ -139,7 +139,6 @@ document.body.onload = async () => {
 		 * Hardware acceleration is available or warnings are suppressed.
 		 * Initialize the chosen rendering solution immediately.
 		 */
-		(await solution).default(canvas, config);
 		const matrixRenderer = await solution;
 		startMatrix(matrixRenderer, canvas, matrixConfig);
 	}
