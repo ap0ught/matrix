@@ -193,7 +193,7 @@ function initializeSpotifyIntegration(config) {
 /**
  * Set up Spotify event listeners
  */
-function setupSpotifyEventListeners(config) {
+function setupSpotifyEventListeners() {
 	// Track changes
 	spotifyIntegration.on('trackChange', (data) => {
 		if (data) {
@@ -246,8 +246,15 @@ function setupSpotifyEventListeners(config) {
 	});
 
 	spotifyUI.on('visualizerToggle', (enabled) => {
-		// Handled by SpotifyUI directly
+		if (musicVisualizer) {
+			if (enabled) {
+				musicVisualizer.show();
+			} else {
+				musicVisualizer.hide();
+			}
+		}
 	});
+
 }
 
 /**

@@ -40,10 +40,10 @@ export default class SpotifyUI {
 		this.updateConnectionStatus();
 		
 		// Listen for auth changes
-		spotify.on('authChange', (isAuthenticated) => {
+		spotify.on('authChange', () => {
 			this.updateConnectionStatus();
 		});
-		
+
 		spotify.on('error', (error) => {
 			this.showError(error);
 		});
@@ -288,8 +288,13 @@ export default class SpotifyUI {
 				const trackName = this.element.querySelector('.track-name');
 				const trackArtist = this.element.querySelector('.track-artist');
 				trackName.textContent = trackInfo.item.name;
-				trackArtist.textContent = trackInfo.item.artists.map(a => a.name).join(', ');
-				currentTrack.style.display = 'block';
+				/**
+				 * @param {Object} trackInfo - Spotify track info
+				 * @param {Object} trackInfo.item - Track item
+				 * @param {Array<{name: string}>} trackInfo.item.artists - Track artists
+				 */
+				// Then your original code should work without warnings
+				trackArtist.textContent = trackInfo?.item?.artists?.map(a => a.name).join(', ') || 'Unknown Artist';				currentTrack.style.display = 'block';
 			} else {
 				currentTrack.style.display = 'none';
 			}
@@ -319,7 +324,7 @@ export default class SpotifyUI {
 	/**
 	 * Update current track display
 	 */
-	updateCurrentTrack(trackData) {
+	updateCurrentTrack( ) {
 		this.updateConnectionStatus();
 	}
 
@@ -344,17 +349,6 @@ export default class SpotifyUI {
 		}
 	}
 
-	/**
-	 * Remove event listener
-	 */
-	off(event, callback) {
-		if (this.callbacks[event]) {
-			const index = this.callbacks[event].indexOf(callback);
-			if (index > -1) {
-				this.callbacks[event].splice(index, 1);
-			}
-		}
-	}
 
 	/**
 	 * Emit event to listeners
