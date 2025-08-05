@@ -13,6 +13,81 @@ import MusicIntegration from "./music-integration.js";
  */
 
 /*
+ * Dynamic CSS Styles for Matrix Warning Interface
+ *
+ * These styles are injected when the SwiftShader warning is displayed,
+ * creating the iconic Matrix choice between blue pill and red pill.
+ */
+const matrixWarningStyles = `
+	.notice {
+		margin-top: 10em;
+		animation: fadeInAnimation ease 3s;
+		animation-iteration-count: 1;
+		animation-fill-mode: forwards;
+	}
+
+	@keyframes fadeInAnimation {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.pill {
+		display: inline-block;
+		background: gray;
+		border: 0.3em solid lightgray;
+		font-size: 1rem;
+		font-family: monospace;
+		color: white;
+		padding: 0.5em 1em;
+		border-radius: 2em;
+		min-width: 6rem;
+		margin: 3em;
+		text-decoration: none;
+		cursor: pointer;
+		text-transform: uppercase;
+		font-weight: bold;
+	}
+
+	.blue {
+		background: linear-gradient(skyblue, blue, black, black, darkblue);
+		border-color: darkblue;
+		color: lightblue;
+	}
+
+	.blue:hover {
+		border-color: blue;
+		color: white;
+	}
+
+	.red {
+		background: linear-gradient(lightpink, crimson, black, black, darkred);
+		border-color: darkred;
+		color: lightpink;
+	}
+
+	.red:hover {
+		border-color: crimson;
+		color: white;
+	}
+`;
+
+/*
+ * Inject Matrix Warning Styles
+ *
+ * Creates and injects the CSS styles needed for the Matrix choice interface.
+ * This approach keeps the styles with the code that uses them.
+ */
+function injectMatrixWarningStyles() {
+	const styleElement = document.createElement('style');
+	styleElement.textContent = matrixWarningStyles;
+	document.head.appendChild(styleElement);
+}
+
+/*
  * Initialize the main rendering canvas
  * Creates a full-screen canvas element that will display the Matrix effect
  */
@@ -109,6 +184,9 @@ document.body.onload = async () => {
 	initializeSpotifyIntegration(matrixConfig);
 
 	if (isRunningSwiftShader() && !matrixConfig.suppressWarnings) {
+		// Inject the styles needed for the Matrix warning interface
+		injectMatrixWarningStyles();
+
 		const notice = document.createElement("notice");
 		notice.innerHTML = `<div class="notice">
 		<p>Wake up, Neo... you've got hardware acceleration disabled.</p>
