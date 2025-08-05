@@ -29,19 +29,18 @@ export default class SpotifyIntegration {
 	/**
 	 * Initialize Spotify integration with client ID
 	 */
-	init(clientId) {
+	async init(clientId) {
 		if (!clientId) {
 			this.emit('error', 'Spotify Client ID is required');
 			return;
 		}
 		this.clientId = clientId;
-		
-		// Check if we're returning from OAuth redirect
-		this.handleOAuthCallback();
-	}
 
+		// Check if we're returning from OAuth redirect
+		await this.handleOAuthCallback();
+	}
 	/**
-	 * Start OAuth authentication flow
+	 * Start the OAuth authentication flow
 	 */
 	authenticate() {
 		if (!this.clientId) {
@@ -56,21 +55,8 @@ export default class SpotifyIntegration {
 		authUrl.searchParams.set('scope', this.scopes);
 		authUrl.searchParams.set('state', 'matrix-spotify-auth');
 
-		// Open popup for OAuth
-		const popup = window.open(authUrl.toString(), 'spotify-auth', 'width=500,height=600');
-		
-		// Monitor popup for completion
-		const checkPopup = setInterval(() => {
-			try {
-				if (popup.closed) {
-					clearInterval(checkPopup);
-					// Check if authentication was successful
-					this.loadStoredTokens();
-				}
-			} catch (e) {
-				// Cross-origin access blocked - popup is on Spotify domain
-			}
-		}, 1000);
+		// Use direct redirect instead of popup for better compatibility
+		window.location.href = authUrl.toString();
 	}
 
 	/**
@@ -80,22 +66,41 @@ export default class SpotifyIntegration {
 		const urlParams = new URLSearchParams(window.location.search);
 		const code = urlParams.get('code');
 		const state = urlParams.get('state');
+		const error = urlParams.get('error');
+
+		// Handle error case
+		if (error) {
+			this.emit('error', `Spotify authorization error: ${error}`);
+			// Clean up URL
+			window.history.replaceState({}, document.title, window.location.pathname);
+			return;
+		}
 
 		if (code && state === 'matrix-spotify-auth') {
-			try {
-				await this.exchangeCodeForTokens(code);
-				// Clean up URL
-				window.history.replaceState({}, document.title, window.location.pathname);
-			} catch (error) {
-				this.emit('error', 'Failed to exchange code for tokens: ' + error.message);
+			console.log('Processing Spotify OAuth callback with code:', code.substring(0, 20) + '...');
+			const result = await this.exchangeCodeForTokens(code);
+
+			// Clean up URL
+			window.history.replaceState({}, document.title, window.location.pathname);
+
+			if (result.error) {
+				console.error('Token exchange error:', result.error);
+				this.emit('error', 'Failed to exchange code for tokens: ' + result.error);
+			} else {
+				console.log('Spotify authentication successful');
 			}
 		}
 	}
-
 	/**
 	 * Exchange authorization code for access and refresh tokens
 	 */
 	async exchangeCodeForTokens(code) {
+		if (!this.clientId) {
+			throw new Error('Client ID not set');
+		}
+
+		console.log('Exchanging code for tokens...');
+
 		const tokenUrl = 'https://accounts.spotify.com/api/token';
 		const body = new URLSearchParams({
 			grant_type: 'authorization_code',
@@ -113,10 +118,15 @@ export default class SpotifyIntegration {
 		});
 
 		if (!response.ok) {
-			throw new Error(`Token exchange failed: ${response.status}`);
+			const errorText = await response.text();
+			console.error('Token exchange response:', response.status, errorText);
+			// Return error details instead of throwing
+			return { error: `Token exchange failed: ${response.status} - ${errorText}` };
 		}
 
 		const data = await response.json();
+		console.log('Token exchange successful');
+
 		this.accessToken = data.access_token;
 		this.refreshToken = data.refresh_token;
 		this.tokenExpiry = Date.now() + (data.expires_in * 1000);
@@ -125,11 +135,12 @@ export default class SpotifyIntegration {
 		// Store tokens securely
 		this.storeTokens();
 		this.emit('authChange', true);
-		
+
 		// Start polling for current track
 		this.startPolling();
-	}
 
+		return { success: true };
+	}
 	/**
 	 * Refresh access token using refresh token
 	 */
@@ -235,11 +246,11 @@ export default class SpotifyIntegration {
 				if (track && track.item) {
 					const trackId = track.item.id;
 					
-					// Check if track changed
+					// Check if the track changed
 					if (!this.currentTrack || this.currentTrack.item.id !== trackId) {
 						this.currentTrack = track;
 						
-						// Fetch audio features for new track
+						// Fetch audio features for a new track
 						try {
 							this.audioFeatures = await this.getAudioFeatures(trackId);
 						} catch (error) {
@@ -305,7 +316,7 @@ export default class SpotifyIntegration {
 			throw new Error('Not authenticated');
 		}
 
-		// Check if token is about to expire (with 5 minute buffer)
+		// Check if the token is about to expire (with a 5-minute buffer)
 		if (this.tokenExpiry && Date.now() > (this.tokenExpiry - 300000)) {
 			await this.refreshAccessToken();
 		}

@@ -253,6 +253,11 @@ function initializeSpotifyIntegration(config) {
 	// Set up event listeners
 	setupSpotifyEventListeners(config);
 
+	// Initialize Spotify with client ID if available
+	if (config.spotifyClientId) {
+		spotifyIntegration.init(config.spotifyClientId);
+	}
+
 	// Initialize with saved settings
 	const uiConfig = spotifyUI.getConfig();
 	if (uiConfig.musicSyncEnabled) {
@@ -267,7 +272,6 @@ function initializeSpotifyIntegration(config) {
 		window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100); // Update 10 times per second
 	}
 }
-
 /**
  * Set up Spotify event listeners
  */
