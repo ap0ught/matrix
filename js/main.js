@@ -1,14 +1,18 @@
 import makeConfig from "./config.js";
+import SpotifyIntegration from "./spotify.js";
+import MusicVisualizer from "./visualizer.js";
+import SpotifyUI from "./spotify-ui.js";
+import MusicIntegration from "./music-integration.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
- * 
+ *
  * This is the primary application bootstrap that initializes the Matrix
  * digital rain effect. It handles renderer selection between WebGL and WebGPU,
  * detects software rendering fallbacks, and presents Matrix-themed warnings.
  */
 
-/* 
+/*
  * Initialize the main rendering canvas
  * Creates a full-screen canvas element that will display the Matrix effect
  */
@@ -25,26 +29,33 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), {
 
 /*
  * WebGPU Capability Detection
- * 
+ *
  * WebGPU is the next-generation graphics API that provides better performance
  * and more modern features compared to WebGL. This function checks if the
  * browser supports the required WebGPU interfaces for our Matrix rendering.
- * 
+ *
  * @returns {Promise<boolean>} True if WebGPU is fully supported
  */
+// Initialize Spotify integration
+let spotifyIntegration = null;
+let musicVisualizer = null;
+let spotifyUI = null;
+let musicIntegration = null;
+let matrixConfig = null;
+
 const supportsWebGPU = async () => {
 	return window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
 };
 
 /*
  * SwiftShader Software Renderer Detection
- * 
+ *
  * SwiftShader is Chrome's software fallback renderer used when hardware
  * acceleration is disabled. While it can run WebGL applications, performance
  * is significantly reduced. This detection helps us warn users about the
  * "blue pill" of disabled hardware acceleration versus the "red pill" of
  * optimal performance.
- * 
+ *
  * @returns {boolean} True if running on SwiftShader software renderer
  */
 const isRunningSwiftShader = () => {
@@ -56,12 +67,12 @@ const isRunningSwiftShader = () => {
 
 /*
  * Matrix Initialization Sequence
- * 
+ *
  * Once the page loads, we begin the sequence to enter the Matrix. This involves:
  * 1. Parsing URL parameters for customization (like choosing red pill options)
  * 2. Determining the optimal rendering path (WebGPU vs WebGL)
  * 3. Checking for performance limitations (SwiftShader detection)
- * 4. Presenting the iconic choice between blue pill (accept limitations) 
+ * 4. Presenting the iconic choice between blue pill (accept limitations)
  *    and red pill (optimize for truth/performance)
  */
 document.body.onload = async () => {
@@ -72,29 +83,33 @@ document.body.onload = async () => {
 	 * to adjusting visual effects and performance settings
 	 */
 	const urlParams = new URLSearchParams(window.location.search);
-	const config = makeConfig(Object.fromEntries(urlParams.entries()));
-	
+	matrixConfig = makeConfig(Object.fromEntries(urlParams.entries()));
+
 	/*
 	 * Renderer Selection Logic
 	 * Choose between WebGPU (cutting-edge) and WebGL (widely supported)
 	 * WebGPU provides better performance and more advanced features,
 	 * but WebGL ensures broader browser compatibility
 	 */
-	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(config.renderer?.toLowerCase());
+	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(matrixConfig.renderer?.toLowerCase());
 	const solution = import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
 
 	/*
 	 * The Matrix Choice: Blue Pill vs Red Pill
-	 * 
+	 *
 	 * If hardware acceleration is disabled (SwiftShader detected), we present
 	 * the user with a Matrix-themed choice:
 	 * - Blue Pill: Accept the performance limitations and continue
 	 * - Red Pill: Learn how to enable hardware acceleration for optimal experience
-	 * 
-	 * This mirrors the film's central metaphor about choosing between 
+	 *
+	 * This mirrors the film's central metaphor about choosing between
 	 * comfortable ignorance and enlightening truth.
 	 */
 	if (isRunningSwiftShader() && !config.suppressWarnings) {
+	// Initialize Spotify integration if enabled
+	initializeSpotifyIntegration(matrixConfig);
+
+	if (isRunningSwiftShader() && !matrixConfig.suppressWarnings) {
 		const notice = document.createElement("notice");
 		notice.innerHTML = `<div class="notice">
 		<p>Wake up, Neo... you've got hardware acceleration disabled.</p>
@@ -104,17 +119,18 @@ document.body.onload = async () => {
 		`;
 		canvas.style.display = "none";
 		document.body.appendChild(notice);
-		
+
 		/*
 		 * Blue Pill Handler
 		 * User chooses to continue with software rendering despite limitations.
 		 * We suppress further warnings and proceed with the Matrix experience.
 		 */
 		document.querySelector(".blue.pill").addEventListener("click", async () => {
-			config.suppressWarnings = true;
+			matrixConfig.suppressWarnings = true;
 			urlParams.set("suppressWarnings", true);
 			history.replaceState({}, "", "?" + unescape(urlParams.toString()));
-			(await solution).default(canvas, config);
+			const matrixRenderer = await solution;
+			startMatrix(matrixRenderer, canvas, matrixConfig);
 			canvas.style.display = "unset";
 			document.body.removeChild(notice);
 		});
@@ -125,5 +141,145 @@ document.body.onload = async () => {
 		 * Initialize the chosen rendering solution immediately.
 		 */
 		(await solution).default(canvas, config);
+		const matrixRenderer = await solution;
+		startMatrix(matrixRenderer, canvas, matrixConfig);
 	}
 };
+
+/**
+ * Initialize Spotify integration components
+ */
+function initializeSpotifyIntegration(config) {
+	// Create Spotify integration instance
+	spotifyIntegration = new SpotifyIntegration();
+
+	// Create music integration for modifying Matrix parameters
+	musicIntegration = new MusicIntegration({
+		influenceColors: config.musicInfluenceColors,
+		influenceSpeed: config.musicInfluenceSpeed,
+		influenceBrightness: config.musicInfluenceBrightness,
+		sensitivity: config.musicSensitivity
+	});
+	musicIntegration.setBaseConfig(config);
+
+	// Create music visualizer
+	musicVisualizer = new MusicVisualizer(document.body, {
+		position: config.visualizerPosition
+	});
+
+	// Create UI controls
+	spotifyUI = new SpotifyUI({
+		clientId: config.spotifyClientId
+	});
+	spotifyUI.setSpotifyIntegration(spotifyIntegration);
+	spotifyUI.setVisualizer(musicVisualizer);
+
+	// Set up event listeners
+	setupSpotifyEventListeners(config);
+
+	// Initialize with saved settings
+	const uiConfig = spotifyUI.getConfig();
+	if (uiConfig.musicSyncEnabled) {
+		musicIntegration.activate();
+	}
+	if (!uiConfig.visualizerEnabled) {
+		musicVisualizer.hide();
+	}
+
+	// Set up regular config updates based on music (only if music sync is enabled)
+	if (uiConfig.musicSyncEnabled) {
+		window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100); // Update 10 times per second
+	}
+}
+
+/**
+ * Set up Spotify event listeners
+ */
+function setupSpotifyEventListeners(config) {
+	// Track changes
+	spotifyIntegration.on('trackChange', (data) => {
+		if (data) {
+			musicVisualizer.updateTrackInfo(data.track);
+			musicVisualizer.updateAudioFeatures(data.audioFeatures);
+			musicIntegration.updateTrackInfo(data.track);
+			musicIntegration.updateAudioFeatures(data.audioFeatures);
+			spotifyUI.updateCurrentTrack(data.track);
+		} else {
+			musicVisualizer.hide();
+			musicIntegration.updateTrackInfo(null);
+			musicIntegration.updateAudioFeatures(null);
+		}
+	});
+
+	// Authentication changes
+	spotifyIntegration.on('authChange', (isAuthenticated) => {
+		console.log('Spotify authentication changed:', isAuthenticated);
+	});
+
+	// Errors
+	spotifyIntegration.on('error', (error) => {
+		console.error('Spotify error:', error);
+	});
+
+	// UI events
+	spotifyUI.on('clientIdChange', (clientId) => {
+		if (spotifyIntegration) {
+			spotifyIntegration.init(clientId);
+		}
+	});
+
+	spotifyUI.on('toggleMusicSync', (enabled) => {
+		if (musicIntegration) {
+			if (enabled) {
+				musicIntegration.activate();
+				// Start updating config based on music
+				if (!window.musicUpdateInterval) {
+					window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100);
+				}
+			} else {
+				musicIntegration.deactivate();
+				// Stop updating config
+				if (window.musicUpdateInterval) {
+					clearInterval(window.musicUpdateInterval);
+					window.musicUpdateInterval = null;
+				}
+			}
+		}
+	});
+
+	spotifyUI.on('visualizerToggle', (enabled) => {
+		// Handled by SpotifyUI directly
+	});
+}
+
+/**
+ * Update Matrix configuration based on music data
+ */
+function updateMatrixConfigFromMusic() {
+	if (!musicIntegration || !musicIntegration.isActive || !matrixConfig) {
+		return;
+	}
+
+	const modifiedConfig = musicIntegration.getModifiedConfig();
+
+	// Update only the properties that can change dynamically
+	const dynamicProperties = [
+		'animationSpeed', 'fallSpeed', 'cycleSpeed',
+		'baseBrightness', 'cursorIntensity', 'bloomStrength',
+		'palette', 'cursorColor', 'raindropLength'
+	];
+
+	dynamicProperties.forEach(prop => {
+		if (modifiedConfig[prop] !== undefined) {
+			matrixConfig[prop] = modifiedConfig[prop];
+		}
+	});
+}
+
+/**
+ * Start the Matrix renderer with music integration
+ */
+function startMatrix(matrixRenderer, canvas, config) {
+	// Start the Matrix renderer
+	matrixRenderer.default(canvas, config);
+}
