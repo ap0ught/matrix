@@ -104,9 +104,25 @@ export function setupFullscreenToggle(element) {
 
 	/**
 	 * Cross-browser fullscreen exit
+	 * @param {Element|null} currentFullscreenElement - The current fullscreen element (optional, will be checked if not provided)
 	 */
-	const exitFullscreen = () => {
+	const exitFullscreen = (currentFullscreenElement = null) => {
 		try {
+			// Check if document is active and we're actually in fullscreen
+			// This prevents "Document not active" errors
+			if (document.visibilityState !== 'visible') {
+				console.warn('Cannot exit fullscreen: document not active');
+				return;
+			}
+			
+			// Check that we're actually in fullscreen mode
+			// Use provided element or get current one
+			const fullscreenElement = currentFullscreenElement || getFullscreenElement();
+			if (!fullscreenElement) {
+				console.warn('Cannot exit fullscreen: not currently in fullscreen mode');
+				return;
+			}
+			
 			if (document.exitFullscreen) {
 				return document.exitFullscreen();
 			} else if (document.webkitExitFullscreen) {
@@ -142,14 +158,15 @@ export function setupFullscreenToggle(element) {
 		event.preventDefault();
 		event.stopPropagation();
 
+		// Get fullscreen element once to avoid duplicate DOM queries
 		const fullscreenElement = getFullscreenElement();
 		
-		if (fullscreenElement === null) {
+		if (!fullscreenElement) {
 			// Not in fullscreen, request it
 			requestFullscreen(element);
 		} else {
-			// In fullscreen, exit it
-			exitFullscreen();
+			// In fullscreen, exit it - pass the element to avoid duplicate check
+			exitFullscreen(fullscreenElement);
 		}
 	};
 
@@ -169,7 +186,7 @@ export function setupFullscreenToggle(element) {
 	};
 
 	// Add event listener using addEventListener for proper event management
-	window.addEventListener('dblclick', handleDoubleClick);
+	element.addEventListener('dblclick', handleDoubleClick);
 	
 	// Add fullscreen change listener for wake lock management
 	// Use multiple event names for cross-browser compatibility
@@ -180,7 +197,7 @@ export function setupFullscreenToggle(element) {
 
 	// Return cleanup function to remove the event listeners
 	return () => {
-		window.removeEventListener('dblclick', handleDoubleClick);
+		element.removeEventListener('dblclick', handleDoubleClick);
 		document.removeEventListener('fullscreenchange', handleFullscreenChange);
 		document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
 		document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
