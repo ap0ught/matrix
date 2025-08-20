@@ -23,7 +23,7 @@
  * @param {Object} versions - Available version configurations
  * @returns {Object} Randomly selected version configuration
  */
-function getRandomVersion(versions) {
+export function getRandomVersion(versions) {
   /*
    * Version Exclusion List
    * These are aliases or deprecated version names that shouldn't
@@ -34,7 +34,26 @@ function getRandomVersion(versions) {
     v => !exclude.includes(v)
   );
   const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return versions[randomKey];
+  return { key: randomKey, config: versions[randomKey] };
+}
+
+/*
+ * Get All Available Modes
+ * 
+ * Returns a list of all available version keys, excluding aliases
+ */
+export function getAvailableModes() {
+  const exclude = ["throwback", "updated", "1999", "2003", "2021"];
+  return Object.keys(versions).filter(v => !exclude.includes(v));
+}
+
+/*
+ * Get Available Effects
+ * 
+ * Returns a list of all available effect names
+ */
+export function getAvailableEffects() {
+  return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
 }
 
 /*
@@ -273,6 +292,7 @@ const defaults = {
 	// Spotify integration settings
 	spotifyEnabled: false, // Whether Spotify integration is active
 	spotifyClientId: null, // Spotify application client ID
+	spotifyControlsVisible: false, // Whether Spotify controls UI is visible by default
 	musicSyncEnabled: false, // Whether Matrix reacts to music
 	musicInfluenceColors: true, // Whether music affects color palette
 	musicInfluenceSpeed: true, // Whether music affects animation speed
@@ -280,9 +300,16 @@ const defaults = {
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
 	visualizerEnabled: true, // Whether to show the music visualizer minimap
 	visualizerPosition: 'bottom-right', // Position of the visualizer
+	
+	// Screensaver mode settings
+	screensaverMode: false, // Whether to enable automatic mode switching
+	modeDisplayEnabled: true, // Whether to show current mode information
+	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
+	availableModes: null, // Array of modes to cycle through (null = all modes)
+	showModeInfo: true, // Whether to display current version and effect info
 };
 
-const versions = {
+export const versions = {
 	classic: {},
 	megacity: {
 		font: "megacity",
@@ -668,6 +695,7 @@ const paramMapping = {
 	// Spotify integration parameters
 	spotifyEnabled: { key: "spotifyEnabled", parser: isTrue },
 	spotifyClientId: { key: "spotifyClientId", parser: (s) => s },
+	spotifyControls: { key: "spotifyControlsVisible", parser: isTrue },
 	musicSync: { key: "musicSyncEnabled", parser: isTrue },
 	musicColors: { key: "musicInfluenceColors", parser: isTrue },
 	musicSpeed: { key: "musicInfluenceSpeed", parser: isTrue },
@@ -675,6 +703,12 @@ const paramMapping = {
 	musicSensitivity: { key: "musicSensitivity", parser: (s) => nullNaN(range(parseFloat(s), 0.1, 3.0)) },
 	visualizer: { key: "visualizerEnabled", parser: isTrue },
 	visualizerPos: { key: "visualizerPosition", parser: (s) => s },
+	
+	// Screensaver mode parameters
+	screensaver: { key: "screensaverMode", parser: isTrue },
+	modeDisplay: { key: "modeDisplayEnabled", parser: isTrue },
+	switchInterval: { key: "modeSwitchInterval", parser: (s) => nullNaN(Math.max(60000, parseInt(s))) }, // Minimum 1 minute
+	showModeInfo: { key: "showModeInfo", parser: isTrue },
 };
 
 paramMapping.paletteRGB = paramMapping.palette;
