@@ -18,6 +18,12 @@ let currentWakeLock = null;
  */
 async function requestWakeLock() {
 	try {
+		// Check if a wake lock already exists to prevent race conditions
+		if (currentWakeLock && !currentWakeLock.released) {
+			console.log('Screen Wake Lock already active');
+			return currentWakeLock;
+		}
+		
 		// Check if Wake Lock API is supported
 		if ('wakeLock' in navigator) {
 			currentWakeLock = await navigator.wakeLock.request('screen');
@@ -53,13 +59,7 @@ async function releaseWakeLock() {
 		} catch (err) {
 			console.error('Failed to release Screen Wake Lock:', err);
 		} finally {
-		const wakeLockToRelease = currentWakeLock;
-		currentWakeLock = null;
-		try {
-			await wakeLockToRelease.release();
-			console.log('Screen Wake Lock released.');
-		} catch (err) {
-			console.error('Failed to release Screen Wake Lock:', err);
+			currentWakeLock = null;
 		}
 	}
 }
