@@ -109,7 +109,7 @@ export function setupFullscreenToggle(element) {
 		try {
 			// Check if document is active and we're actually in fullscreen
 			// This prevents "Document not active" errors
-			if (!document.hasFocus()) {
+			if (document.visibilityState !== 'visible') {
 				console.warn('Cannot exit fullscreen: document not active');
 				return;
 			}
