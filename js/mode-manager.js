@@ -88,7 +88,32 @@ export default class ModeManager {
 			return this.switchToRandomMode();
 		}
 
-		this.setMode(newMode);
+		const MAX_RETRIES = 10;
+		let attempt = 0;
+		let newMode;
+		do {
+			const randomVersion = this.getRandomVersionName();
+			const randomEffect = this.getRandomEffect();
+			newMode = {
+				version: randomVersion,
+				effect: randomEffect
+			};
+			attempt++;
+		} while (
+			newMode.version === this.currentMode.version &&
+			newMode.effect === this.currentMode.effect &&
+			attempt < MAX_RETRIES
+		);
+
+		// Only switch if a new mode was found
+		if (
+			newMode.version !== this.currentMode.version ||
+			newMode.effect !== this.currentMode.effect
+		) {
+			this.setMode(newMode);
+		} else {
+			console.warn('Could not find a different mode to switch to after maximum retries.');
+		}
 	}
 
 	/**
