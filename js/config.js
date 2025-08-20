@@ -28,12 +28,13 @@ export function getRandomVersion(versions) {
 	 * Version Exclusion List
 	 * These are aliases or deprecated version names that shouldn't
 	 * appear in random selection to avoid confusion or broken experiences
+	 * const exclude = ["throwback", "updated", "1999", "2003", "2021"];
 	 */
-	/*const exclude = ["throwback", "updated", "1999", "2003", "2021"];*/
-    const exclude = []
-	const keys = Object.keys(versions).filter((v) => !exclude.includes(v));
+    /*const exclude = [];*/
+	const exclude = []
+	constkeys = Object.keys(versions).filter((v) => !exclude.includes(v));
 	const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return versions[randomKey];
+	return versions[randomKey];
 }
 
 /*
@@ -42,8 +43,8 @@ export function getRandomVersion(versions) {
  * Returns a list of all available version keys, excluding aliases
  */
 export function getAvailableModes() {
-    /*const exclude = ["throwback", "updated", "1999", "2003", "2021"];*/
-    const exclude = []
+/*const exclude = ["throwback", "updated", "1999", "2003", "2021"];*/
+const exclude = [];
     return Object.keys(versions).filter(v => !exclude.includes(v));
 }
 
