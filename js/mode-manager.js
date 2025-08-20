@@ -76,6 +76,9 @@ export default class ModeManager {
 		const MAX_RETRIES = 10;
 		let attempt = 0;
 		let newMode;
+		// If only one mode/effect is available, avoid unnecessary retries
+		const onlyOneVersion = this.availableModes.length === 1;
+		const onlyOneEffect = this.availableEffects.length === 1;
 		do {
 			const randomVersion = this.getRandomVersionName();
 			const randomEffect = this.getRandomEffect();
