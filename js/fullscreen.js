@@ -53,7 +53,13 @@ async function releaseWakeLock() {
 		} catch (err) {
 			console.error('Failed to release Screen Wake Lock:', err);
 		} finally {
-			currentWakeLock = null;
+		const wakeLockToRelease = currentWakeLock;
+		currentWakeLock = null;
+		try {
+			await wakeLockToRelease.release();
+			console.log('Screen Wake Lock released.');
+		} catch (err) {
+			console.error('Failed to release Screen Wake Lock:', err);
 		}
 	}
 }
