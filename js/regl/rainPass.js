@@ -20,7 +20,7 @@ const makeComputeDoubleBuffer = (regl, height, width) =>
 		height,
 		wrapT: "clamp",
 		type: "half float",
-		data: Array(width * height * 4).fill(0)
+		data: Array(width * height * 4).fill(0),
 	});
 
 const numVerticesPerQuad = 2 * 3;
@@ -134,7 +134,7 @@ export default ({ regl, config, lkg }) => {
 		.map((_, y) =>
 			Array(numQuadColumns)
 				.fill()
-				.map((_, x) => Array(numVerticesPerQuad).fill([x, y]))
+				.map((_, x) => Array(numVerticesPerQuad).fill([x, y])),
 		);
 
 	// We render the code into an FBO using MSDFs: https://github.com/Chlumsky/msdfgen
@@ -315,6 +315,6 @@ export default ({ regl, config, lkg }) => {
 					render({ ...vantagePoint, transform, screenSize, vert: rainPassVert.text(), frag: rainPassFrag.text() });
 				}
 			}
-		}
+		},
 	);
 };

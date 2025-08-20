@@ -1,6 +1,6 @@
 /**
  * Fullscreen utility for cross-browser fullscreen support with proper event management
- * 
+ *
  * This utility provides:
  * - Cross-browser compatibility (webkit, moz, ms prefixes)
  * - Proper event listener management with cleanup
@@ -20,28 +20,28 @@ async function requestWakeLock() {
 	try {
 		// Check if a wake lock already exists to prevent race conditions
 		if (currentWakeLock && !currentWakeLock.released) {
-			console.log('Screen Wake Lock already active');
+			console.log("Screen Wake Lock already active");
 			return currentWakeLock;
 		}
-		
+
 		// Check if Wake Lock API is supported
-		if ('wakeLock' in navigator) {
-			currentWakeLock = await navigator.wakeLock.request('screen');
-			console.log('Screen Wake Lock acquired:', currentWakeLock);
-			
+		if ("wakeLock" in navigator) {
+			currentWakeLock = await navigator.wakeLock.request("screen");
+			console.log("Screen Wake Lock acquired:", currentWakeLock);
+
 			// Listen for wake lock release (e.g., when tab becomes invisible)
-			currentWakeLock.addEventListener('release', () => {
-				console.log('Screen Wake Lock released automatically.');
+			currentWakeLock.addEventListener("release", () => {
+				console.log("Screen Wake Lock released automatically.");
 				currentWakeLock = null;
 			});
-			
+
 			return currentWakeLock;
 		} else {
-			console.warn('Wake Lock API not supported in this browser');
+			console.warn("Wake Lock API not supported in this browser");
 			return null;
 		}
 	} catch (err) {
-		console.error('Failed to acquire Screen Wake Lock:', err);
+		console.error("Failed to acquire Screen Wake Lock:", err);
 		currentWakeLock = null;
 		return null;
 	}
@@ -55,9 +55,9 @@ async function releaseWakeLock() {
 	if (currentWakeLock) {
 		try {
 			await currentWakeLock.release();
-			console.log('Screen Wake Lock released.');
+			console.log("Screen Wake Lock released.");
 		} catch (err) {
-			console.error('Failed to release Screen Wake Lock:', err);
+			console.error("Failed to release Screen Wake Lock:", err);
 		} finally {
 			currentWakeLock = null;
 		}
@@ -71,14 +71,10 @@ async function releaseWakeLock() {
  */
 export function setupFullscreenToggle(element) {
 	// Check for fullscreen API support with various prefixes
-	const isFullscreenSupported = 
-		document.fullscreenEnabled ||
-		document.webkitFullscreenEnabled ||
-		document.mozFullScreenEnabled ||
-		document.msFullscreenEnabled;
+	const isFullscreenSupported = document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled;
 
 	if (!isFullscreenSupported) {
-		console.warn('Fullscreen API not supported in this browser');
+		console.warn("Fullscreen API not supported in this browser");
 		return () => {}; // Return empty cleanup function
 	}
 
@@ -98,7 +94,7 @@ export function setupFullscreenToggle(element) {
 				return elem.msRequestFullscreen();
 			}
 		} catch (error) {
-			console.error('Failed to request fullscreen:', error);
+			console.error("Failed to request fullscreen:", error);
 		}
 	};
 
@@ -110,19 +106,19 @@ export function setupFullscreenToggle(element) {
 		try {
 			// Check if document is active and we're actually in fullscreen
 			// This prevents "Document not active" errors
-			if (document.visibilityState !== 'visible') {
-				console.warn('Cannot exit fullscreen: document not active');
+			if (document.visibilityState !== "visible") {
+				console.warn("Cannot exit fullscreen: document not active");
 				return;
 			}
-			
+
 			// Check that we're actually in fullscreen mode
 			// Use provided element or get current one
 			const fullscreenElement = currentFullscreenElement || getFullscreenElement();
 			if (!fullscreenElement) {
-				console.warn('Cannot exit fullscreen: not currently in fullscreen mode');
+				console.warn("Cannot exit fullscreen: not currently in fullscreen mode");
 				return;
 			}
-			
+
 			if (document.exitFullscreen) {
 				return document.exitFullscreen();
 			} else if (document.webkitExitFullscreen) {
@@ -133,7 +129,7 @@ export function setupFullscreenToggle(element) {
 				return document.msExitFullscreen();
 			}
 		} catch (error) {
-			console.error('Failed to exit fullscreen:', error);
+			console.error("Failed to exit fullscreen:", error);
 		}
 	};
 
@@ -141,12 +137,7 @@ export function setupFullscreenToggle(element) {
 	 * Cross-browser check for fullscreen element
 	 */
 	const getFullscreenElement = () => {
-		return (
-			document.fullscreenElement ||
-			document.webkitFullscreenElement ||
-			document.mozFullScreenElement ||
-			document.msFullscreenElement
-		);
+		return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 	};
 
 	/**
@@ -160,7 +151,7 @@ export function setupFullscreenToggle(element) {
 
 		// Get fullscreen element once to avoid duplicate DOM queries
 		const fullscreenElement = getFullscreenElement();
-		
+
 		if (!fullscreenElement) {
 			// Not in fullscreen, request it
 			requestFullscreen(element);
@@ -175,7 +166,7 @@ export function setupFullscreenToggle(element) {
 	 */
 	const handleFullscreenChange = () => {
 		const fullscreenElement = getFullscreenElement();
-		
+
 		if (fullscreenElement) {
 			// Entering fullscreen - request wake lock
 			requestWakeLock();
@@ -186,23 +177,23 @@ export function setupFullscreenToggle(element) {
 	};
 
 	// Add event listener using addEventListener for proper event management
-	element.addEventListener('dblclick', handleDoubleClick);
-	
+	element.addEventListener("dblclick", handleDoubleClick);
+
 	// Add fullscreen change listener for wake lock management
 	// Use multiple event names for cross-browser compatibility
-	document.addEventListener('fullscreenchange', handleFullscreenChange);
-	document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-	document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-	document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+	document.addEventListener("fullscreenchange", handleFullscreenChange);
+	document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+	document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+	document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
 	// Return cleanup function to remove the event listeners
 	return () => {
-		element.removeEventListener('dblclick', handleDoubleClick);
-		document.removeEventListener('fullscreenchange', handleFullscreenChange);
-		document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-		document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-		document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-		
+		element.removeEventListener("dblclick", handleDoubleClick);
+		document.removeEventListener("fullscreenchange", handleFullscreenChange);
+		document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+		document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+		document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+
 		// Release wake lock on cleanup
 		releaseWakeLock();
 	};
@@ -213,12 +204,8 @@ export function setupFullscreenToggle(element) {
  * @returns {boolean} - True if currently in fullscreen
  */
 export function isFullscreen() {
-	const fullscreenElement = 
-		document.fullscreenElement ||
-		document.webkitFullscreenElement ||
-		document.mozFullScreenElement ||
-		document.msFullscreenElement;
-	
+	const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
 	return fullscreenElement !== null;
 }
 
@@ -227,10 +214,5 @@ export function isFullscreen() {
  * @returns {boolean} - True if fullscreen API is supported
  */
 export function isFullscreenSupported() {
-	return !!(
-		document.fullscreenEnabled ||
-		document.webkitFullscreenEnabled ||
-		document.mozFullScreenEnabled ||
-		document.msFullscreenEnabled
-	);
+	return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled);
 }
