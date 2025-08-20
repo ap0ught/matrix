@@ -44,7 +44,7 @@ const makePalette = (regl, entries) => {
 
 	return make1DTexture(
 		regl,
-		paletteColors.map((rgb) => [...rgb, 1])
+		paletteColors.map((rgb) => [...rgb, 1]),
 	);
 };
 
@@ -88,6 +88,6 @@ export default ({ regl, config }, inputs) => {
 			if (shouldRender) {
 				render({ frag: palettePassFrag.text() });
 			}
-		}
+		},
 	);
 };

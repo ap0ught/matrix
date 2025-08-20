@@ -8,13 +8,13 @@ export default class SpotifyUI {
 	 * Enable the visualizer toggle when Spotify connects
 	 */
 	enableVisualizerToggle() {
-		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
 		if (visualizerToggle) {
 			visualizerToggle.disabled = false;
 
 			// Restore saved state if available
-			const savedState = localStorage.getItem('visualizer_enabled');
-			if (savedState === 'true' && this.visualizer) {
+			const savedState = localStorage.getItem("visualizer_enabled");
+			if (savedState === "true" && this.visualizer) {
 				visualizerToggle.checked = true;
 				this.visualizer.show();
 			}
@@ -25,7 +25,7 @@ export default class SpotifyUI {
 	 * Disable the visualizer toggle when Spotify disconnects
 	 */
 	disableVisualizerToggle() {
-		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
 		if (visualizerToggle) {
 			visualizerToggle.disabled = true;
 			visualizerToggle.checked = false;
@@ -38,11 +38,11 @@ export default class SpotifyUI {
 	}
 	constructor(config = {}) {
 		this.config = {
-			position: 'top-left',
-			clientId: '', // Must be set by user
-			...config
+			position: "top-left",
+			clientId: "", // Must be set by user
+			...config,
 		};
-		
+
 		this.element = null;
 		this.spotify = null;
 		this.visualizer = null;
@@ -50,9 +50,9 @@ export default class SpotifyUI {
 		this.callbacks = {
 			onClientIdChange: [],
 			onToggleMusicSync: [],
-			onVisualizerToggle: []
+			onVisualizerToggle: [],
 		};
-		
+
 		this.init();
 	}
 
@@ -70,13 +70,13 @@ export default class SpotifyUI {
 	setSpotifyIntegration(spotify) {
 		this.spotify = spotify;
 		this.updateConnectionStatus();
-		
+
 		// Listen for auth changes
-		spotify.on('authChange', () => {
+		spotify.on("authChange", () => {
 			this.updateConnectionStatus();
 		});
 
-		spotify.on('error', (error) => {
+		spotify.on("error", (error) => {
 			this.showError(error);
 		});
 	}
@@ -92,8 +92,8 @@ export default class SpotifyUI {
 	 * Create the UI element
 	 */
 	createElement() {
-		this.element = document.createElement('div');
-		this.element.className = 'spotify-controls';
+		this.element = document.createElement("div");
+		this.element.className = "spotify-controls";
 		this.element.style.cssText = `
 			position: fixed;
 			top: 20px;
@@ -111,7 +111,7 @@ export default class SpotifyUI {
 			transition: all 0.3s ease;
 			transform: translateX(-95%);
 		`;
-		
+
 		this.element.innerHTML = `
 			<div class="controls-header" style="cursor: pointer; padding: 5px; border-bottom: 1px solid rgba(0, 255, 0, 0.2); margin-bottom: 10px;">
 				<span class="toggle-icon">♪</span> Spotify
@@ -169,7 +169,7 @@ export default class SpotifyUI {
 				<div class="error-message" style="color: #ff0000; font-size: 10px; margin-top: 5px; display: none;"></div>
 			</div>
 		`;
-		
+
 		document.body.appendChild(this.element);
 	}
 
@@ -178,65 +178,65 @@ export default class SpotifyUI {
 	 */
 	setupEventListeners() {
 		// Toggle panel expansion
-		const header = this.element.querySelector('.controls-header');
-		header.addEventListener('click', () => {
+		const header = this.element.querySelector(".controls-header");
+		header.addEventListener("click", () => {
 			this.toggleExpanded();
 		});
-		
+
 		// Client ID input
-		const clientIdInput = this.element.querySelector('.client-id-input');
-		clientIdInput.addEventListener('change', (e) => {
+		const clientIdInput = this.element.querySelector(".client-id-input");
+		clientIdInput.addEventListener("change", (e) => {
 			this.config.clientId = e.target.value.trim();
-			this.emit('clientIdChange', this.config.clientId);
-			localStorage.setItem('spotify_client_id', this.config.clientId);
+			this.emit("clientIdChange", this.config.clientId);
+			localStorage.setItem("spotify_client_id", this.config.clientId);
 		});
-		
+
 		// Load saved client ID
-		const savedClientId = localStorage.getItem('spotify_client_id');
+		const savedClientId = localStorage.getItem("spotify_client_id");
 		if (savedClientId) {
 			clientIdInput.value = savedClientId;
 			this.config.clientId = savedClientId;
 		}
-		
+
 		// Connect button
-		const connectBtn = this.element.querySelector('.connect-btn');
-		connectBtn.addEventListener('click', () => {
+		const connectBtn = this.element.querySelector(".connect-btn");
+		connectBtn.addEventListener("click", () => {
 			if (this.spotify && this.config.clientId) {
 				this.spotify.init(this.config.clientId);
 				this.spotify.authenticate();
 			} else {
-				this.showError('Please enter a valid Spotify Client ID');
+				this.showError("Please enter a valid Spotify Client ID");
 			}
 		});
-		
+
 		// Disconnect button
-		const disconnectBtn = this.element.querySelector('.disconnect-btn');
-		disconnectBtn.addEventListener('click', () => {
+		const disconnectBtn = this.element.querySelector(".disconnect-btn");
+		disconnectBtn.addEventListener("click", () => {
 			if (this.spotify) {
 				this.spotify.disconnect();
 			}
 		});
-		
-		// Music sync toggle
-		const musicSyncToggle = this.element.querySelector('.music-sync-toggle');
-		musicSyncToggle.addEventListener('change', (e) => {
-			this.emit('toggleMusicSync', e.target.checked);
-			localStorage.setItem('music_sync_enabled', e.target.checked);
-		});
-		
-		// Load saved music sync setting
-		const savedMusicSync = localStorage.getItem('music_sync_enabled');
-		if (savedMusicSync !== null) {
-			musicSyncToggle.checked = savedMusicSync === 'true';
-		}
-		
-		// Visualizer toggle
-		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
-		visualizerToggle.checked = false; // Start unchecked
-		visualizerToggle.disabled = true;  // Disabled until connected (FIXED)
 
-		visualizerToggle.addEventListener('change', (e) => {
-			this.emit('visualizerToggle', e.target.checked);
+		// Music sync toggle
+		const musicSyncToggle = this.element.querySelector(".music-sync-toggle");
+		musicSyncToggle.addEventListener("change", (e) => {
+			this.emit("toggleMusicSync", e.target.checked);
+			localStorage.setItem("music_sync_enabled", e.target.checked);
+		});
+
+		// Load saved music sync setting
+		const savedMusicSync = localStorage.getItem("music_sync_enabled");
+		if (savedMusicSync !== null) {
+			musicSyncToggle.checked = savedMusicSync === "true";
+		}
+
+		// Visualizer toggle
+		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
+		visualizerToggle.checked = false; // Start unchecked
+		visualizerToggle.disabled = true; // Disabled until connected (FIXED)
+
+		visualizerToggle.addEventListener("change", (e) => {
+			this.emit("visualizerToggle", e.target.checked);
 			if (this.visualizer) {
 				if (e.target.checked) {
 					this.visualizer.show();
@@ -244,34 +244,34 @@ export default class SpotifyUI {
 					this.visualizer.hide();
 				}
 			}
-			localStorage.setItem('visualizer_enabled', e.target.checked);
+			localStorage.setItem("visualizer_enabled", e.target.checked);
 		});
 
 		// Visualizer position
-		const visualizerPosition = this.element.querySelector('.visualizer-position');
-		visualizerPosition.addEventListener('change', (e) => {
+		const visualizerPosition = this.element.querySelector(".visualizer-position");
+		visualizerPosition.addEventListener("change", (e) => {
 			if (this.visualizer) {
 				this.visualizer.setPosition(e.target.value);
 			}
-			localStorage.setItem('visualizer_position', e.target.value);
+			localStorage.setItem("visualizer_position", e.target.value);
 		});
-		
+
 		// Load saved visualizer position
-		const savedPosition = localStorage.getItem('visualizer_position');
+		const savedPosition = localStorage.getItem("visualizer_position");
 		if (savedPosition) {
 			visualizerPosition.value = savedPosition;
 		}
-		
+
 		// Button hover effects
-		this.element.addEventListener('mouseover', (e) => {
-			if (e.target.tagName === 'BUTTON') {
-				e.target.style.opacity = '0.8';
+		this.element.addEventListener("mouseover", (e) => {
+			if (e.target.tagName === "BUTTON") {
+				e.target.style.opacity = "0.8";
 			}
 		});
-		
-		this.element.addEventListener('mouseout', (e) => {
-			if (e.target.tagName === 'BUTTON') {
-				e.target.style.opacity = '1';
+
+		this.element.addEventListener("mouseout", (e) => {
+			if (e.target.tagName === "BUTTON") {
+				e.target.style.opacity = "1";
 			}
 		});
 	}
@@ -281,17 +281,17 @@ export default class SpotifyUI {
 	 */
 	toggleExpanded() {
 		this.isExpanded = !this.isExpanded;
-		const content = this.element.querySelector('.controls-content');
-		const icon = this.element.querySelector('.toggle-icon');
-		
+		const content = this.element.querySelector(".controls-content");
+		const icon = this.element.querySelector(".toggle-icon");
+
 		if (this.isExpanded) {
-			this.element.style.transform = 'translateX(0)';
-			content.style.display = 'block';
-			icon.textContent = '♫';
+			this.element.style.transform = "translateX(0)";
+			content.style.display = "block";
+			icon.textContent = "♫";
 		} else {
-			this.element.style.transform = 'translateX(-95%)';
-			content.style.display = 'none';
-			icon.textContent = '♪';
+			this.element.style.transform = "translateX(-95%)";
+			content.style.display = "none";
+			icon.textContent = "♪";
 		}
 	}
 
@@ -299,25 +299,25 @@ export default class SpotifyUI {
 	 * Update connection status display
 	 */
 	updateConnectionStatus() {
-		const indicator = this.element.querySelector('.status-indicator');
-		const statusText = this.element.querySelector('.status-text');
-		const connectBtn = this.element.querySelector('.connect-btn');
-		const disconnectBtn = this.element.querySelector('.disconnect-btn');
-		const currentTrack = this.element.querySelector('.current-track');
-		const visualizerToggle = this.element.querySelector('.visualizer-toggle');
+		const indicator = this.element.querySelector(".status-indicator");
+		const statusText = this.element.querySelector(".status-text");
+		const connectBtn = this.element.querySelector(".connect-btn");
+		const disconnectBtn = this.element.querySelector(".disconnect-btn");
+		const currentTrack = this.element.querySelector(".current-track");
+		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
 
 		if (this.spotify && this.spotify.getConnectionStatus().isAuthenticated) {
-			indicator.style.background = '#00ff00';
-			statusText.textContent = 'Connected';
-			connectBtn.style.display = 'none';
-			disconnectBtn.style.display = 'inline-block';
+			indicator.style.background = "#00ff00";
+			statusText.textContent = "Connected";
+			connectBtn.style.display = "none";
+			disconnectBtn.style.display = "inline-block";
 
 			// Enable visualizer toggle first
 			visualizerToggle.disabled = true;
 
 			// Then apply saved state
-			const savedVisualizer = localStorage.getItem('visualizer_enabled');
-			if (savedVisualizer === 'true') {
+			const savedVisualizer = localStorage.getItem("visualizer_enabled");
+			if (savedVisualizer === "true") {
 				visualizerToggle.checked = true;
 				if (this.visualizer) this.visualizer.show();
 			}
@@ -325,8 +325,8 @@ export default class SpotifyUI {
 			// Show current track if available
 			const trackInfo = this.spotify.getCurrentTrackInfo();
 			if (trackInfo && trackInfo.item) {
-				const trackName = this.element.querySelector('.track-name');
-				const trackArtist = this.element.querySelector('.track-artist');
+				const trackName = this.element.querySelector(".track-name");
+				const trackArtist = this.element.querySelector(".track-artist");
 				trackName.textContent = trackInfo.item.name;
 				/**
 				 * @param {Object} trackInfo - Spotify track info
@@ -334,19 +334,20 @@ export default class SpotifyUI {
 				 * @param {Array<{name: string}>} trackInfo.item.artists - Track artists
 				 */
 				// Then your original code should work without warnings
-				trackArtist.textContent = trackInfo?.item?.artists?.map(a => a.name).join(', ') || 'Unknown Artist';				currentTrack.style.display = 'block';
+				trackArtist.textContent = trackInfo?.item?.artists?.map((a) => a.name).join(", ") || "Unknown Artist";
+				currentTrack.style.display = "block";
 			} else {
-				currentTrack.style.display = 'none';
+				currentTrack.style.display = "none";
 			}
 		} else {
-			indicator.style.background = '#ff0000';
-			statusText.textContent = 'Disconnected';
-			connectBtn.style.display = 'inline-block';
-			disconnectBtn.style.display = 'none';
+			indicator.style.background = "#ff0000";
+			statusText.textContent = "Disconnected";
+			connectBtn.style.display = "inline-block";
+			disconnectBtn.style.display = "none";
 			visualizerToggle.checked = false;
 			visualizerToggle.disabled = true;
 			if (this.visualizer) this.visualizer.hide();
-			currentTrack.style.display = 'none';
+			currentTrack.style.display = "none";
 		}
 	}
 
@@ -354,20 +355,20 @@ export default class SpotifyUI {
 	 * Show error message
 	 */
 	showError(message) {
-		const errorElement = this.element.querySelector('.error-message');
+		const errorElement = this.element.querySelector(".error-message");
 		errorElement.textContent = message;
-		errorElement.style.display = 'block';
-		
+		errorElement.style.display = "block";
+
 		// Hide error after 5 seconds
 		setTimeout(() => {
-			errorElement.style.display = 'none';
+			errorElement.style.display = "none";
 		}, 5000);
 	}
 
 	/**
 	 * Update current track display
 	 */
-	updateCurrentTrack( ) {
+	updateCurrentTrack() {
 		this.updateConnectionStatus();
 	}
 
@@ -377,9 +378,9 @@ export default class SpotifyUI {
 	getConfig() {
 		return {
 			clientId: this.config.clientId,
-			musicSyncEnabled: this.element.querySelector('.music-sync-toggle').checked,
-			visualizerEnabled: this.element.querySelector('.visualizer-toggle').checked,
-			visualizerPosition: this.element.querySelector('.visualizer-position').value
+			musicSyncEnabled: this.element.querySelector(".music-sync-toggle").checked,
+			visualizerEnabled: this.element.querySelector(".visualizer-toggle").checked,
+			visualizerPosition: this.element.querySelector(".visualizer-position").value,
 		};
 	}
 
@@ -392,17 +393,16 @@ export default class SpotifyUI {
 		}
 	}
 
-
 	/**
 	 * Emit event to listeners
 	 */
 	emit(event, data) {
 		if (this.callbacks[event]) {
-			this.callbacks[event].forEach(callback => {
+			this.callbacks[event].forEach((callback) => {
 				try {
 					callback(data);
 				} catch (error) {
-					console.error('Error in UI event callback:', error);
+					console.error("Error in UI event callback:", error);
 				}
 			});
 		}

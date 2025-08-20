@@ -20,8 +20,8 @@ const makePyramid = (device, size, pyramidHeight) =>
 		.map((_, index) =>
 			makeComputeTarget(
 				device,
-				size.map((x) => Math.floor(x * 2 ** -index))
-			)
+				size.map((x) => Math.floor(x * 2 ** -index)),
+			),
 		);
 
 const destroyPyramid = (pyramid) => pyramid?.forEach((texture) => texture.destroy());

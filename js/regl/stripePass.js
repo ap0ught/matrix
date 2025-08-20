@@ -36,7 +36,7 @@ export default ({ regl, config }, inputs) => {
 	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "pride" ? prideStripeColors : transPrideStripeColors;
 	const stripeTex = make1DTexture(
 		regl,
-		stripeColors.map((color) => [...colorToRGB(color), 1])
+		stripeColors.map((color) => [...colorToRGB(color), 1]),
 	);
 
 	const stripePassFrag = loadText("shaders/glsl/stripePass.frag.glsl");
@@ -68,6 +68,6 @@ export default ({ regl, config }, inputs) => {
 			if (shouldRender) {
 				render({ frag: stripePassFrag.text() });
 			}
-		}
+		},
 	);
 };

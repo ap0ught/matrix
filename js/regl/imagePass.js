@@ -28,6 +28,6 @@ export default ({ regl, config }, inputs) => {
 			if (shouldRender) {
 				render({ frag: imagePassFrag.text() });
 			}
-		}
+		},
 	);
 };

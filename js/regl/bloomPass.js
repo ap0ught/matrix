@@ -100,6 +100,6 @@ export default ({ regl, config }, inputs) => {
 			}
 
 			combine({ frag: combineFrag.text() });
-		}
+		},
 	);
 };

@@ -41,7 +41,7 @@ export default ({ config, device, timeBuffer }) => {
 	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "pride" ? prideStripeColors : transPrideStripeColors;
 	const stripeTex = make1DTexture(
 		device,
-		stripeColors.map((color) => [...colorToRGB(color), 1])
+		stripeColors.map((color) => [...colorToRGB(color), 1]),
 	);
 
 	const linearSampler = device.createSampler({

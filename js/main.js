@@ -82,7 +82,7 @@ const matrixWarningStyles = `
  * This approach keeps the styles with the code that uses them.
  */
 function injectMatrixWarningStyles() {
-	const styleElement = document.createElement('style');
+	const styleElement = document.createElement("style");
 	styleElement.textContent = matrixWarningStyles;
 	document.head.appendChild(styleElement);
 }
@@ -234,18 +234,18 @@ function initializeSpotifyIntegration(config) {
 		influenceColors: config.musicInfluenceColors,
 		influenceSpeed: config.musicInfluenceSpeed,
 		influenceBrightness: config.musicInfluenceBrightness,
-		sensitivity: config.musicSensitivity
+		sensitivity: config.musicSensitivity,
 	});
 	musicIntegration.setBaseConfig(config);
 
 	// Create music visualizer
 	musicVisualizer = new MusicVisualizer(document.body, {
-		position: config.visualizerPosition
+		position: config.visualizerPosition,
 	});
 
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
-		clientId: config.spotifyClientId
+		clientId: config.spotifyClientId,
 	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
 	spotifyUI.setVisualizer(musicVisualizer);
@@ -280,7 +280,7 @@ function initializeSpotifyIntegration(config) {
  */
 function setupSpotifyEventListeners() {
 	// Track changes
-	spotifyIntegration.on('trackChange', (data) => {
+	spotifyIntegration.on("trackChange", (data) => {
 		if (data) {
 			musicVisualizer.updateTrackInfo(data.track);
 			musicVisualizer.updateAudioFeatures(data.audioFeatures);
@@ -295,8 +295,8 @@ function setupSpotifyEventListeners() {
 	});
 
 	// Authentication changes
-	spotifyIntegration.on('authChange', (isAuthenticated) => {
-		console.log('Spotify authentication changed:', isAuthenticated);
+	spotifyIntegration.on("authChange", (isAuthenticated) => {
+		console.log("Spotify authentication changed:", isAuthenticated);
 
 		// Enable/disable visualizer toggle based on authentication
 		if (isAuthenticated) {
@@ -307,18 +307,18 @@ function setupSpotifyEventListeners() {
 	});
 
 	// Errors
-	spotifyIntegration.on('error', (error) => {
-		console.error('Spotify error:', error);
+	spotifyIntegration.on("error", (error) => {
+		console.error("Spotify error:", error);
 	});
 
 	// UI events
-	spotifyUI.on('clientIdChange', (clientId) => {
+	spotifyUI.on("clientIdChange", (clientId) => {
 		if (spotifyIntegration) {
 			spotifyIntegration.init(clientId);
 		}
 	});
 
-	spotifyUI.on('toggleMusicSync', (enabled) => {
+	spotifyUI.on("toggleMusicSync", (enabled) => {
 		if (musicIntegration) {
 			if (enabled) {
 				musicIntegration.activate();
@@ -337,7 +337,7 @@ function setupSpotifyEventListeners() {
 		}
 	});
 
-	spotifyUI.on('visualizerToggle', (enabled) => {
+	spotifyUI.on("visualizerToggle", (enabled) => {
 		if (musicVisualizer) {
 			if (enabled) {
 				musicVisualizer.show();
@@ -359,12 +359,18 @@ function updateMatrixConfigFromMusic() {
 
 	// Update only the properties that can change dynamically
 	const dynamicProperties = [
-		'animationSpeed', 'fallSpeed', 'cycleSpeed',
-		'baseBrightness', 'cursorIntensity', 'bloomStrength',
-		'palette', 'cursorColor', 'raindropLength'
+		"animationSpeed",
+		"fallSpeed",
+		"cycleSpeed",
+		"baseBrightness",
+		"cursorIntensity",
+		"bloomStrength",
+		"palette",
+		"cursorColor",
+		"raindropLength",
 	];
 
-	dynamicProperties.forEach(prop => {
+	dynamicProperties.forEach((prop) => {
 		if (modifiedConfig[prop] !== undefined) {
 			matrixConfig[prop] = modifiedConfig[prop];
 		}

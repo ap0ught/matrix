@@ -42,7 +42,7 @@ const interpretDevice = (device) => {
 	const calibration = Object.fromEntries(
 		Object.entries(device.calibration)
 			.map(([key, value]) => [key, value.value])
-			.filter(([key, value]) => value != null)
+			.filter(([key, value]) => value != null),
 	);
 
 	const screenInches = calibration.screenW / calibration.DPI;
@@ -79,8 +79,8 @@ export default async (useHoloplay = false, useRecordedDevice = false) => {
 		(resolve, reject) =>
 			new HoloPlayCore.Client(
 				(data) => resolve(data.devices?.[0]),
-				(error) => resolve(null)
-			)
+				(error) => resolve(null),
+			),
 	);
 	if (device == null && useRecordedDevice) {
 		return interpretDevice(recordedDevice);

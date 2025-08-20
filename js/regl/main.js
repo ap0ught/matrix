@@ -44,10 +44,10 @@ export default async (canvas, config) => {
 		canvas.height = Math.ceil(canvas.clientHeight * devicePixelRatio * config.resolution);
 	};
 	window.onresize = resize;
-	
+
 	// Setup fullscreen toggle with proper cleanup
 	const cleanupFullscreen = setupFullscreenToggle(canvas);
-	
+
 	resize();
 
 	if (config.useCamera) {

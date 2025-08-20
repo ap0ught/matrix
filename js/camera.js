@@ -1,6 +1,6 @@
 /*
  * Matrix Camera Input System
- * 
+ *
  * This module handles webcam integration for interactive Matrix effects,
  * particularly the mirror mode where the digital rain reflects the user's
  * movements. Like Morpheus showing Neo the mirror that becomes liquid,
@@ -35,11 +35,11 @@ const cameraSize = [1, 1];
 
 /*
  * Continuous Frame Capture Loop
- * 
+ *
  * This function creates a rendering loop that continuously captures
  * frames from the video stream to the canvas. Each frame becomes
  * available as a texture for the Matrix effect to sample from.
- * 
+ *
  * The loop runs at the browser's refresh rate (typically 60fps)
  * using requestAnimationFrame for smooth performance.
  */
@@ -50,21 +50,21 @@ const drawToCanvas = () => {
 
 /*
  * Camera Initialization and Stream Setup
- * 
- * This function implements the "red pill" moment for camera access - 
+ *
+ * This function implements the "red pill" moment for camera access -
  * requesting permission to see the user's physical reality and integrate
  * it with the Matrix digital environment.
- * 
+ *
  * The setup process:
  * 1. Request camera permissions from the user
  * 2. Configure optimal video settings (1280x720@60fps preferred)
  * 3. Extract actual stream dimensions from the camera
  * 4. Set up the video element and canvas for texture capture
  * 5. Begin the continuous frame capture loop
- * 
+ *
  * Error handling gracefully degrades when camera access is denied
  * or unavailable, allowing the Matrix to continue without user reflection.
- * 
+ *
  * @returns {Promise<void>} Resolves when camera is successfully initialized
  */
 const setupCamera = async () => {
@@ -84,7 +84,7 @@ const setupCamera = async () => {
 			},
 			audio: false,
 		});
-		
+
 		/*
 		 * Stream Configuration Extraction
 		 * Get the actual video track settings to properly configure
