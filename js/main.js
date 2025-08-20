@@ -318,16 +318,9 @@ async function restartMatrixWithNewConfig(newConfig) {
 	// Try to update the renderer's config directly, if supported
 	if (typeof currentMatrixRenderer.updateConfig === "function") {
 		currentMatrixRenderer.updateConfig(newConfig);
-	} else {
-		// Fallback: destroy and re-initialize the renderer
-		if (typeof currentMatrixRenderer.destroy === "function") {
-			currentMatrixRenderer.destroy();
-		}
-		// Re-initialize the renderer with the new config
-		// You may need to call your renderer initialization logic here
-		currentMatrixRenderer = new MusicVisualizer(newConfig);
-		// If you have additional setup (e.g., attaching to DOM), do it here
 	}
+	// Note: Fallback path removed as Matrix renderers are reactive to config changes
+	// and don't need to be re-initialized when switching modes
 
 	console.log(`Matrix restarted with: ${newConfig.version || 'default'} + ${newConfig.effect || 'default'}`);
 }
