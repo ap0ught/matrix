@@ -5,6 +5,40 @@
 
 export default class SpotifyUI {
 	/**
+	 * Show the Spotify controls
+	 */
+	show() {
+		this.isVisible = true;
+		this.element.style.display = 'block';
+	}
+
+	/**
+	 * Hide the Spotify controls
+	 */
+	hide() {
+		this.isVisible = false;
+		this.element.style.display = 'none';
+		// Also collapse the panel when hiding
+		this.isExpanded = false;
+		const content = this.element.querySelector('.controls-content');
+		const icon = this.element.querySelector('.toggle-icon');
+		if (content) content.style.display = 'none';
+		if (icon) icon.textContent = '♪';
+		this.element.style.transform = 'translateX(-95%)';
+	}
+
+	/**
+	 * Toggle visibility of the Spotify controls
+	 */
+	toggleVisibility() {
+		if (this.isVisible) {
+			this.hide();
+		} else {
+			this.show();
+		}
+	}
+
+	/**
 	 * Enable the visualizer toggle when Spotify connects
 	 */
 	enableVisualizerToggle() {
@@ -40,6 +74,7 @@ export default class SpotifyUI {
 		this.config = {
 			position: "top-left",
 			clientId: "", // Must be set by user
+			visible: true, // Whether the controls are visible by default
 			...config,
 		};
 
@@ -47,6 +82,7 @@ export default class SpotifyUI {
 		this.spotify = null;
 		this.visualizer = null;
 		this.isExpanded = false;
+		this.isVisible = this.config.visible;
 		this.callbacks = {
 			onClientIdChange: [],
 			onToggleMusicSync: [],
@@ -110,6 +146,7 @@ export default class SpotifyUI {
 			backdrop-filter: blur(5px);
 			transition: all 0.3s ease;
 			transform: translateX(-95%);
+			display: ${this.isVisible ? 'block' : 'none'};
 		`;
 
 		this.element.innerHTML = `

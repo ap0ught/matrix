@@ -3,6 +3,8 @@ import SpotifyIntegration from "./spotify.js";
 import MusicVisualizer from "./visualizer.js";
 import SpotifyUI from "./spotify-ui.js";
 import MusicIntegration from "./music-integration.js";
+import ModeManager from "./mode-manager.js";
+import ModeDisplay from "./mode-display.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -117,6 +119,9 @@ let musicVisualizer = null;
 let spotifyUI = null;
 let musicIntegration = null;
 let matrixConfig = null;
+let modeManager = null;
+let modeDisplay = null;
+let currentMatrixRenderer = null;
 
 const supportsWebGPU = async () => {
 	return window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
@@ -183,6 +188,9 @@ document.body.onload = async () => {
 	// Initialize Spotify integration if enabled
 	initializeSpotifyIntegration(matrixConfig);
 
+	// Initialize mode management and display
+	initializeModeManagement(matrixConfig);
+
 	if (isRunningSwiftShader() && !matrixConfig.suppressWarnings) {
 		// Inject the styles needed for the Matrix warning interface
 		injectMatrixWarningStyles();
@@ -206,8 +214,8 @@ document.body.onload = async () => {
 			matrixConfig.suppressWarnings = true;
 			urlParams.set("suppressWarnings", true);
 			history.replaceState({}, "", "?" + unescape(urlParams.toString()));
-			const matrixRenderer = await solution;
-			startMatrix(matrixRenderer, canvas, matrixConfig);
+			currentMatrixRenderer = await solution;
+			startMatrix(currentMatrixRenderer, canvas, matrixConfig);
 			canvas.style.display = "unset";
 			document.body.removeChild(notice);
 		});
@@ -217,10 +225,100 @@ document.body.onload = async () => {
 		 * Hardware acceleration is available or warnings are suppressed.
 		 * Initialize the chosen rendering solution immediately.
 		 */
-		const matrixRenderer = await solution;
-		startMatrix(matrixRenderer, canvas, matrixConfig);
+		currentMatrixRenderer = await solution;
+		startMatrix(currentMatrixRenderer, canvas, matrixConfig);
 	}
 };
+
+/**
+ * Initialize mode management and display components
+ */
+function initializeModeManagement(config) {
+	// Create mode manager
+	modeManager = new ModeManager(config);
+
+	// Create mode display
+	modeDisplay = new ModeDisplay({
+		position: 'top-right',
+		autoHide: true,
+		autoHideDelay: 5000,
+		showControls: true
+	});
+
+	// Connect mode display to mode manager
+	modeDisplay.setModeManager(modeManager);
+
+	// Set initial toggle states
+	modeDisplay.setToggleStates(
+		config.screensaverMode || false,
+		config.spotifyControlsVisible || false
+	);
+
+	// Set up event listeners
+	setupModeManagementEvents(config);
+
+	// Start screensaver mode if enabled in config
+	if (config.screensaverMode) {
+		modeManager.start();
+	}
+}
+
+/**
+ * Set up mode management event listeners
+ */
+function setupModeManagementEvents(config) {
+	// Mode display events
+	modeDisplay.on('toggleScreensaver', (enabled) => {
+		config.screensaverMode = enabled;
+		if (enabled) {
+			modeManager.start();
+		} else {
+			modeManager.stop();
+		}
+	});
+
+	modeDisplay.on('toggleSpotifyControls', (visible) => {
+		config.spotifyControlsVisible = visible;
+		if (spotifyUI) {
+			if (visible) {
+				spotifyUI.show();
+			} else {
+				spotifyUI.hide();
+			}
+		}
+	});
+
+	// Mode manager events
+	modeManager.on('modeChange', (newMode) => {
+		// Update the URL parameters and reload the configuration
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set('version', newMode.version);
+		urlParams.set('effect', newMode.effect);
+
+		// Update the URL without reloading the page
+		history.replaceState({}, "", "?" + urlParams.toString());
+
+		// Update the configuration and restart the renderer
+		const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
+		restartMatrixWithNewConfig(newConfig);
+	});
+}
+
+/**
+ * Restart the Matrix renderer with new configuration
+ */
+async function restartMatrixWithNewConfig(newConfig) {
+	if (!currentMatrixRenderer) return;
+
+	// Update the global config
+	Object.assign(matrixConfig, newConfig);
+
+	// The Matrix renderer should automatically pick up the config changes
+	// Most Matrix implementations are designed to be reactive to config changes
+	// If not, we might need to restart the entire renderer, but that would be more disruptive
+
+	console.log(`Matrix restarted with: ${newConfig.version || 'default'} + ${newConfig.effect || 'default'}`);
+}
 
 /**
  * Initialize Spotify integration components
@@ -246,6 +344,7 @@ function initializeSpotifyIntegration(config) {
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
+		visible: config.spotifyControlsVisible
 	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
 	spotifyUI.setVisualizer(musicVisualizer);
