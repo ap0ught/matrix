@@ -107,6 +107,20 @@ export function setupFullscreenToggle(element) {
 	 */
 	const exitFullscreen = () => {
 		try {
+			// Check if document is active and we're actually in fullscreen
+			// This prevents "Document not active" errors
+			if (!document.hasFocus()) {
+				console.warn('Cannot exit fullscreen: document not active');
+				return;
+			}
+			
+			// Double-check that we're actually in fullscreen mode
+			const fullscreenElement = getFullscreenElement();
+			if (!fullscreenElement) {
+				console.warn('Cannot exit fullscreen: not currently in fullscreen mode');
+				return;
+			}
+			
 			if (document.exitFullscreen) {
 				return document.exitFullscreen();
 			} else if (document.webkitExitFullscreen) {
@@ -144,7 +158,7 @@ export function setupFullscreenToggle(element) {
 
 		const fullscreenElement = getFullscreenElement();
 		
-		if (fullscreenElement === null) {
+		if (!fullscreenElement) {
 			// Not in fullscreen, request it
 			requestFullscreen(element);
 		} else {
@@ -169,7 +183,7 @@ export function setupFullscreenToggle(element) {
 	};
 
 	// Add event listener using addEventListener for proper event management
-	window.addEventListener('dblclick', handleDoubleClick);
+	element.addEventListener('dblclick', handleDoubleClick);
 	
 	// Add fullscreen change listener for wake lock management
 	// Use multiple event names for cross-browser compatibility
@@ -180,7 +194,7 @@ export function setupFullscreenToggle(element) {
 
 	// Return cleanup function to remove the event listeners
 	return () => {
-		window.removeEventListener('dblclick', handleDoubleClick);
+		element.removeEventListener('dblclick', handleDoubleClick);
 		document.removeEventListener('fullscreenchange', handleFullscreenChange);
 		document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
 		document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
