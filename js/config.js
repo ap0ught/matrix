@@ -34,7 +34,7 @@ export function getRandomVersion(versions) {
     v => !exclude.includes(v)
   );
   const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return { key: randomKey, config: versions[randomKey] };
+  return versions[randomKey];
 }
 
 /*
