@@ -29,6 +29,6 @@ export default ({ regl, config, lkg }, inputs) => {
 			if (shouldRender) {
 				render({ frag: quiltPassFrag.text() });
 			}
-		}
+		},
 	);
 };
