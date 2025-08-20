@@ -73,21 +73,6 @@ export default class ModeManager {
 	 * Switch to a random mode
 	 */
 	switchToRandomMode() {
-		const randomVersion = this.getRandomVersionName();
-		const randomEffect = this.getRandomEffect();
-		
-		const newMode = {
-			version: randomVersion,
-			effect: randomEffect
-		};
-
-		// Avoid switching to the same combination
-		if (newMode.version === this.currentMode.version && 
-			newMode.effect === this.currentMode.effect) {
-			// Try again with a different combination
-			return this.switchToRandomMode();
-		}
-
 		const MAX_RETRIES = 10;
 		let attempt = 0;
 		let newMode;
