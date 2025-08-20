@@ -104,8 +104,9 @@ export function setupFullscreenToggle(element) {
 
 	/**
 	 * Cross-browser fullscreen exit
+	 * @param {Element|null} currentFullscreenElement - The current fullscreen element (optional, will be checked if not provided)
 	 */
-	const exitFullscreen = () => {
+	const exitFullscreen = (currentFullscreenElement = null) => {
 		try {
 			// Check if document is active and we're actually in fullscreen
 			// This prevents "Document not active" errors
@@ -114,8 +115,9 @@ export function setupFullscreenToggle(element) {
 				return;
 			}
 			
-			// Double-check that we're actually in fullscreen mode
-			const fullscreenElement = getFullscreenElement();
+			// Check that we're actually in fullscreen mode
+			// Use provided element or get current one
+			const fullscreenElement = currentFullscreenElement || getFullscreenElement();
 			if (!fullscreenElement) {
 				console.warn('Cannot exit fullscreen: not currently in fullscreen mode');
 				return;
@@ -156,14 +158,15 @@ export function setupFullscreenToggle(element) {
 		event.preventDefault();
 		event.stopPropagation();
 
+		// Get fullscreen element once to avoid duplicate DOM queries
 		const fullscreenElement = getFullscreenElement();
 		
 		if (!fullscreenElement) {
 			// Not in fullscreen, request it
 			requestFullscreen(element);
 		} else {
-			// In fullscreen, exit it
-			exitFullscreen();
+			// In fullscreen, exit it - pass the element to avoid duplicate check
+			exitFullscreen(fullscreenElement);
 		}
 	};
 
