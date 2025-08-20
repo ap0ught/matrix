@@ -10,19 +10,7 @@ import makeMirrorPass from "./mirrorPass.js";
 import { setupCamera, cameraCanvas, cameraAspectRatio } from "../camera.js";
 import getLKG from "./lkgHelper.js";
 import { setupFullscreenToggle } from "../fullscreen.js";
-
-const effects = {
-	none: null,
-	plain: makePalettePass,
-	palette: makePalettePass,
-	customStripes: makeStripePass,
-	stripes: makeStripePass,
-	pride: makeStripePass,
-	transPride: makeStripePass,
-	trans: makeStripePass,
-	image: makeImagePass,
-	mirror: makeMirrorPass,
-};
+import { createEffectsMapping, getEffectPass } from "../effects.js";
 
 const dimensions = { width: 1, height: 1 };
 
@@ -75,9 +63,18 @@ export default async (canvas, config) => {
 
 	// All this takes place in a full screen quad.
 	const fullScreenQuad = makeFullScreenQuad(regl);
-	const effectName = config.effect in effects ? config.effect : "palette";
+	
+	// Create dynamic effects mapping
+	const passModules = {
+		makePalettePass,
+		makeStripePass,
+		makeImagePass,
+		makeMirrorPass,
+	};
+	const effects = createEffectsMapping('regl', passModules);
+	const effectPass = getEffectPass(config.effect, effects, 'palette');
 	const context = { regl, config, lkg, cameraTex, cameraAspectRatio };
-	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effects[effectName], makeQuiltPass]);
+	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effectPass, makeQuiltPass]);
 	const screenUniforms = { tex: pipeline[pipeline.length - 1].outputs.primary };
 	const drawToScreen = regl({ uniforms: screenUniforms });
 	await Promise.all(pipeline.map((step) => step.ready));

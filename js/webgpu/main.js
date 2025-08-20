@@ -10,6 +10,7 @@ import makeMirrorPass from "./mirrorPass.js";
 import makeEndPass from "./endPass.js";
 import { setupCamera, cameraCanvas, cameraAspectRatio, cameraSize } from "../camera.js";
 import { setupFullscreenToggle } from "../fullscreen.js";
+import { createEffectsMapping, getEffectPass } from "../effects.js";
 
 const loadJS = (src) =>
 	new Promise((resolve, reject) => {
@@ -20,18 +21,14 @@ const loadJS = (src) =>
 		document.body.appendChild(tag);
 	});
 
-const effects = {
-	none: null,
-	plain: makePalettePass,
-	palette: makePalettePass,
-	customStripes: makeStripePass,
-	stripes: makeStripePass,
-	pride: makeStripePass,
-	transPride: makeStripePass,
-	trans: makeStripePass,
-	image: makeImagePass,
-	mirror: makeMirrorPass,
-};
+const loadJS = (src) =>
+	new Promise((resolve, reject) => {
+		const tag = document.createElement("script");
+		tag.onload = resolve;
+		tag.onerror = reject;
+		tag.src = src;
+		document.body.appendChild(tag);
+	});
 
 export default async (canvas, config) => {
 	await loadJS("lib/gl-matrix.js");
@@ -79,8 +76,16 @@ export default async (canvas, config) => {
 		cameraSize,
 	};
 
-	const effectName = config.effect in effects ? config.effect : "palette";
-	const pipeline = await makePipeline(context, [makeRain, makeBloomPass, effects[effectName], makeEndPass]);
+	// Create dynamic effects mapping
+	const passModules = {
+		makePalettePass,
+		makeStripePass,
+		makeImagePass,
+		makeMirrorPass,
+	};
+	const effects = createEffectsMapping('webgpu', passModules);
+	const effectPass = getEffectPass(config.effect, effects, 'palette');
+	const pipeline = await makePipeline(context, [makeRain, makeBloomPass, effectPass, makeEndPass]);
 
 	const targetFrameTimeMilliseconds = 1000 / config.fps;
 	let frames = 0;
