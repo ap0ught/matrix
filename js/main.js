@@ -320,7 +320,10 @@ async function restartMatrixWithNewConfig(newConfig) {
 		currentMatrixRenderer.updateConfig(newConfig);
 	}
 	// Note: Fallback path removed as Matrix renderers are reactive to config changes
-	// and don't need to be re-initialized when switching modes
+	// Note: Fallback path removed as Matrix renderers are reactive to config changes.
+	// If the renderer does not support updateConfig(), it is assumed to automatically
+	// pick up changes from the global config object (matrixConfig). If this is not the case,
+	// you may need to implement additional logic to handle config updates for such renderers.
 
 	console.log(`Matrix restarted with: ${newConfig.version || 'default'} + ${newConfig.effect || 'default'}`);
 }
