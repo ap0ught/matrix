@@ -23,16 +23,26 @@
  * @param {Object} versions - Available version configurations
  * @returns {Object} Randomly selected version configuration
  */
+/*
+ * Version Exclusion List
+ * These are aliases or deprecated version names that shouldn't
+ * appear in random selection or available modes to avoid confusion or broken experiences
+ */
+const EXCLUDED_VERSIONS = ["excludeME"];
+
+/*
+ * Random Version Selection Utility
+ *
+ * Sometimes the best way to experience the Matrix is to let the system
+ * choose for you - like following the white rabbit down an unknown path.
+ * This function selects a random Matrix version while excluding aliases
+ * and deprecated version names.
+ *
+ * @param {Object} versions - Available version configurations
+ * @returns {Object} Randomly selected version configuration
+ */
 export function getRandomVersion(versions) {
-	/*
-	 * Version Exclusion List
-	 * These are aliases or deprecated version names that shouldn't
-	 * appear in random selection to avoid confusion or broken experiences
-	 * const exclude = ["throwback", "updated", "1999", "2003", "2021"];
-	 */
-    /*const exclude = [];*/
-	const exclude = []
-	constkeys = Object.keys(versions).filter((v) => !exclude.includes(v));
+	const keys = Object.keys(versions).filter((v) => !EXCLUDED_VERSIONS.includes(v));
 	const randomKey = keys[Math.floor(Math.random() * keys.length)];
 	return versions[randomKey];
 }
@@ -43,9 +53,7 @@ export function getRandomVersion(versions) {
  * Returns a list of all available version keys, excluding aliases
  */
 export function getAvailableModes() {
-/*const exclude = ["throwback", "updated", "1999", "2003", "2021"];*/
-const exclude = [];
-    return Object.keys(versions).filter(v => !exclude.includes(v));
+	return Object.keys(versions).filter(v => !EXCLUDED_VERSIONS.includes(v));
 }
 
 /*
@@ -54,7 +62,7 @@ const exclude = [];
  * Returns a list of all available effect names
  */
 export function getAvailableEffects() {
-  return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
+	return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
 }
 
 /*
@@ -148,7 +156,7 @@ const fonts = {
 		/*
 		 * Gtarg Tenretniolleh - Experimental Font
 		 * Specialized glyph set for alternative Matrix interpretations
-		 * Name appears to be "hellointernetgtag" reversed - a digital easter egg
+		 * Name appears to be "hellointernetgtag" reversed - a digital Easter egg
 		 */
 		glyphMSDFURL: "assets/gtarg_tenretniolleh_msdf.png",
 		glyphSequenceLength: 36,
@@ -222,7 +230,7 @@ const defaults = {
 
 	/* === Visual Effects === */
 	effect: "mirror", // Post-processing effect to apply (mirror, palette, etc.)
-	baseTexture: null, // Optional texture applied to glyph base layer
+	baseTexture: null, // Optional texture applied to the glyph base layer
 	glintTexture: null, // Optional texture applied to glyph highlights
 
 	/* === Camera and Interaction === */
@@ -234,7 +242,7 @@ const defaults = {
 	/* === Cursor (Raindrop Leader) Settings === */
 	isolateCursor: true, // Whether cursor has distinct appearance from other glyphs
 	cursorColor: hsl(0.242, 1, 0.73), // Cyan-green cursor color (classic Matrix accent)
-	cursorIntensity: 2, // Brightness multiplier for cursor glow
+	cursorIntensity: 2, // Brightness multiplier for a cursor glow
 
 	/* === Glint (Highlight) Settings === */
 	isolateGlint: false, // Whether to render special glyph highlights
@@ -284,7 +292,7 @@ const defaults = {
 	resolution: 0.75, // An overall scale multiplier
 	useHalfFloat: false,
 	renderer: "regl", // The preferred web graphics API
-	suppressWarnings: false, // Whether to show warnings to visitors on load
+	suppressWarnings: false, // Whether to show warnings to visitors on a load
 	isometric: false,
 	useHoloplay: false,
 	loops: false,
@@ -295,7 +303,7 @@ const defaults = {
 	spotifyClientId: null, // Spotify application client ID
 	spotifyControlsVisible: false, // Whether Spotify controls UI is visible by default
 	musicSyncEnabled: false, // Whether Matrix reacts to music
-	musicInfluenceColors: true, // Whether music affects color palette
+	musicInfluenceColors: true, // Whether music affects the color palette
 	musicInfluenceSpeed: true, // Whether music affects animation speed
 	musicInfluenceBrightness: true, // Whether music affects brightness
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
@@ -307,7 +315,7 @@ const defaults = {
 	modeDisplayEnabled: true, // Whether to show current mode information
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)
-	showModeInfo: true, // Whether to display current version and effect info
+	showModeInfo: true, // Whether to display the current version and effect info
 };
 
 export const versions = {
@@ -436,8 +444,7 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
-		cycleSpeed: 0.01,
-		volumetric: true,
+ 		volumetric: true,
 		forwardSpeed: 0.2,
 		raindropLength: 0.3,
 		density: 0.75,
@@ -458,8 +465,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
-		cycleSpeed: 0.03,
-		bloomStrength: 0.7,
+ 		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.97, 0.6, 0.0), at: 0.0 },
@@ -487,8 +493,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
-		cycleSpeed: 0.03,
-		bloomStrength: 0.7,
+ 		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.12, 0.6, 0.0), at: 0.0 },
@@ -553,14 +558,12 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
-		cycleSpeed: 0.01,
-		raindropLength: 0.3,
+ 		raindropLength: 0.3,
 
 		renderer: "regl",
 		numColumns: 20,
 		ditherMagnitude: 0,
-		bloomStrength: 0,
-		volumetric: true,
+ 		volumetric: true,
 		forwardSpeed: 0,
 		density: 3,
 		useHoloplay: true,
@@ -594,7 +597,7 @@ const parseColors = (isHSL) => (s) => {
 	const values = s.split(",").map(parseFloat);
 	const space = isHSL ? "hsl" : "rgb";
 	return Array(Math.floor(values.length / 3))
-		.fill()
+		.fill(undefined, undefined, undefined)
 		.map((_, index) => ({
 			space,
 			values: values.slice(index * 3, (index + 1) * 3),
@@ -605,7 +608,7 @@ const parsePalette = (isHSL) => (s) => {
 	const values = s.split(",").map(parseFloat);
 	const space = isHSL ? "hsl" : "rgb";
 	return Array(Math.floor(values.length / 4))
-		.fill()
+		.fill(undefined, undefined, undefined)
 		.map((_, index) => {
 			const colorValues = values.slice(index * 4, (index + 1) * 4);
 			return {
