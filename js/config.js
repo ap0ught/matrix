@@ -1,10 +1,10 @@
 /*
  * Matrix Configuration System
- * 
+ *
  * This module defines all the configurable aspects of the Matrix digital rain effect.
  * Like the Architect's precise control over the simulation's parameters, this system
  * allows fine-tuning of every visual aspect from glyph fonts to color palettes.
- * 
+ *
  * The configuration handles multiple Matrix "versions" representing different eras:
  * - Classic: The iconic green rain from the original trilogy
  * - Resurrections: Updated glyphs from the 2021 film
@@ -12,58 +12,67 @@
  * - Custom variants: Artistic interpretations and thematic variations
  */
 
-/*  
+/*
  * Random Version Selection Utility
- * 
+ *
  * Sometimes the best way to experience the Matrix is to let the system
  * choose for you - like following the white rabbit down an unknown path.
  * This function selects a random Matrix version while excluding aliases
  * and deprecated version names.
- * 
+ *
+ * @param {Object} versions - Available version configurations
+ * @returns {Object} Randomly selected version configuration
+ */
+/*
+ * Version Exclusion List
+ * These are aliases or deprecated version names that shouldn't
+ * appear in random selection or available modes to avoid confusion or broken experiences
+ */
+const EXCLUDED_VERSIONS = ["excludeME"];
+
+/*
+ * Random Version Selection Utility
+ *
+ * Sometimes the best way to experience the Matrix is to let the system
+ * choose for you - like following the white rabbit down an unknown path.
+ * This function selects a random Matrix version while excluding aliases
+ * and deprecated version names.
+ *
  * @param {Object} versions - Available version configurations
  * @returns {Object} Randomly selected version configuration
  */
 export function getRandomVersion(versions) {
-  /*
-   * Version Exclusion List
-   * These are aliases or deprecated version names that shouldn't
-   * appear in random selection to avoid confusion or broken experiences
-   */
-  const exclude = ["throwback", "updated", "1999", "2003", "2021"];
-  const keys = Object.keys(versions).filter(
-    v => !exclude.includes(v)
-  );
-  const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return versions[randomKey];
+	const keys = Object.keys(versions).filter((v) => !EXCLUDED_VERSIONS.includes(v));
+	const randomKey = keys[Math.floor(Math.random() * keys.length)];
+	return versions[randomKey];
 }
 
 /*
  * Get All Available Modes
- * 
+ *
  * Returns a list of all available version keys, excluding aliases
  */
 export function getAvailableModes() {
-  const exclude = ["throwback", "updated", "1999", "2003", "2021"];
-  return Object.keys(versions).filter(v => !exclude.includes(v));
+	return Object.keys(versions).filter(v => !EXCLUDED_VERSIONS.includes(v));
 }
 
 /*
  * Get Available Effects
- * 
+ *
  * Returns a list of all available effect names
  */
 export function getAvailableEffects() {
-  return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
+	return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
 }
 
 /*
- * Font Definitions - The Languages of the Matrix  
- * 
+ * Font Definitions - The Languages of the Matrix
+ *
  * Each font represents different script systems used across Matrix versions.
  * The glyphs are stored as Multi-channel Signed Distance Fields (MSDF) which
  * preserve crisp vector-like quality at any scale - essential for the Matrix's
  * precise geometric appearance.
- * 
+ *
  * Key properties:
  * - glyphMSDFURL: Path to the MSDF texture containing all glyphs
  * - glyphSequenceLength: Total number of unique glyphs in the font
@@ -83,7 +92,7 @@ const fonts = {
 	},
 	gothic: {
 		/*
-		 * Gothic Script - Language of the Nightmare Matrix  
+		 * Gothic Script - Language of the Nightmare Matrix
 		 * The script the Codex Argenteus was written in, representing
 		 * the harsh, Hobbesian predecessor that was "too brutal"
 		 */
@@ -147,7 +156,7 @@ const fonts = {
 		/*
 		 * Gtarg Tenretniolleh - Experimental Font
 		 * Specialized glyph set for alternative Matrix interpretations
-		 * Name appears to be "hellointernetgtag" reversed - a digital easter egg
+		 * Name appears to be "hellointernetgtag" reversed - a digital Easter egg
 		 */
 		glyphMSDFURL: "assets/gtarg_tenretniolleh_msdf.png",
 		glyphSequenceLength: 36,
@@ -177,25 +186,25 @@ const fonts = {
 
 /*
  * Texture Assets - Surface Materials for the Digital World
- * 
+ *
  * These textures can be applied to glyphs to create different surface
  * appearances, adding depth and variety to the Matrix's visual language.
  * Each texture represents a different aspect of digital reality.
  */
 const textureURLs = {
-	sand: "assets/sand.png",         // Organic, natural texture - reality bleeding through
+	sand: "assets/sand.png", // Organic, natural texture - reality bleeding through
 	pixels: "assets/pixel_grid.png", // Raw digital structure - the Matrix's true form
-	mesh: "assets/mesh.png",         // Network connections - the web of the simulation  
-	metal: "assets/metal.png",       // Industrial reality - the machine world
+	mesh: "assets/mesh.png", // Network connections - the web of the simulation
+	metal: "assets/metal.png", // Industrial reality - the machine world
 };
 
 /*
  * Color Space Constructors
- * 
+ *
  * These utility functions create color specifications for different color spaces:
- * - HSL: Human-intuitive (Hue, Saturation, Lightness) 
+ * - HSL: Human-intuitive (Hue, Saturation, Lightness)
  * - RGB: Machine-native (Red, Green, Blue)
- * 
+ *
  * HSL is often more convenient for creating pleasing color palettes,
  * while RGB maps directly to display hardware capabilities.
  */
@@ -204,51 +213,51 @@ const rgb = (...values) => ({ space: "rgb", values });
 
 /*
  * Default Configuration Values - The Matrix's Base Parameters
- * 
+ *
  * These settings define the fundamental characteristics of the digital rain effect.
  * Like the Architect's carefully balanced equations, each parameter influences
  * the overall behavior and appearance of the simulation.
- * 
+ *
  * Categories:
  * - Visual: Colors, fonts, effects, and appearance
- * - Animation: Speeds, timing, and movement parameters  
+ * - Animation: Speeds, timing, and movement parameters
  * - Rendering: Performance, quality, and technical settings
  * - Interaction: Camera, input, and user interface options
  */
 const defaults = {
 	/* === Font and Glyph Settings === */
-	font: "matrixcode",              // Default to classic Matrix typography
-	
+	font: "matrixcode", // Default to classic Matrix typography
+
 	/* === Visual Effects === */
-	effect: "mirror",                // Post-processing effect to apply (mirror, palette, etc.)
-	baseTexture: null,               // Optional texture applied to glyph base layer
-	glintTexture: null,              // Optional texture applied to glyph highlights
-	
+	effect: "mirror", // Post-processing effect to apply (mirror, palette, etc.)
+	baseTexture: null, // Optional texture applied to the glyph base layer
+	glintTexture: null, // Optional texture applied to glyph highlights
+
 	/* === Camera and Interaction === */
-	useCamera: false,                // Enable webcam input for interactive effects
-	
+	useCamera: false, // Enable webcam input for interactive effects
+
 	/* === Color Configuration === */
-	backgroundColor: hsl(0, 0, 0),   // The void behind the glyphs - pure black
-	
+	backgroundColor: hsl(0, 0, 0), // The void behind the glyphs - pure black
+
 	/* === Cursor (Raindrop Leader) Settings === */
-	isolateCursor: true,             // Whether cursor has distinct appearance from other glyphs
+	isolateCursor: true, // Whether cursor has distinct appearance from other glyphs
 	cursorColor: hsl(0.242, 1, 0.73), // Cyan-green cursor color (classic Matrix accent)
-	cursorIntensity: 2,              // Brightness multiplier for cursor glow
-	
+	cursorIntensity: 2, // Brightness multiplier for a cursor glow
+
 	/* === Glint (Highlight) Settings === */
-	isolateGlint: false,             // Whether to render special glyph highlights
-	glintColor: hsl(0, 0, 1),        // Pure white glint color for maximum contrast
-	glintIntensity: 1,               // Brightness multiplier for glint effects
-	
+	isolateGlint: false, // Whether to render special glyph highlights
+	glintColor: hsl(0, 0, 1), // Pure white glint color for maximum contrast
+	glintIntensity: 1, // Brightness multiplier for glint effects
+
 	/* === 3D and Perspective === */
-	volumetric: false,               // Enable 3D mode with depth and perspective
-	forwardSpeed: 0.25,              // Speed that 3D raindrops approach the viewer
-	
+	volumetric: false, // Enable 3D mode with depth and perspective
+	forwardSpeed: 0.25, // Speed that 3D raindrops approach the viewer
+
 	/* === Animation and Timing === */
-	animationSpeed: 1,               // Global multiplier for all animation speeds
-	fps: 60,                         // Target frame rate for smooth motion
-	cycleSpeed: 0.03,                // Rate at which glyphs change their symbols
-	cycleFrameSkip: 1,               // Minimum frames between glyph symbol changes
+	animationSpeed: 1, // Global multiplier for all animation speeds
+	fps: 60, // Target frame rate for smooth motion
+	cycleSpeed: 0.03, // Rate at which glyphs change their symbols
+	cycleFrameSkip: 1, // Minimum frames between glyph symbol changes
 	baseBrightness: -0.5, // The brightness of the glyphs, before any effects are applied
 	baseContrast: 1.1, // The contrast of the glyphs, before any effects are applied
 	glintBrightness: -1.5, // The brightness of the glints, before any effects are applied
@@ -283,7 +292,7 @@ const defaults = {
 	resolution: 0.75, // An overall scale multiplier
 	useHalfFloat: false,
 	renderer: "regl", // The preferred web graphics API
-	suppressWarnings: false, // Whether to show warnings to visitors on load
+	suppressWarnings: false, // Whether to show warnings to visitors on a load
 	isometric: false,
 	useHoloplay: false,
 	loops: false,
@@ -294,19 +303,19 @@ const defaults = {
 	spotifyClientId: null, // Spotify application client ID
 	spotifyControlsVisible: false, // Whether Spotify controls UI is visible by default
 	musicSyncEnabled: false, // Whether Matrix reacts to music
-	musicInfluenceColors: true, // Whether music affects color palette
+	musicInfluenceColors: true, // Whether music affects the color palette
 	musicInfluenceSpeed: true, // Whether music affects animation speed
 	musicInfluenceBrightness: true, // Whether music affects brightness
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
 	visualizerEnabled: true, // Whether to show the music visualizer minimap
-	visualizerPosition: 'bottom-right', // Position of the visualizer
-	
+	visualizerPosition: "bottom-right", // Position of the visualizer
+
 	// Screensaver mode settings
 	screensaverMode: false, // Whether to enable automatic mode switching
 	modeDisplayEnabled: true, // Whether to show current mode information
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)
-	showModeInfo: true, // Whether to display current version and effect info
+	showModeInfo: true, // Whether to display the current version and effect info
 };
 
 export const versions = {
@@ -435,8 +444,7 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
-		cycleSpeed: 0.01,
-		volumetric: true,
+ 		volumetric: true,
 		forwardSpeed: 0.2,
 		raindropLength: 0.3,
 		density: 0.75,
@@ -457,8 +465,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
-		cycleSpeed: 0.03,
-		bloomStrength: 0.7,
+ 		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.97, 0.6, 0.0), at: 0.0 },
@@ -486,8 +493,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
-		cycleSpeed: 0.03,
-		bloomStrength: 0.7,
+ 		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.12, 0.6, 0.0), at: 0.0 },
@@ -552,14 +558,12 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
-		cycleSpeed: 0.01,
-		raindropLength: 0.3,
+ 		raindropLength: 0.3,
 
 		renderer: "regl",
 		numColumns: 20,
 		ditherMagnitude: 0,
-		bloomStrength: 0,
-		volumetric: true,
+ 		volumetric: true,
 		forwardSpeed: 0,
 		density: 3,
 		useHoloplay: true,
@@ -593,7 +597,7 @@ const parseColors = (isHSL) => (s) => {
 	const values = s.split(",").map(parseFloat);
 	const space = isHSL ? "hsl" : "rgb";
 	return Array(Math.floor(values.length / 3))
-		.fill()
+		.fill(undefined, undefined, undefined)
 		.map((_, index) => ({
 			space,
 			values: values.slice(index * 3, (index + 1) * 3),
@@ -604,7 +608,7 @@ const parsePalette = (isHSL) => (s) => {
 	const values = s.split(",").map(parseFloat);
 	const space = isHSL ? "hsl" : "rgb";
 	return Array(Math.floor(values.length / 4))
-		.fill()
+		.fill(undefined, undefined, undefined)
 		.map((_, index) => {
 			const colorValues = values.slice(index * 4, (index + 1) * 4);
 			return {
@@ -703,7 +707,7 @@ const paramMapping = {
 	musicSensitivity: { key: "musicSensitivity", parser: (s) => nullNaN(range(parseFloat(s), 0.1, 3.0)) },
 	visualizer: { key: "visualizerEnabled", parser: isTrue },
 	visualizerPos: { key: "visualizerPosition", parser: (s) => s },
-	
+
 	// Screensaver mode parameters
 	screensaver: { key: "screensaverMode", parser: isTrue },
 	modeDisplay: { key: "modeDisplayEnabled", parser: isTrue },

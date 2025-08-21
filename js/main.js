@@ -84,7 +84,7 @@ const matrixWarningStyles = `
  * This approach keeps the styles with the code that uses them.
  */
 function injectMatrixWarningStyles() {
-	const styleElement = document.createElement('style');
+	const styleElement = document.createElement("style");
 	styleElement.textContent = matrixWarningStyles;
 	document.head.appendChild(styleElement);
 }
@@ -187,7 +187,7 @@ document.body.onload = async () => {
 	 */
 	// Initialize Spotify integration if enabled
 	initializeSpotifyIntegration(matrixConfig);
-	
+
 	// Initialize mode management and display
 	initializeModeManagement(matrixConfig);
 
@@ -236,7 +236,7 @@ document.body.onload = async () => {
 function initializeModeManagement(config) {
 	// Create mode manager
 	modeManager = new ModeManager(config);
-	
+
 	// Create mode display
 	modeDisplay = new ModeDisplay({
 		position: 'top-right',
@@ -244,19 +244,19 @@ function initializeModeManagement(config) {
 		autoHideDelay: 5000,
 		showControls: true
 	});
-	
+
 	// Connect mode display to mode manager
 	modeDisplay.setModeManager(modeManager);
-	
+
 	// Set initial toggle states
 	modeDisplay.setToggleStates(
 		config.screensaverMode || false,
 		config.spotifyControlsVisible || false
 	);
-	
+
 	// Set up event listeners
 	setupModeManagementEvents(config);
-	
+
 	// Start screensaver mode if enabled in config
 	if (config.screensaverMode) {
 		modeManager.start();
@@ -276,7 +276,7 @@ function setupModeManagementEvents(config) {
 			modeManager.stop();
 		}
 	});
-	
+
 	modeDisplay.on('toggleSpotifyControls', (visible) => {
 		config.spotifyControlsVisible = visible;
 		if (spotifyUI) {
@@ -287,17 +287,17 @@ function setupModeManagementEvents(config) {
 			}
 		}
 	});
-	
+
 	// Mode manager events
 	modeManager.on('modeChange', (newMode) => {
 		// Update the URL parameters and reload the configuration
 		const urlParams = new URLSearchParams(window.location.search);
 		urlParams.set('version', newMode.version);
 		urlParams.set('effect', newMode.effect);
-		
+
 		// Update the URL without reloading the page
 		history.replaceState({}, "", "?" + urlParams.toString());
-		
+
 		// Update the configuration and restart the renderer
 		const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
 		restartMatrixWithNewConfig(newConfig);
@@ -309,10 +309,10 @@ function setupModeManagementEvents(config) {
  */
 async function restartMatrixWithNewConfig(newConfig) {
 	if (!currentMatrixRenderer) return;
-	
+
 	// Update the global config
 	Object.assign(matrixConfig, newConfig);
-	
+
 	// The Matrix renderer should automatically pick up the config changes
 	// Most Matrix implementations are designed to be reactive to config changes
 	// Try to update the renderer's config directly, if supported
@@ -324,7 +324,7 @@ async function restartMatrixWithNewConfig(newConfig) {
 	// If the renderer does not support updateConfig(), it is assumed to automatically
 	// pick up changes from the global config object (matrixConfig). If this is not the case,
 	// you may need to implement additional logic to handle config updates for such renderers.
-	
+
 	console.log(`Matrix restarted with: ${newConfig.version || 'default'} + ${newConfig.effect || 'default'}`);
 }
 
@@ -340,13 +340,13 @@ function initializeSpotifyIntegration(config) {
 		influenceColors: config.musicInfluenceColors,
 		influenceSpeed: config.musicInfluenceSpeed,
 		influenceBrightness: config.musicInfluenceBrightness,
-		sensitivity: config.musicSensitivity
+		sensitivity: config.musicSensitivity,
 	});
 	musicIntegration.setBaseConfig(config);
 
 	// Create music visualizer
 	musicVisualizer = new MusicVisualizer(document.body, {
-		position: config.visualizerPosition
+		position: config.visualizerPosition,
 	});
 
 	// Create UI controls
@@ -387,7 +387,7 @@ function initializeSpotifyIntegration(config) {
  */
 function setupSpotifyEventListeners() {
 	// Track changes
-	spotifyIntegration.on('trackChange', (data) => {
+	spotifyIntegration.on("trackChange", (data) => {
 		if (data) {
 			musicVisualizer.updateTrackInfo(data.track);
 			musicVisualizer.updateAudioFeatures(data.audioFeatures);
@@ -402,8 +402,8 @@ function setupSpotifyEventListeners() {
 	});
 
 	// Authentication changes
-	spotifyIntegration.on('authChange', (isAuthenticated) => {
-		console.log('Spotify authentication changed:', isAuthenticated);
+	spotifyIntegration.on("authChange", (isAuthenticated) => {
+		console.log("Spotify authentication changed:", isAuthenticated);
 
 		// Enable/disable visualizer toggle based on authentication
 		if (isAuthenticated) {
@@ -414,18 +414,18 @@ function setupSpotifyEventListeners() {
 	});
 
 	// Errors
-	spotifyIntegration.on('error', (error) => {
-		console.error('Spotify error:', error);
+	spotifyIntegration.on("error", (error) => {
+		console.error("Spotify error:", error);
 	});
 
 	// UI events
-	spotifyUI.on('clientIdChange', (clientId) => {
+	spotifyUI.on("clientIdChange", (clientId) => {
 		if (spotifyIntegration) {
 			spotifyIntegration.init(clientId);
 		}
 	});
 
-	spotifyUI.on('toggleMusicSync', (enabled) => {
+	spotifyUI.on("toggleMusicSync", (enabled) => {
 		if (musicIntegration) {
 			if (enabled) {
 				musicIntegration.activate();
@@ -444,7 +444,7 @@ function setupSpotifyEventListeners() {
 		}
 	});
 
-	spotifyUI.on('visualizerToggle', (enabled) => {
+	spotifyUI.on("visualizerToggle", (enabled) => {
 		if (musicVisualizer) {
 			if (enabled) {
 				musicVisualizer.show();
@@ -466,12 +466,18 @@ function updateMatrixConfigFromMusic() {
 
 	// Update only the properties that can change dynamically
 	const dynamicProperties = [
-		'animationSpeed', 'fallSpeed', 'cycleSpeed',
-		'baseBrightness', 'cursorIntensity', 'bloomStrength',
-		'palette', 'cursorColor', 'raindropLength'
+		"animationSpeed",
+		"fallSpeed",
+		"cycleSpeed",
+		"baseBrightness",
+		"cursorIntensity",
+		"bloomStrength",
+		"palette",
+		"cursorColor",
+		"raindropLength",
 	];
 
-	dynamicProperties.forEach(prop => {
+	dynamicProperties.forEach((prop) => {
 		if (modifiedConfig[prop] !== undefined) {
 			matrixConfig[prop] = modifiedConfig[prop];
 		}
