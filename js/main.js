@@ -352,8 +352,9 @@ function initializeSpotifyIntegration(config) {
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
+ 
 		visible: config.spotifyControlsVisible
-	});
+ 	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
 	spotifyUI.setVisualizer(musicVisualizer);
 

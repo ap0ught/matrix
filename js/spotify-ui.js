@@ -74,8 +74,9 @@ export default class SpotifyUI {
 		this.config = {
 			position: "top-left",
 			clientId: "", // Must be set by user
+ 
 			visible: true, // Whether the controls are visible by default
-			...config,
+ 			...config,
 		};
 
 		this.element = null;
