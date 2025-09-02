@@ -9,7 +9,7 @@ export default class SpotifyUI {
 	 */
 	show() {
 		this.isVisible = true;
-		this.element.style.display = 'block';
+		this.element.style.display = "block";
 	}
 
 	/**
@@ -17,14 +17,14 @@ export default class SpotifyUI {
 	 */
 	hide() {
 		this.isVisible = false;
-		this.element.style.display = 'none';
+		this.element.style.display = "none";
 		// Also collapse the panel when hiding
 		this.isExpanded = false;
-		const content = this.element.querySelector('.controls-content');
-		const icon = this.element.querySelector('.toggle-icon');
-		if (content) content.style.display = 'none';
-		if (icon) icon.textContent = '♪';
-		this.element.style.transform = 'translateX(-95%)';
+		const content = this.element.querySelector(".controls-content");
+		const icon = this.element.querySelector(".toggle-icon");
+		if (content) content.style.display = "none";
+		if (icon) icon.textContent = "♪";
+		this.element.style.transform = "translateX(-95%)";
 	}
 
 	/**
@@ -146,7 +146,7 @@ export default class SpotifyUI {
 			backdrop-filter: blur(5px);
 			transition: all 0.3s ease;
 			transform: translateX(-95%);
-			display: ${this.isVisible ? 'block' : 'none'};
+			display: ${this.isVisible ? "block" : "none"};
 		`;
 
 		this.element.innerHTML = `

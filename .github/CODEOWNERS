@@ -1,0 +1,27 @@
+# Matrix Digital Rain - Code Owners
+# 
+# This file defines individuals or teams that are responsible for code in this repository.
+# When a pull request modifies code owned by someone listed below, that person or team
+# will be automatically requested for review.
+#
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - require review for all changes to protect the master branch
+* @ap0ught
+
+# Core Matrix application files require maintainer review
+/js/ @ap0ught
+/shaders/ @ap0ught
+/index.html @ap0ught
+
+# Build and configuration files
+/.github/ @ap0ught
+/prettier_command.txt @ap0ught
+
+# Documentation requires review to maintain quality
+/README.md @ap0ught
+/DEV_README.md @ap0ught
+/.copilot/ @ap0ught
+
+# Playdate version development
+/playdate/ @ap0ught
