@@ -239,20 +239,17 @@ function initializeModeManagement(config) {
 
 	// Create mode display
 	modeDisplay = new ModeDisplay({
-		position: 'top-right',
+		position: "top-right",
 		autoHide: true,
 		autoHideDelay: 5000,
-		showControls: true
+		showControls: true,
 	});
 
 	// Connect mode display to mode manager
 	modeDisplay.setModeManager(modeManager);
 
 	// Set initial toggle states
-	modeDisplay.setToggleStates(
-		config.screensaverMode || false,
-		config.spotifyControlsVisible || false
-	);
+	modeDisplay.setToggleStates(config.screensaverMode || false, config.spotifyControlsVisible || false);
 
 	// Set up event listeners
 	setupModeManagementEvents(config);
@@ -268,7 +265,7 @@ function initializeModeManagement(config) {
  */
 function setupModeManagementEvents(config) {
 	// Mode display events
-	modeDisplay.on('toggleScreensaver', (enabled) => {
+	modeDisplay.on("toggleScreensaver", (enabled) => {
 		config.screensaverMode = enabled;
 		if (enabled) {
 			modeManager.start();
@@ -277,7 +274,7 @@ function setupModeManagementEvents(config) {
 		}
 	});
 
-	modeDisplay.on('toggleSpotifyControls', (visible) => {
+	modeDisplay.on("toggleSpotifyControls", (visible) => {
 		config.spotifyControlsVisible = visible;
 		if (spotifyUI) {
 			if (visible) {
@@ -289,11 +286,11 @@ function setupModeManagementEvents(config) {
 	});
 
 	// Mode manager events
-	modeManager.on('modeChange', (newMode) => {
+	modeManager.on("modeChange", (newMode) => {
 		// Update the URL parameters and reload the configuration
 		const urlParams = new URLSearchParams(window.location.search);
-		urlParams.set('version', newMode.version);
-		urlParams.set('effect', newMode.effect);
+		urlParams.set("version", newMode.version);
+		urlParams.set("effect", newMode.effect);
 
 		// Update the URL without reloading the page
 		history.replaceState({}, "", "?" + urlParams.toString());
@@ -325,7 +322,7 @@ async function restartMatrixWithNewConfig(newConfig) {
 	// pick up changes from the global config object (matrixConfig). If this is not the case,
 	// you may need to implement additional logic to handle config updates for such renderers.
 
-	console.log(`Matrix restarted with: ${newConfig.version || 'default'} + ${newConfig.effect || 'default'}`);
+	console.log(`Matrix restarted with: ${newConfig.version || "default"} + ${newConfig.effect || "default"}`);
 }
 
 /**
@@ -352,9 +349,9 @@ function initializeSpotifyIntegration(config) {
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
- 
-		visible: config.spotifyControlsVisible
- 	});
+
+		visible: config.spotifyControlsVisible,
+	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
 	spotifyUI.setVisualizer(musicVisualizer);
 
