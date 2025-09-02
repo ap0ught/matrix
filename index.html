@@ -1,49 +1,49 @@
 <!doctype html>
 <html lang="en">
-<head>
-	<title>Matrix digital rain</title>
-	<meta charset="utf-8" />
-	<meta name="mobile-web-app-capable" content="yes" />
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="theme-color" content="#000000" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-	<style>
-		@supports (padding-top: env(safe-area-inset-top)) {
-			body {
-				padding: 0;
-				height: calc(100% + env(safe-area-inset-top));
+	<head>
+		<title>Matrix digital rain</title>
+		<meta charset="utf-8" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="#000000" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<style>
+			@supports (padding-top: env(safe-area-inset-top)) {
+				body {
+					padding: 0;
+					height: calc(100% + env(safe-area-inset-top));
+				}
 			}
-		}
-		body {
-			background: black;
-			overflow: hidden;
-			margin: 0;
+			body {
+				background: black;
+				overflow: hidden;
+				margin: 0;
 
-			font-family: monospace;
-			font-size: 2em;
-			text-align: center;
-		}
+				font-family: monospace;
+				font-size: 2em;
+				text-align: center;
+			}
 
-		canvas {
-			width: 100vw;
-			height: 100vh;
-		}
+			canvas {
+				width: 100vw;
+				height: 100vh;
+			}
 
-		p {
-			color: hsl(108, 90%, 70%);
-			text-shadow: hsl(108, 90%, 40%) 1px 0 10px;
-		}
-	</style>
-</head>
-<body>
-<script>
-	// Redirect to the default effect if no query string is present
-	if (!window.location.search) {
-		window.location.search = '?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0';
-	}
-</script>
-<!--
+			p {
+				color: hsl(108, 90%, 70%);
+				text-shadow: hsl(108, 90%, 40%) 1px 0 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			// Redirect to the default effect if no query string is present
+			if (!window.location.search) {
+				window.location.search = "?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0";
+			}
+		</script>
+		<!--
     This is an implementation of the green code seen in The Matrix film and video game franchise.
     This project demonstrates five concepts:
             1. Drawing to floating point frame buffer objects, or 'FBO's,
@@ -57,6 +57,6 @@
 
     For more information, please visit: https://github.com/Rezmason/matrix
  -->
-<script type="module" src="js/main.js"></script>
-</body>
+		<script type="module" src="js/main.js"></script>
+	</body>
 </html>
