@@ -59,7 +59,7 @@ export function getRandomVersion(versions) {
  * Returns a list of all available version keys, excluding aliases
  */
 export function getAvailableModes() {
-	return Object.keys(versions).filter(v => !EXCLUDED_VERSIONS.includes(v));
+	return Object.keys(versions).filter((v) => !EXCLUDED_VERSIONS.includes(v));
 }
 
 /*
@@ -452,7 +452,7 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
- 		volumetric: true,
+		volumetric: true,
 		forwardSpeed: 0.2,
 		raindropLength: 0.3,
 		density: 0.75,
@@ -473,7 +473,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
- 		bloomStrength: 0.7,
+		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.97, 0.6, 0.0), at: 0.0 },
@@ -501,7 +501,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
- 		bloomStrength: 0.7,
+		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.12, 0.6, 0.0), at: 0.0 },
@@ -566,12 +566,12 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
- 		raindropLength: 0.3,
+		raindropLength: 0.3,
 
 		renderer: "regl",
 		numColumns: 20,
 		ditherMagnitude: 0,
- 		volumetric: true,
+		volumetric: true,
 		forwardSpeed: 0,
 		density: 3,
 		useHoloplay: true,

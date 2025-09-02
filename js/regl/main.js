@@ -63,7 +63,7 @@ export default async (canvas, config) => {
 
 	// All this takes place in a full screen quad.
 	const fullScreenQuad = makeFullScreenQuad(regl);
-	
+
 	// Create dynamic effects mapping
 	const passModules = {
 		makePalettePass,
@@ -71,8 +71,8 @@ export default async (canvas, config) => {
 		makeImagePass,
 		makeMirrorPass,
 	};
-	const effects = createEffectsMapping('regl', passModules);
-	const effectPass = getEffectPass(config.effect, effects, 'palette');
+	const effects = createEffectsMapping("regl", passModules);
+	const effectPass = getEffectPass(config.effect, effects, "palette");
 	const context = { regl, config, lkg, cameraTex, cameraAspectRatio };
 	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effectPass, makeQuiltPass]);
 	const screenUniforms = { tex: pipeline[pipeline.length - 1].outputs.primary };

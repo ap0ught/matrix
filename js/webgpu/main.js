@@ -83,8 +83,8 @@ export default async (canvas, config) => {
 		makeImagePass,
 		makeMirrorPass,
 	};
-	const effects = createEffectsMapping('webgpu', passModules);
-	const effectPass = getEffectPass(config.effect, effects, 'palette');
+	const effects = createEffectsMapping("webgpu", passModules);
+	const effectPass = getEffectPass(config.effect, effects, "palette");
 	const pipeline = await makePipeline(context, [makeRain, makeBloomPass, effectPass, makeEndPass]);
 
 	const targetFrameTimeMilliseconds = 1000 / config.fps;

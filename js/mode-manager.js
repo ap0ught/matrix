@@ -1,25 +1,25 @@
 /**
  * Matrix Screensaver Mode Manager
- * 
+ *
  * Handles automatic switching between different Matrix versions and effects
  * to create a screensaver-like experience with rotating visual modes.
  */
 
-import { getRandomVersion, getAvailableModes, getAvailableEffects, versions } from './config.js';
+import { getRandomVersion, getAvailableModes, getAvailableEffects, versions } from "./config.js";
 
 export default class ModeManager {
 	constructor(config = {}) {
 		this.config = config;
 		this.isActive = false;
 		this.currentMode = {
-			version: config.version || 'classic',
-			effect: config.effect || 'mirror'
+			version: config.version || "classic",
+			effect: config.effect || "mirror",
 		};
 		this.switchTimer = null;
 		this.callbacks = {
-			modeChange: []
+			modeChange: [],
 		};
-		
+
 		// Get available modes
 		this.availableModes = getAvailableModes();
 		this.availableEffects = getAvailableEffects();
@@ -35,7 +35,7 @@ export default class ModeManager {
 
 		this.isActive = true;
 		this.scheduleNextSwitch();
-		console.log('Matrix screensaver mode started');
+		console.log("Matrix screensaver mode started");
 	}
 
 	/**
@@ -51,7 +51,7 @@ export default class ModeManager {
 			clearTimeout(this.switchTimer);
 			this.switchTimer = null;
 		}
-		console.log('Matrix screensaver mode stopped');
+		console.log("Matrix screensaver mode stopped");
 	}
 
 	/**
@@ -84,23 +84,16 @@ export default class ModeManager {
 			const randomEffect = this.getRandomEffect();
 			newMode = {
 				version: randomVersion,
-				effect: randomEffect
+				effect: randomEffect,
 			};
 			attempt++;
-		} while (
-			newMode.version === this.currentMode.version &&
-			newMode.effect === this.currentMode.effect &&
-			attempt < MAX_RETRIES
-		);
+		} while (newMode.version === this.currentMode.version && newMode.effect === this.currentMode.effect && attempt < MAX_RETRIES);
 
 		// Only switch if a new mode was found
-		if (
-			newMode.version !== this.currentMode.version ||
-			newMode.effect !== this.currentMode.effect
-		) {
+		if (newMode.version !== this.currentMode.version || newMode.effect !== this.currentMode.effect) {
 			this.setMode(newMode);
 		} else {
-			console.warn('Could not find a different mode to switch to after maximum retries.');
+			console.warn("Could not find a different mode to switch to after maximum retries.");
 		}
 	}
 
@@ -124,7 +117,7 @@ export default class ModeManager {
 	 */
 	setMode(mode) {
 		this.currentMode = { ...mode };
-		this.emit('modeChange', this.currentMode);
+		this.emit("modeChange", this.currentMode);
 		console.log(`Matrix mode switched to: ${mode.version} + ${mode.effect}`);
 	}
 
@@ -142,13 +135,13 @@ export default class ModeManager {
 		const versionConfig = versions[this.currentMode.version] || {};
 		const versionName = this.formatModeName(this.currentMode.version);
 		const effectName = this.formatModeName(this.currentMode.effect);
-		
+
 		return {
 			version: this.currentMode.version,
 			versionName,
 			effect: this.currentMode.effect,
 			effectName,
-			displayText: `${versionName} / ${effectName}`
+			displayText: `${versionName} / ${effectName}`,
 		};
 	}
 
@@ -158,8 +151,8 @@ export default class ModeManager {
 	formatModeName(name) {
 		return name
 			.split(/(?=[A-Z])|[_-]/) // Split on camelCase, underscores, and hyphens
-			.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-			.join(' ');
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(" ");
 	}
 
 	/**
@@ -168,7 +161,7 @@ export default class ModeManager {
 	getAvailableModes() {
 		return {
 			versions: this.availableModes,
-			effects: this.availableEffects
+			effects: this.availableEffects,
 		};
 	}
 
@@ -177,7 +170,7 @@ export default class ModeManager {
 	 */
 	updateConfig(newConfig) {
 		const wasActive = this.isActive;
-		
+
 		if (wasActive) {
 			this.stop();
 		}
@@ -203,11 +196,11 @@ export default class ModeManager {
 	 */
 	emit(event, data) {
 		if (this.callbacks[event]) {
-			this.callbacks[event].forEach(callback => {
+			this.callbacks[event].forEach((callback) => {
 				try {
 					callback(data);
 				} catch (error) {
-					console.error('Error in mode manager event callback:', error);
+					console.error("Error in mode manager event callback:", error);
 				}
 			});
 		}

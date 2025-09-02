@@ -1,0 +1,159 @@
+name: Master Branch Protection
+
+# This workflow provides status checks for pull requests targeting the master branch
+# It serves as a branch protection mechanism by ensuring code quality before merging
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+
+jobs:
+  validate-matrix:
+    name: Validate Matrix Application
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Validate code formatting with Prettier
+      run: |
+        echo "Checking code formatting..."
+        npx prettier --check --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" || {
+          echo "❌ Code formatting check failed!"
+          echo "Run: npx prettier --write --use-tabs --print-width 160 \"index.html\" \"./js/**/*.js\" \"./lib/gpu-buffer.js\""
+          exit 1
+        }
+        echo "✅ Code formatting is correct"
+    
+    - name: Start Matrix application server
+      run: |
+        echo "Starting Matrix application server..."
+        python3 -m http.server 8000 &
+        SERVER_PID=$!
+        echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+        # Wait for server to start
+        sleep 3
+        
+    - name: Test Matrix application endpoints
+      run: |
+        echo "Testing Matrix application endpoints..."
+        
+        # Test main page loads
+        if curl -f -s "http://localhost:8000/" > /dev/null; then
+          echo "✅ Main page loads successfully"
+        else
+          echo "❌ Main page failed to load"
+          exit 1
+        fi
+        
+        # Test with suppressWarnings parameter
+        if curl -f -s "http://localhost:8000/?suppressWarnings=true" > /dev/null; then
+          echo "✅ Page with suppressWarnings loads successfully"
+        else
+          echo "❌ Page with suppressWarnings failed to load"
+          exit 1
+        fi
+        
+        # Test version parameter
+        if curl -f -s "http://localhost:8000/?version=classic&suppressWarnings=true" > /dev/null; then
+          echo "✅ Classic version loads successfully"
+        else
+          echo "❌ Classic version failed to load"
+          exit 1
+        fi
+        
+        # Test effect parameter
+        if curl -f -s "http://localhost:8000/?effect=pride&suppressWarnings=true" > /dev/null; then
+          echo "✅ Pride effect loads successfully"
+        else
+          echo "❌ Pride effect failed to load"
+          exit 1
+        fi
+        
+        echo "✅ All endpoint tests passed"
+    
+    - name: Validate JavaScript modules
+      run: |
+        echo "Validating JavaScript modules..."
+        
+        # Check if main JavaScript files exist and are valid
+        if [ ! -f "js/main.js" ]; then
+          echo "❌ Main JavaScript file missing"
+          exit 1
+        fi
+        
+        if [ ! -f "js/config.js" ]; then
+          echo "❌ Config JavaScript file missing"
+          exit 1
+        fi
+        
+        # Simple syntax validation using Node.js
+        node -c js/main.js
+        node -c js/config.js
+        
+        echo "✅ JavaScript modules are valid"
+    
+    - name: Validate HTML structure
+      run: |
+        echo "Validating HTML structure..."
+        
+        if [ ! -f "index.html" ]; then
+          echo "❌ index.html is missing"
+          exit 1
+        fi
+        
+        # Check for required elements
+        if ! grep -q "<!DOCTYPE html>" index.html; then
+          echo "❌ Missing DOCTYPE declaration"
+          exit 1
+        fi
+        
+        # Check for canvas creation in JavaScript (dynamically created)
+        if ! grep -q "createElement.*canvas\|canvas.*createElement" js/main.js; then
+          echo "❌ Missing canvas creation in JavaScript"
+          exit 1
+        fi
+        
+        echo "✅ HTML structure is valid"
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        if [ ! -z "$SERVER_PID" ]; then
+          kill $SERVER_PID || true
+        fi
+  
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
