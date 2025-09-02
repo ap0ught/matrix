@@ -31,22 +31,12 @@
  */
 const EXCLUDED_VERSIONS = ["excludeME"];
 
-/*
-
-function getRandomVersion(versions) {
-	/*
-	 * Version Exclusion List
-	 * These are aliases or deprecated version names that shouldn't
-	 * appear in random selection to avoid confusion or broken experiences
-	 */
-	const exclude = ["throwback", "updated", "1999", "2003", "2021"];
-	const keys = Object.keys(versions).filter((v) => !exclude.includes(v));
-	const randomKey = keys[Math.floor(Math.random() * keys.length)];
-	return versions[randomKey];
-}
-
-/*
-=======
+/**
+ * Get Random Version
+ *
+ * Selects a random Matrix version from available options, excluding aliases
+ * and deprecated versions to ensure users get a working experience.
+ */
 export function getRandomVersion(versions) {
 	const keys = Object.keys(versions).filter((v) => !EXCLUDED_VERSIONS.includes(v));
 	const randomKey = keys[Math.floor(Math.random() * keys.length)];
@@ -59,7 +49,7 @@ export function getRandomVersion(versions) {
  * Returns a list of all available version keys, excluding aliases
  */
 export function getAvailableModes() {
-	return Object.keys(versions).filter(v => !EXCLUDED_VERSIONS.includes(v));
+	return Object.keys(versions).filter((v) => !EXCLUDED_VERSIONS.includes(v));
 }
 
 /*
@@ -72,7 +62,7 @@ export function getAvailableEffects() {
 }
 
 /*
-  * Font Definitions - The Languages of the Matrix
+ * Font Definitions - The Languages of the Matrix
  *
  * Each font represents different script systems used across Matrix versions.
  * The glyphs are stored as Multi-channel Signed Distance Fields (MSDF) which
@@ -236,9 +226,9 @@ const defaults = {
 
 	/* === Visual Effects === */
 	effect: "mirror", // Post-processing effect to apply (mirror, palette, etc.)
- 
+
 	baseTexture: null, // Optional texture applied to the glyph base layer
- 	glintTexture: null, // Optional texture applied to glyph highlights
+	glintTexture: null, // Optional texture applied to glyph highlights
 
 	/* === Camera and Interaction === */
 	useCamera: false, // Enable webcam input for interactive effects
@@ -249,9 +239,9 @@ const defaults = {
 	/* === Cursor (Raindrop Leader) Settings === */
 	isolateCursor: true, // Whether cursor has distinct appearance from other glyphs
 	cursorColor: hsl(0.242, 1, 0.73), // Cyan-green cursor color (classic Matrix accent)
- 
+
 	cursorIntensity: 2, // Brightness multiplier for a cursor glow
- 
+
 	/* === Glint (Highlight) Settings === */
 	isolateGlint: false, // Whether to render special glyph highlights
 	glintColor: hsl(0, 0, 1), // Pure white glint color for maximum contrast
@@ -317,14 +307,14 @@ const defaults = {
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
 	visualizerEnabled: true, // Whether to show the music visualizer minimap
 	visualizerPosition: "bottom-right", // Position of the visualizer
- 
+
 	// Screensaver mode settings
 	screensaverMode: false, // Whether to enable automatic mode switching
 	modeDisplayEnabled: true, // Whether to show current mode information
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)
 	showModeInfo: true, // Whether to display the current version and effect info
- };
+};
 
 export const versions = {
 	classic: {},
@@ -452,7 +442,7 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
- 		volumetric: true,
+		volumetric: true,
 		forwardSpeed: 0.2,
 		raindropLength: 0.3,
 		density: 0.75,
@@ -473,7 +463,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
- 		bloomStrength: 0.7,
+		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.97, 0.6, 0.0), at: 0.0 },
@@ -501,7 +491,7 @@ export const versions = {
 		baseContrast: 1.5,
 		highPassThreshold: 0,
 		numColumns: 60,
- 		bloomStrength: 0.7,
+		bloomStrength: 0.7,
 		fallSpeed: 0.3,
 		palette: [
 			{ color: hsl(0.12, 0.6, 0.0), at: 0.0 },
@@ -566,12 +556,12 @@ export const versions = {
 			{ color: hsl(0.37, 0.6, 0.0), at: 0.0 },
 			{ color: hsl(0.37, 0.6, 0.5), at: 1.0 },
 		],
- 		raindropLength: 0.3,
+		raindropLength: 0.3,
 
 		renderer: "regl",
 		numColumns: 20,
 		ditherMagnitude: 0,
- 		volumetric: true,
+		volumetric: true,
 		forwardSpeed: 0,
 		density: 3,
 		useHoloplay: true,
