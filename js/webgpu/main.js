@@ -21,15 +21,6 @@ const loadJS = (src) =>
 		document.body.appendChild(tag);
 	});
 
-const loadJS = (src) =>
-	new Promise((resolve, reject) => {
-		const tag = document.createElement("script");
-		tag.onload = resolve;
-		tag.onerror = reject;
-		tag.src = src;
-		document.body.appendChild(tag);
-	});
-
 export default async (canvas, config) => {
 	await loadJS("lib/gl-matrix.js");
 
