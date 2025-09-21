@@ -194,7 +194,7 @@ export default class ModeDisplay {
 		const switchBtn = this.element.querySelector(".switch-mode-btn");
 		switchBtn.addEventListener("click", () => {
 			if (this.modeManager) {
-				this.modeManager.switchToRandomMode();
+				this.modeManager.switchToRandomMode(true); // Pass true to indicate manual switch
 			}
 		});
 
