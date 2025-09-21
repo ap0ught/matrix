@@ -72,7 +72,7 @@ export default class ModeManager {
 	/**
 	 * Switch to a random mode
 	 */
-	switchToRandomMode() {
+	switchToRandomMode(isManual = false) {
 		const MAX_RETRIES = 10;
 		let attempt = 0;
 		let newMode;
@@ -91,7 +91,7 @@ export default class ModeManager {
 
 		// Only switch if a new mode was found
 		if (newMode.version !== this.currentMode.version || newMode.effect !== this.currentMode.effect) {
-			this.setMode(newMode);
+			this.setMode(newMode, isManual);
 		} else {
 			console.warn("Could not find a different mode to switch to after maximum retries.");
 		}
@@ -115,9 +115,9 @@ export default class ModeManager {
 	/**
 	 * Set the current mode
 	 */
-	setMode(mode) {
+	setMode(mode, isManual = false) {
 		this.currentMode = { ...mode };
-		this.emit("modeChange", this.currentMode);
+		this.emit("modeChange", { ...this.currentMode, isManual });
 		console.log(`Matrix mode switched to: ${mode.version} + ${mode.effect}`);
 	}
 
