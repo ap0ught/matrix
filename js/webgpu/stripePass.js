@@ -7,7 +7,7 @@ import { loadShader, make1DTexture, makeUniformBuffer, makeBindGroup, makeComput
 
 // This shader introduces noise into the renders, to avoid banding
 
-const transPrideStripeColors = [
+const spectrumStripeColors = [
 	{ space: "rgb", values: [0.36, 0.81, 0.98] },
 	{ space: "rgb", values: [0.96, 0.66, 0.72] },
 	{ space: "rgb", values: [1.0, 1.0, 1.0] },
@@ -17,7 +17,7 @@ const transPrideStripeColors = [
 	.map((color) => Array(3).fill(color))
 	.flat(1);
 
-const prideStripeColors = [
+const rainbowStripeColors = [
 	{ space: "rgb", values: [0.89, 0.01, 0.01] },
 	{ space: "rgb", values: [1.0, 0.55, 0.0] },
 	{ space: "rgb", values: [1.0, 0.93, 0.0] },
@@ -38,7 +38,7 @@ const numVerticesPerQuad = 2 * 3;
 
 export default ({ config, device, timeBuffer }) => {
 	// Expand and convert stripe colors into 1D texture data
-	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "pride" ? prideStripeColors : transPrideStripeColors;
+	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "rainbow" ? rainbowStripeColors : spectrumStripeColors;
 	const stripeTex = make1DTexture(
 		device,
 		stripeColors.map((color) => [...colorToRGB(color), 1]),
