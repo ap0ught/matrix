@@ -209,9 +209,6 @@ export default class ModeDisplay {
 		intervalSelect.addEventListener("change", (e) => {
 			const newInterval = parseInt(e.target.value);
 			this.emit("changeSwitchInterval", newInterval);
-			if (this.modeManager) {
-				this.modeManager.updateInterval(newInterval);
-			}
 			this.updateNextSwitchTime();
 		});
 
