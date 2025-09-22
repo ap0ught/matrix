@@ -183,6 +183,22 @@ export default class ModeManager {
 	}
 
 	/**
+	 * Update switch interval
+	 */
+	updateInterval(newInterval) {
+		this.config.modeSwitchInterval = newInterval;
+
+		// If currently active, restart with new interval
+		if (this.isActive) {
+			if (this.switchTimer) {
+				clearTimeout(this.switchTimer);
+				this.switchTimer = null;
+			}
+			this.scheduleNextSwitch();
+		}
+	}
+
+	/**
 	 * Add event listener
 	 */
 	on(event, callback) {

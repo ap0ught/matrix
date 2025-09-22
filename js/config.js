@@ -305,11 +305,11 @@ const defaults = {
 	musicInfluenceSpeed: true, // Whether music affects animation speed
 	musicInfluenceBrightness: true, // Whether music affects brightness
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
-	visualizerEnabled: true, // Whether to show the music visualizer minimap
+	visualizerEnabled: false, // Whether to show the music visualizer minimap
 	visualizerPosition: "bottom-right", // Position of the visualizer
 
 	// Screensaver mode settings
-	screensaverMode: false, // Whether to enable automatic mode switching
+	screensaverMode: true, // Whether to enable automatic mode switching
 	modeDisplayEnabled: true, // Whether to show current mode information
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)

@@ -22,6 +22,7 @@ export default class ModeDisplay {
 		this.callbacks = {
 			toggleScreensaver: [],
 			toggleSpotifyControls: [],
+			changeSwitchInterval: [],
 		};
 
 		this.init();
@@ -78,8 +79,21 @@ export default class ModeDisplay {
 				<div class="mode-controls" style="border-top: 1px solid rgba(0, 255, 0, 0.2); padding-top: 8px;">
 					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
 						<input type="checkbox" class="screensaver-toggle" style="margin-right: 5px;" />
-						Auto Mode Switching (10min)
+						Auto Mode Switching
 					</label>
+					<div class="auto-switch-interval" style="margin-left: 20px; margin-bottom: 5px; font-size: 10px;">
+						<label style="display: block;">
+							Interval:
+							<select class="interval-select" style="margin-left: 5px; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; padding: 2px;">
+								<option value="600000">10 min</option>
+								<option value="1200000">20 min</option>
+								<option value="1800000">30 min</option>
+								<option value="2400000">40 min</option>
+								<option value="3000000">50 min</option>
+								<option value="3600000">60 min</option>
+							</select>
+						</label>
+					</div>
 					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
 						<input type="checkbox" class="spotify-controls-toggle" style="margin-right: 5px;" />
 						Show Spotify Controls
@@ -188,6 +202,17 @@ export default class ModeDisplay {
 		const spotifyToggle = this.element.querySelector(".spotify-controls-toggle");
 		spotifyToggle.addEventListener("change", (e) => {
 			this.emit("toggleSpotifyControls", e.target.checked);
+		});
+
+		// Interval selection
+		const intervalSelect = this.element.querySelector(".interval-select");
+		intervalSelect.addEventListener("change", (e) => {
+			const newInterval = parseInt(e.target.value);
+			this.emit("changeSwitchInterval", newInterval);
+			if (this.modeManager) {
+				this.modeManager.updateInterval(newInterval);
+			}
+			this.updateNextSwitchTime();
 		});
 
 		// Switch mode button
@@ -317,11 +342,12 @@ export default class ModeDisplay {
 	updateNextSwitchTime() {
 		const nextSwitchElement = this.element.querySelector(".next-switch-time");
 		const screensaverToggle = this.element.querySelector(".screensaver-toggle");
+		const intervalSelect = this.element.querySelector(".interval-select");
 
 		if (!nextSwitchElement) return;
 
 		if (screensaverToggle.checked && this.modeManager && this.modeManager.isActive) {
-			const interval = this.modeManager.config.modeSwitchInterval || 600000;
+			const interval = intervalSelect ? parseInt(intervalSelect.value) : this.modeManager.config.modeSwitchInterval || 600000;
 			const minutes = Math.floor(interval / 60000);
 			nextSwitchElement.textContent = `Next switch: ${minutes}min`;
 		} else {
@@ -332,15 +358,19 @@ export default class ModeDisplay {
 	/**
 	 * Set toggle states
 	 */
-	setToggleStates(screensaverEnabled, spotifyControlsVisible) {
+	setToggleStates(screensaverEnabled, spotifyControlsVisible, switchInterval = 600000) {
 		const screensaverToggle = this.element.querySelector(".screensaver-toggle");
 		const spotifyToggle = this.element.querySelector(".spotify-controls-toggle");
+		const intervalSelect = this.element.querySelector(".interval-select");
 
 		if (screensaverToggle) {
 			screensaverToggle.checked = screensaverEnabled;
 		}
 		if (spotifyToggle) {
 			spotifyToggle.checked = spotifyControlsVisible;
+		}
+		if (intervalSelect) {
+			intervalSelect.value = switchInterval.toString();
 		}
 
 		this.updateNextSwitchTime();
