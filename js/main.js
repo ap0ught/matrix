@@ -249,7 +249,7 @@ function initializeModeManagement(config) {
 	modeDisplay.setModeManager(modeManager);
 
 	// Set initial toggle states
-	modeDisplay.setToggleStates(config.screensaverMode || false, config.spotifyControlsVisible || false);
+	modeDisplay.setToggleStates(config.screensaverMode || false, config.spotifyControlsVisible || false, config.modeSwitchInterval || 600000);
 
 	// Set up event listeners
 	setupModeManagementEvents(config);
@@ -282,6 +282,13 @@ function setupModeManagementEvents(config) {
 			} else {
 				spotifyUI.hide();
 			}
+		}
+	});
+
+	modeDisplay.on("changeSwitchInterval", (interval) => {
+		config.modeSwitchInterval = interval;
+		if (modeManager) {
+			modeManager.updateInterval(interval);
 		}
 	});
 
