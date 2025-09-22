@@ -58,7 +58,7 @@ export function getAvailableModes() {
  * Returns a list of all available effect names
  */
 export function getAvailableEffects() {
-	return ["none", "plain", "palette", "customStripes", "stripes", "pride", "transPride", "trans", "image", "mirror"];
+	return ["none", "plain", "palette", "customStripes", "stripes", "rainbow", "spectrum", "trans", "image", "mirror"];
 }
 
 /*
@@ -725,6 +725,14 @@ paramMapping.angle = paramMapping.slant;
 paramMapping.colors = paramMapping.stripeColors;
 
 export default (urlParams) => {
+	// Backward compatibility for legacy effect names
+	if (urlParams.effect === "pride") {
+		urlParams.effect = "rainbow";
+	}
+	if (urlParams.effect === "transPride") {
+		urlParams.effect = "spectrum";
+	}
+
 	const validParams = Object.fromEntries(
 		Object.entries(urlParams)
 			.filter(([key]) => key in paramMapping)

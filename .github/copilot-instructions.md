@@ -231,7 +231,7 @@ Format code with Prettier:
    - Debug view: `?effect=none&suppressWarnings=true` (shows raw data visualization)
 
 4. **Custom Effects**: Verify customization works:
-   - Pride colors: `?effect=pride&suppressWarnings=true`
+   - Rainbow colors: `?effect=rainbow&suppressWarnings=true`
    - Custom stripes: `?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0&suppressWarnings=true`
 
 ### Performance Testing

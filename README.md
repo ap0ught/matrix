@@ -25,8 +25,8 @@
 - [A custom variant I call "Twilight"](https://ap0ught.github.io/matrix?version=twilight)
 - [Morpheus mode](https://ap0ught.github.io/matrix?version=morpheus)
 - [Bugs mode](https://ap0ught.github.io/matrix?version=bugs)
-- [Pride flag colors](https://ap0ught.github.io/matrix/?effect=pride)
-- [Trans flag colors](https://ap0ught.github.io/matrix/?effect=trans)
+- [Rainbow colors](https://ap0ught.github.io/matrix/?effect=rainbow)
+- [Light spectrum colors](https://ap0ught.github.io/matrix/?effect=spectrum)
 - [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
 - [Custom palette (`palette=R,G,B,%,R,G,B,%,R,G,B,%, etc`)](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
 - [Custom image (`url=www.website.com/picture.jpg`)](https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
@@ -131,7 +131,7 @@ Now you know link fu. Here's a list of customization options:
 - `animationSpeed` - the overall speed of the animation. Can be any number.
 - `fallSpeed` - the speed of the rain's descent. Can be any number.
 - `cycleSpeed` - the speed that the glyphs change their symbol. Can be any number.
-- `effect` - alternatives to the default post-processing effect. Can be "plain", "pride", "stripes", "none", "image" or "mirror".
+- `effect` - alternatives to the default post-processing effect. Can be "plain", "rainbow", "spectrum", "stripes", "none", "image" or "mirror".
   - ("none" displays the 'debug view', a behind-the-scenes look at the anatomy of the effect.)
 - `camera` - some effects, ie. the mirror effect, optionally support webcam input. Can be "true" or "false". Default is false.
 - `stripeColors` - if you set the effect to "stripes", you can specify the colors of vertical stripes as alternating *R,G,B* numeric values, like so: [https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
