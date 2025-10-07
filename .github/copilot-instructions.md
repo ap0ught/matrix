@@ -140,7 +140,7 @@ cp msdfgen/build/msdfgen out/
    - Debug view: `?effect=none&suppressWarnings=true` (shows raw data visualization)
 
 4. **Custom Effects**: Verify customization works:
-   - Pride colors: `?effect=pride&suppressWarnings=true`
+   - Rainbow colors: `?effect=rainbow&suppressWarnings=true`
    - Custom stripes: `?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0&suppressWarnings=true`
    - Custom colors: `http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0`
    - Performance testing: `?fps=30&resolution=0.5`

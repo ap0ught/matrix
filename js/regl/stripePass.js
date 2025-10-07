@@ -6,7 +6,7 @@ import { loadText, make1DTexture, makePassFBO, makePass } from "./utils.js";
 
 // This shader introduces noise into the renders, to avoid banding
 
-const transPrideStripeColors = [
+const spectrumStripeColors = [
 	{ space: "rgb", values: [0.36, 0.81, 0.98] },
 	{ space: "rgb", values: [0.96, 0.66, 0.72] },
 	{ space: "rgb", values: [1.0, 1.0, 1.0] },
@@ -16,7 +16,7 @@ const transPrideStripeColors = [
 	.map((color) => Array(3).fill(color))
 	.flat();
 
-const prideStripeColors = [
+const rainbowStripeColors = [
 	{ space: "rgb", values: [0.89, 0.01, 0.01] },
 	{ space: "rgb", values: [1.0, 0.55, 0.0] },
 	{ space: "rgb", values: [1.0, 0.93, 0.0] },
@@ -33,7 +33,7 @@ export default ({ regl, config }, inputs) => {
 	const { backgroundColor, cursorColor, glintColor, cursorIntensity, glintIntensity, ditherMagnitude } = config;
 
 	// Expand and convert stripe colors into 1D texture data
-	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "pride" ? prideStripeColors : transPrideStripeColors;
+	const stripeColors = "stripeColors" in config ? config.stripeColors : config.effect === "rainbow" ? rainbowStripeColors : spectrumStripeColors;
 	const stripeTex = make1DTexture(
 		regl,
 		stripeColors.map((color) => [...colorToRGB(color), 1]),
