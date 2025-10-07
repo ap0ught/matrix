@@ -142,11 +142,11 @@ cp msdfgen/build/msdfgen out/
 4. **Custom Effects**: Verify customization works:
    - Rainbow colors: `?effect=rainbow&suppressWarnings=true`
    - Custom stripes: `?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0&suppressWarnings=true`
-   - Custom colors: `http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0`
-   - Performance testing: `http://localhost:8000/?fps=30&resolution=0.5`
+   - Custom colors: `http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0&suppressWarnings=true`
+   - Performance testing: `http://localhost:8000/?fps=30&resolution=0.5&suppressWarnings=true`
 
 ### Performance Testing
-- Use URL parameters for performance validation: `?fps=30&resolution=0.5&effect=none`
+- Use URL parameters for performance validation: `?fps=30&resolution=0.5&effect=none&suppressWarnings=true`
 - **WebGL Inspector** - Use browser DevTools for frame analysis
 - **Chrome DevTools** - Monitor CPU and memory usage during animation
 - **Test with software rendering** - Application should work even without hardware acceleration
@@ -182,8 +182,8 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 
 ### Performance Optimization
 1. **Profile with browser DevTools** - built-in GPU performance counters
-2. **Test with different resolutions**: `?resolution=0.5` for performance testing
-3. **Use debug view**: `?effect=none` to see raw computational output
+2. **Test with different resolutions**: `?resolution=0.5&suppressWarnings=true` for performance testing
+3. **Use debug view**: `?effect=none&suppressWarnings=true` to see raw computational output
 4. **Monitor WebGL state** if making renderer changes
 5. Monitor GPU usage in browser DevTools
 6. Adjust bloom settings and resolution parameters
@@ -237,15 +237,15 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 - Rebuild msdfgen if fonts appear blurry
 
 ### Performance problems
-- Lower resolution: `?resolution=0.5`
-- Reduce bloom: `?bloomSize=0.1&bloomStrength=0.3`
-- Debug view for analysis: `?effect=none` (reveals character grid structure)
+- Lower resolution: `?resolution=0.5&suppressWarnings=true`
+- Reduce bloom: `?bloomSize=0.1&bloomStrength=0.3&suppressWarnings=true`
+- Debug view for analysis: `?effect=none&suppressWarnings=true` (reveals character grid structure)
 
 ### Common Issues
 - **Performance warnings**: Expected in headless/sandboxed environments
 - **WebGL fallback warnings**: Normal when hardware acceleration unavailable
 - **Blank screen**: Check browser console for JavaScript errors
-- **Slow performance**: Test with `?resolution=0.5` parameter
+- **Slow performance**: Test with `?resolution=0.5&suppressWarnings=true` parameter
 
 ### Development Environment
 - **Any modern browser** with JavaScript enabled
