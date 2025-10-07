@@ -198,6 +198,13 @@ jobs:
         git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" || \
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
         
+        # Ensure we're on gh-pages branch (handle case where default branch might be different)
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        if [ "$CURRENT_BRANCH" != "gh-pages" ]; then
+          echo "Current branch is '$CURRENT_BRANCH', renaming to gh-pages"
+          git branch -M gh-pages
+        fi
+        
         # Stage all changes
         git add .
         
