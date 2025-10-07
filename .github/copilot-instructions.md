@@ -53,7 +53,7 @@ php -S localhost:8000
 npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 
 # Complete format command including HTML and libraries
-npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/**.js" "./lib/gpu-buffer.js"
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js"
 ```
 
 **TIMING**: Takes ~2-5 seconds to complete, including npm package install. **NEVER CANCEL**: Always let Prettier finish completely.
