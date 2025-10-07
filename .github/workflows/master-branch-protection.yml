@@ -75,11 +75,19 @@ jobs:
           exit 1
         fi
         
-        # Test effect parameter
-        if curl -f -s "http://localhost:8000/?effect=pride&suppressWarnings=true" > /dev/null; then
-          echo "✅ Pride effect loads successfully"
+        # Test effect parameter with new neutral naming
+        if curl -f -s "http://localhost:8000/?effect=rainbow&suppressWarnings=true" > /dev/null; then
+          echo "✅ Rainbow effect loads successfully"
         else
-          echo "❌ Pride effect failed to load"
+          echo "❌ Rainbow effect failed to load"
+          exit 1
+        fi
+        
+        # Test backward compatibility with legacy effect names
+        if curl -f -s "http://localhost:8000/?effect=pride&suppressWarnings=true" > /dev/null; then
+          echo "✅ Legacy pride effect (backward compatibility) loads successfully"
+        else
+          echo "❌ Legacy pride effect (backward compatibility) failed to load"
           exit 1
         fi
         
@@ -100,9 +108,14 @@ jobs:
           exit 1
         fi
         
-        # Simple syntax validation using Node.js
-        node -c js/main.js
-        node -c js/config.js
+        # Validate ES6 module syntax by creating a temporary package.json
+        echo '{"type": "module"}' > package.json
+        node --check js/main.js
+        node --check js/config.js
+        node --check js/effects.js
+        node --check js/regl/stripePass.js
+        node --check js/webgpu/stripePass.js
+        rm package.json
         
         echo "✅ JavaScript modules are valid"
     
