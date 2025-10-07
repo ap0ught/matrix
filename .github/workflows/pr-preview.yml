@@ -27,6 +27,7 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
         fetch-depth: 1
+        token: ${{ github.token }}
     
     - name: Determine preview path
       id: preview
@@ -49,6 +50,7 @@ jobs:
         ref: gh-pages
         path: gh-pages
         fetch-depth: 1
+        token: ${{ github.token }}
       continue-on-error: true
     
     - name: Initialize gh-pages if needed
@@ -58,7 +60,13 @@ jobs:
           mkdir -p gh-pages
           cd gh-pages
           git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b gh-pages
+          
+          # Set up remote with authentication
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          
           echo "# Matrix PR Previews" > README.md
           echo "" >> README.md
           echo "This branch contains PR preview deployments." >> README.md
@@ -174,6 +182,11 @@ jobs:
         
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Set up authentication for push if not already configured
+        if ! git remote get-url origin | grep -q "x-access-token"; then
+          git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        fi
         
         git add .
         git commit -m "Deploy preview: ${{ steps.preview.outputs.path }}" || echo "No changes to commit"
