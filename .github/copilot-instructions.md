@@ -143,7 +143,7 @@ cp msdfgen/build/msdfgen out/
    - Rainbow colors: `?effect=rainbow&suppressWarnings=true`
    - Custom stripes: `?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0&suppressWarnings=true`
    - Custom colors: `http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0`
-   - Performance testing: `?fps=30&resolution=0.5`
+   - Performance testing: `http://localhost:8000/?fps=30&resolution=0.5`
 
 ### Performance Testing
 - Use URL parameters for performance validation: `?fps=30&resolution=0.5&effect=none`
