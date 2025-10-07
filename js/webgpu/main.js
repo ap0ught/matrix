@@ -59,6 +59,7 @@ export default async (canvas, config) => {
 		config,
 		adapter,
 		device,
+		canvas,
 		canvasContext,
 		timeBuffer,
 		canvasFormat,

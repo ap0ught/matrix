@@ -20,7 +20,7 @@ const makePyramid = (device, size, pyramidHeight) =>
 		.map((_, index) =>
 			makeComputeTarget(
 				device,
-				size.map((x) => Math.floor(x * 2 ** -index)),
+				size.map((x) => Math.max(1, Math.floor(x * 2 ** -index))),
 			),
 		);
 
@@ -102,7 +102,7 @@ export default ({ config, device }) => {
 
 	const build = (screenSize, inputs) => {
 		// Since the bloom is blurry, we downscale everything
-		scaledScreenSize = screenSize.map((x) => Math.floor(x * bloomSize));
+		scaledScreenSize = screenSize.map((x) => Math.max(1, Math.floor(x * bloomSize)));
 
 		destroyPyramid(hBlurPyramid);
 		hBlurPyramid = makePyramid(device, scaledScreenSize, pyramidHeight);
@@ -144,7 +144,11 @@ export default ({ config, device }) => {
 
 		computePass.setPipeline(blurPipeline);
 		for (let i = 0; i < pyramidHeight; i++) {
-			const dispatchSize = [Math.ceil(Math.floor(scaledScreenSize[0] * 2 ** -i) / 32), Math.floor(Math.floor(scaledScreenSize[1] * 2 ** -i)), 1];
+			const dispatchSize = [
+				Math.max(1, Math.ceil(Math.floor(scaledScreenSize[0] * 2 ** -i) / 32)),
+				Math.max(1, Math.floor(Math.floor(scaledScreenSize[1] * 2 ** -i))),
+				1,
+			];
 			computePass.setBindGroup(0, hBlurBindGroups[i]);
 			computePass.dispatchWorkgroups(...dispatchSize);
 			computePass.setBindGroup(0, vBlurBindGroups[i]);

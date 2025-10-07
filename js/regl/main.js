@@ -73,7 +73,7 @@ export default async (canvas, config) => {
 	};
 	const effects = createEffectsMapping("regl", passModules);
 	const effectPass = getEffectPass(config.effect, effects, "palette");
-	const context = { regl, config, lkg, cameraTex, cameraAspectRatio };
+	const context = { regl, canvas, config, lkg, cameraTex, cameraAspectRatio };
 	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effectPass, makeQuiltPass]);
 	const screenUniforms = { tex: pipeline[pipeline.length - 1].outputs.primary };
 	const drawToScreen = regl({ uniforms: screenUniforms });
