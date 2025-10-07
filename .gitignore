@@ -1,0 +1,34 @@
+# Build artifacts
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Temporary files
+/tmp/
+*.log
+
+# Release artifacts (created during release process)
+matrix-*.zip
+matrix-*.tar.gz
+
+# MSDF build artifacts
+msdfgen/build/
+
+# Playdate build artifacts
+playdate/matrix_c/build/
+playdate/matrix_c/build-device/
+playdate/ThePlaytrix.pdx/
+playdate/ThePlaytrixLua.pdx/
+
+# OS-specific
+.DS_Store
+Thumbs.db

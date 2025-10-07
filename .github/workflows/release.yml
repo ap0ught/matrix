@@ -1,0 +1,164 @@
+name: Create Release
+
+# This workflow creates a new release of the Matrix Digital Rain application
+# It can be triggered manually or automatically when a tag is pushed
+# The workflow packages the web application assets and creates a GitHub release
+
+on:
+  # Allow manual triggering from the Actions tab
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+  
+  # Trigger on tag push (v*.*.*)
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # Required to create releases
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for changelog generation
+        submodules: false  # Don't fetch msdfgen submodule for releases
+    
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Manual trigger - use input version
+          VERSION="${{ github.event.inputs.version }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+        else
+          # Tag push - extract version from tag
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+        
+        # Read VERSION file for comparison
+        if [ -f VERSION ]; then
+          FILE_VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "file_version=$FILE_VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "file_version=unknown" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Update VERSION file
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "${{ steps.version.outputs.version }}" > VERSION
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add VERSION
+        git commit -m "Release version ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+    
+    - name: Create and push tag
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.version }}"
+        git push origin "${{ steps.version.outputs.tag }}"
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 "${{ steps.version.outputs.tag }}^" 2>/dev/null || echo "")
+        
+        if [ -z "$PREVIOUS_TAG" ]; then
+          # First release - show recent commits
+          echo "## What's New" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log --pretty=format:"- %s (%h)" -10 >> CHANGELOG.md
+        else
+          # Generate changelog from previous tag
+          echo "## Changes since $PREVIOUS_TAG" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log --pretty=format:"- %s (%h)" "$PREVIOUS_TAG..${{ steps.version.outputs.tag }}" >> CHANGELOG.md
+        fi
+        
+        echo "" >> CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        echo "## Installation" >> CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        echo "1. Download \`matrix-${{ steps.version.outputs.version }}.zip\`" >> CHANGELOG.md
+        echo "2. Extract the archive" >> CHANGELOG.md
+        echo "3. Serve the files with any HTTP server:" >> CHANGELOG.md
+        echo "   - Python: \`python3 -m http.server 8000\`" >> CHANGELOG.md
+        echo "   - Node.js: \`npx http-server -p 8000\`" >> CHANGELOG.md
+        echo "   - PHP: \`php -S localhost:8000\`" >> CHANGELOG.md
+        echo "4. Open http://localhost:8000 in your browser" >> CHANGELOG.md
+        
+        # Output changelog for debugging
+        cat CHANGELOG.md
+    
+    - name: Create release package
+      run: |
+        # Create a clean release directory
+        mkdir -p release-package
+        
+        # Copy essential web application files
+        cp index.html release-package/
+        cp README.md release-package/
+        cp LICENSE release-package/
+        cp VERSION release-package/
+        
+        # Copy directories needed for the web application
+        cp -r js release-package/
+        cp -r lib release-package/
+        cp -r assets release-package/
+        cp -r shaders release-package/
+        
+        # Create the release archive
+        cd release-package
+        zip -r "../matrix-${{ steps.version.outputs.version }}.zip" .
+        cd ..
+        
+        # Calculate checksum
+        sha256sum "matrix-${{ steps.version.outputs.version }}.zip" > "matrix-${{ steps.version.outputs.version }}.zip.sha256"
+        
+        echo "✅ Created release package: matrix-${{ steps.version.outputs.version }}.zip"
+        ls -lh "matrix-${{ steps.version.outputs.version }}.zip"
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: Matrix Digital Rain v${{ steps.version.outputs.version }}
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease || false }}
+        files: |
+          matrix-${{ steps.version.outputs.version }}.zip
+          matrix-${{ steps.version.outputs.version }}.zip.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Summary
+      run: |
+        echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Tag:** ${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Package:** matrix-${{ steps.version.outputs.version }}.zip" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+        echo "- [View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Download Package](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/matrix-${{ steps.version.outputs.version }}.zip)" >> $GITHUB_STEP_SUMMARY
