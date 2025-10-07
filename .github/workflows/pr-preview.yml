@@ -25,7 +25,7 @@ jobs:
     - name: Checkout PR branch
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.ref || github.ref }}
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
         fetch-depth: 1
         token: ${{ github.token }}
     
@@ -49,14 +49,15 @@ jobs:
       with:
         ref: gh-pages
         path: gh-pages
-        fetch-depth: 1
+        fetch-depth: 0
         token: ${{ github.token }}
       continue-on-error: true
     
     - name: Initialize gh-pages if needed
       run: |
-        if [ ! -d "gh-pages" ]; then
+        if [ ! -d "gh-pages/.git" ]; then
           echo "Creating new gh-pages branch"
+          rm -rf gh-pages
           mkdir -p gh-pages
           cd gh-pages
           git init
@@ -71,6 +72,15 @@ jobs:
           echo "" >> README.md
           echo "This branch contains PR preview deployments." >> README.md
           echo "Main site: https://ap0ught.github.io/matrix/" >> README.md
+          
+          git add .
+          git commit -m "Initialize gh-pages branch"
+          cd ..
+        else
+          echo "gh-pages branch exists, configuring..."
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           cd ..
         fi
     
@@ -180,19 +190,27 @@ jobs:
       run: |
         cd gh-pages
         
+        # Ensure git config is set
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Set up authentication for push if not already configured
-        if ! git remote get-url origin | grep -q "x-access-token"; then
-          git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-        fi
+        # Set up authentication for push
+        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" || \
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
         
+        # Stage all changes
         git add .
-        git commit -m "Deploy preview: ${{ steps.preview.outputs.path }}" || echo "No changes to commit"
         
-        # Push to gh-pages branch
-        git push origin gh-pages --force
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to deploy"
+        else
+          git commit -m "Deploy preview: ${{ steps.preview.outputs.path }}"
+          
+          # Push to gh-pages branch
+          git push origin gh-pages --force
+          echo "✅ Successfully deployed to gh-pages"
+        fi
     
     - name: Comment on PR with preview URL
       if: github.event_name == 'pull_request'
