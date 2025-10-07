@@ -128,8 +128,8 @@ jobs:
           exit 1
         fi
         
-        # Check for required elements
-        if ! grep -q "<!DOCTYPE html>" index.html; then
+        # Check for required elements (case-insensitive)
+        if ! grep -iq "<!doctype html>" index.html; then
           echo "❌ Missing DOCTYPE declaration"
           exit 1
         fi
