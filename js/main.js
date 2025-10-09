@@ -191,7 +191,7 @@ document.body.onload = async () => {
 	// Initialize mode management and display
 	initializeModeManagement(matrixConfig);
 
-	if (isRunningSwiftShader() && !matrixConfig.suppressWarnings) {
+	if (!matrixConfig.suppressWarnings && isRunningSwiftShader()) {
 		// Inject the styles needed for the Matrix warning interface
 		injectMatrixWarningStyles();
 
