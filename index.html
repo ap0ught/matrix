@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix PR Previews</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #0f0; text-shadow: 0 0 10px #0f0; }
+        a { color: #0f0; text-decoration: none; }
+        a:hover { text-decoration: underline; text-shadow: 0 0 5px #0f0; }
+        .preview { 
+            margin: 10px 0; 
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 4px;
+        }
+        .main-link {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 2px solid #0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Matrix PR Preview Deployments</h1>
+    
+    <div class="main-link">
+        <strong>Main Site:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
+    </div>
+    
+    <h2>Available PR Previews:</h2>
+    <div id="previews"></div>
+    
+    <script>
+        const previews = [];
+                previews.push('pr-42');
+        
+        const container = document.getElementById('previews');
+        if (previews.length === 0) {
+            container.innerHTML = '<p>No PR previews available yet.</p>';
+        } else {
+            previews.sort().reverse().forEach(preview => {
+                const div = document.createElement('div');
+                div.className = 'preview';
+                div.innerHTML = `<strong>${preview}</strong>: <a href="/matrix/${preview}/">View Preview</a>`;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
