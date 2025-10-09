@@ -32,6 +32,7 @@ GitHub Actions provides an automated way to create releases with proper tagging 
 7. Click "Run workflow"
 
 The workflow will:
+
 - Update the VERSION file
 - Create and push a git tag
 - Generate a changelog from git history
@@ -56,6 +57,7 @@ The release workflow will automatically trigger and create the release.
 ### Method 2: Local Release Script
 
 The local script creates a release package without GitHub integration. This is useful for:
+
 - Testing the release process
 - Creating distribution packages for other platforms
 - Internal releases
@@ -71,6 +73,7 @@ chmod +x create-release.sh
 ```
 
 The script will:
+
 1. Read the current version from VERSION file
 2. Prompt for a new version (or use current)
 3. Package the web application files
@@ -80,6 +83,7 @@ The script will:
 #### Output
 
 The script creates:
+
 - `matrix-{version}.zip` - Release package
 - `matrix-{version}.zip.sha256` - Checksum file
 
@@ -130,6 +134,7 @@ The project uses [Semantic Versioning](https://semver.org/):
 - **PATCH**: Backward-compatible bug fixes
 
 Examples:
+
 - `1.0.0` - First stable release
 - `1.1.0` - New Matrix version added
 - `1.1.1` - Bug fix for shader rendering
@@ -182,6 +187,7 @@ The `create-release.sh` script:
 **Problem**: `zip` or `sha256sum` not found
 
 **Solutions**:
+
 - Install zip: `sudo apt-get install zip` (Ubuntu/Debian)
 - macOS uses `shasum -a 256` automatically
 - Windows: Use Git Bash or WSL
@@ -191,6 +197,7 @@ The `create-release.sh` script:
 **Problem**: Archive is unexpectedly large
 
 **Solution**: Check for unwanted files:
+
 ```bash
 # Ensure .gitignore excludes build artifacts
 git status --ignored
