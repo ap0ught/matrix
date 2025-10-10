@@ -98,6 +98,12 @@ jobs:
         cp -r assets "gh-pages/${PREVIEW_PATH}/"
         cp -r shaders "gh-pages/${PREVIEW_PATH}/"
         
+        # Copy PWA files (service worker, manifest, icons)
+        cp service-worker.js "gh-pages/${PREVIEW_PATH}/"
+        cp manifest.webmanifest "gh-pages/${PREVIEW_PATH}/"
+        cp icon-192.png "gh-pages/${PREVIEW_PATH}/"
+        cp icon-512.png "gh-pages/${PREVIEW_PATH}/"
+        
         # Optional files (don't fail if missing)
         cp README.md "gh-pages/${PREVIEW_PATH}/" 2>/dev/null || true
         cp screenshot.png "gh-pages/${PREVIEW_PATH}/" 2>/dev/null || true

@@ -2,7 +2,7 @@
 	"name": "Matrix Digital Rain",
 	"short_name": "Matrix",
 	"description": "Implementation of the iconic falling green code from The Matrix films",
-	"start_url": "/",
+	"start_url": "./",
 	"display": "fullscreen",
 	"background_color": "#000000",
 	"theme_color": "#000000",
