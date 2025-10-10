@@ -57,7 +57,15 @@ PR previews remain on GitHub Pages until manually removed. To clean up old previ
 - **Workflow file:** `.github/workflows/pr-preview.yml`
 - **Deployment branch:** `gh-pages`
 - **Directory structure:** Each PR gets its own subdirectory
-- **Files deployed:** `index.html`, `js/`, `lib/`, `assets/`, `shaders/`
+- **Files deployed:** `index.html`, `js/`, `lib/`, `assets/`, `shaders/`, `service-worker.js`, `manifest.webmanifest`, `icon-*.png`
+
+### Path Handling
+
+The application uses relative paths for all resources to support deployment in subdirectories:
+- Icon and manifest references in `index.html` use relative paths (e.g., `icon-192.png` instead of `/icon-192.png`)
+- Service worker registration uses a relative path
+- The service worker automatically detects its base path using `self.location.pathname`
+- All cached assets are resolved relative to the service worker's location
 
 ## Limitations
 
