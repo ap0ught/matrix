@@ -1,0 +1,98 @@
+# Matrix Variant Creation Workflow
+# This workflow uses multiple AI agents to create a new Matrix version from a high-level description
+
+name: Create Matrix Variant
+description: Generate a complete Matrix variant including colors, configuration, and documentation
+version: 1.0.0
+
+# Input parameters required from user
+inputs:
+  - name: variant_name
+    type: string
+    required: true
+    description: Name of the new Matrix variant (e.g., "ocean-depths", "neon-sunset")
+    validation: "^[a-z][a-z0-9-]*$"
+  
+  - name: theme_description
+    type: string
+    required: true
+    description: Detailed description of the theme and aesthetic
+  
+  - name: base_version
+    type: string
+    default: classic
+    description: Existing version to base the variant on
+    options: [classic, 3d, resurrections, operator, paradise, nightmare]
+  
+  - name: auto_test
+    type: boolean
+    default: true
+    description: Automatically test the variant after creation
+
+# AI agents used in this workflow
+agents:
+  color_designer:
+    role: color_palette_generator
+    agent: matrix-lore-keeper
+    temperature: 0.6
+  
+  config_writer:
+    role: configuration_developer
+    agent: shader-expert
+    temperature: 0.3
+  
+  tester:
+    role: quality_validator
+    agent: webgl-specialist
+    temperature: 0.2
+  
+  documenter:
+    role: documentation_writer
+    agent: matrix-lore-keeper
+    temperature: 0.5
+
+# Workflow execution steps
+steps:
+  - name: analyze_theme
+    agent: color_designer
+    description: Generate color palette from theme
+    
+  - name: write_config
+    agent: config_writer
+    depends_on: [analyze_theme]
+    description: Add variant configuration to js/config.js
+    
+  - name: test_variant
+    agent: tester
+    depends_on: [write_config]
+    condition: "{{auto_test}} == true"
+    description: Validate the new variant
+    
+  - name: document_variant
+    agent: documenter
+    depends_on: [analyze_theme, write_config, test_variant]
+    description: Create documentation
+  
+  - name: update_readme
+    agent: config_writer
+    depends_on: [document_variant]
+    description: Add variant to README.md
+
+# Final outputs
+outputs:
+  config_file: js/config.js
+  readme_file: README.md
+  test_url: http://localhost:8000/?version={{variant_name}}&suppressWarnings=true
+
+# Success criteria
+success_criteria:
+  - config_valid: Configuration file is valid JavaScript
+  - tests_pass: All tests completed successfully
+  - docs_complete: Documentation added to README
+
+notes: |
+  This workflow demonstrates multi-agent collaboration:
+  - Color Designer Agent: Creative palette generation
+  - Config Writer Agent: Precise code updates
+  - Tester Agent: Quality validation
+  - Documenter Agent: Thematic documentation
