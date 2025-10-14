@@ -445,7 +445,6 @@ We welcome contributions of CodeMachine workflows! See [CONTRIBUTING.md](CONTRIB
 - [CodeMachine-CLI GitHub Repository](https://github.com/moazbuilds/CodeMachine-CLI)
 - [Multi-Agent AI Workflows](https://github.com/moazbuilds/CodeMachine-CLI/blob/main/README.md)
 - [Matrix Development Guide](DEV_README.md)
-- [Shader Development Guide](SHADER_GUIDE.md)
 
 ---
 
