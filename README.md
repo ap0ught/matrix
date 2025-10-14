@@ -165,6 +165,7 @@ This project is still in active development, but some upcoming features are wort
 
 - **An audio element.** Things make sounds, don't they? Yes, they do, especially in movies. And while silence is precious, there are plans to provide a setting that introduces some kind of pleasant audio treatment to the effect.
 - **A user interface that isn't a URL.** This project supports a lot of configurable options under the hood, and it would be wise to add a fun looking UI that exposes them all to visitors in an intuitive way.
+- **CLI-Enhanced Development with CodeMachine-CLI.** Multi-agent AI orchestration could revolutionize how we develop Matrix variants, generate shaders, and automate testing workflows. See [CLI_INTEGRATION.md](CLI_INTEGRATION.md) for how [CodeMachine-CLI](https://github.com/moazbuilds/CodeMachine-CLI) could enhance this project's development experience.
 
 ## Friends of the project
 
