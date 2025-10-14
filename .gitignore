@@ -32,3 +32,8 @@ playdate/ThePlaytrixLua.pdx/
 # OS-specific
 .DS_Store
 Thumbs.db
+
+# CodeMachine-CLI configuration (keep examples, ignore actual config)
+.codemachine/config.yml
+.codemachine/temp/
+.codemachine/**/*.log
