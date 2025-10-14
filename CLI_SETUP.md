@@ -546,7 +546,7 @@ Check out `examples/codemachine/` directory for:
 
 - [CodeMachine-CLI Documentation](https://github.com/moazbuilds/CodeMachine-CLI)
 - [Matrix Development Discord](https://discord.gg/matrix-dev) (hypothetical)
-- [Video Tutorials](https://youtube.com/matrix-cli-tutorials) (hypothetical)
+- [Video Tutorials (placeholder)](https://youtube.com/matrix-cli-tutorials) — example only, not a real resource
 
 ## 🎉 Success Stories
 
