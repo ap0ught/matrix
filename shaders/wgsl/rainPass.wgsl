@@ -1,52 +1,62 @@
+// ============================================================================
+// Matrix Digital Rain - Main WebGPU Shader (Compute + Render)
+// ============================================================================
+// "Welcome to the real world" - This shader combines compute and rendering
+// for the complete Matrix rain effect using WebGPU's modern pipeline.
+
 // This shader module is the star of the show.
 // It is where the cell states update and the symbols get drawn to the screen.
 
+// ============================================================================
+// Configuration Structures
+// ============================================================================
+
 struct Config {
-	// common properties used for compute and rendering
+	// Common properties used for compute and rendering
 	animationSpeed : f32,
-	glyphSequenceLength : f32,
-	glyphTextureGridSize : vec2<i32>,
-	glyphHeightToWidth : f32,
-	glyphTransform : mat2x2<f32>,
-	gridSize : vec2<f32>,
-	showDebugView : i32,
+	glyphSequenceLength : f32,          // Number of available glyphs
+	glyphTextureGridSize : vec2<i32>,   // MSDF texture atlas dimensions
+	glyphHeightToWidth : f32,           // Glyph aspect ratio
+	glyphTransform : mat2x2<f32>,       // Rotation/skew matrix
+	gridSize : vec2<f32>,               // Number of columns and rows
+	showDebugView : i32,                // Debug visualization flag
 
-	// compute-specific properties
-	brightnessThreshold : f32,
-	brightnessOverride : f32,
-	brightnessDecay : f32,
-	cursorBrightness : f32,
-	cycleSpeed : f32,
-	cycleFrameSkip : i32,
-	fallSpeed : f32,
-	hasThunder : i32,
-	raindropLength : f32,
-	rippleScale : f32,
-	rippleSpeed : f32,
-	rippleThickness : f32,
-	rippleType : i32,
+	// Compute-specific properties (raindrop simulation)
+	brightnessThreshold : f32,          // Minimum brightness for override
+	brightnessOverride : f32,           // Fixed brightness mode
+	brightnessDecay : f32,              // How fast glyphs fade
+	cursorBrightness : f32,             // Leading character brightness
+	cycleSpeed : f32,                   // Glyph change speed
+	cycleFrameSkip : i32,               // Performance optimization
+	fallSpeed : f32,                    // Rain falling speed
+	hasThunder : i32,                   // Lightning flash effect
+	raindropLength : f32,               // Length of rain streaks
+	rippleScale : f32,                  // Ripple wave size
+	rippleSpeed : f32,                  // Ripple animation speed
+	rippleThickness : f32,              // Ripple ring width
+	rippleType : i32,                   // -1=none, 0=square, 1=circular
 
-	// render-specific properties
-	msdfPxRange : f32,
-	forwardSpeed : f32,
-	baseBrightness : f32,
-	baseContrast : f32,
-	glintBrightness : f32,
-	glintContrast : f32,
-	hasBaseTexture: i32,
-	hasGlintTexture: i32,
-	glyphVerticalSpacing : f32,
-	glyphEdgeCrop : f32,
-	isPolar : i32,
-	density : f32,
-	slantScale : f32,
-	slantVec : vec2<f32>,
-	volumetric : i32,
-	isolateCursor : i32,
-	isolateGlint : i32,
-	loops : i32,
-	skipIntro : i32,
-	highPassThreshold : f32,
+	// Render-specific properties (MSDF rendering)
+	msdfPxRange : f32,                  // Distance field range
+	forwardSpeed : f32,                 // 3D depth animation speed
+	baseBrightness : f32,               // Base glyph brightness
+	baseContrast : f32,                 // Base glyph contrast
+	glintBrightness : f32,              // Glint highlight brightness
+	glintContrast : f32,                // Glint highlight contrast
+	hasBaseTexture: i32,                // Custom texture overlay flag
+	hasGlintTexture: i32,               // Custom glint texture flag
+	glyphVerticalSpacing : f32,         // Vertical spacing multiplier
+	glyphEdgeCrop : f32,                // Edge trimming amount
+	isPolar : i32,                      // Polar coordinate mode
+	density : f32,                      // Horizontal glyph density
+	slantScale : f32,                   // Slant magnitude
+	slantVec : vec2<f32>,               // Slant direction vector
+	volumetric : i32,                   // 3D mode flag
+	isolateCursor : i32,                // Cursor-only rendering
+	isolateGlint : i32,                 // Glint-only rendering
+	loops : i32,                        // Seamless looping mode
+	skipIntro : i32,                    // Skip intro animation
+	highPassThreshold : f32,            // Bloom threshold
 };
 
 // The properties that change over time get their own buffer.
@@ -58,14 +68,15 @@ struct Time {
 // The properties related to the size of the canvas get their own buffer.
 struct Scene {
 	screenSize : vec2<f32>,
-	camera : mat4x4<f32>,
-	transform : mat4x4<f32>,
+	camera : mat4x4<f32>,               // 3D camera matrix
+	transform : mat4x4<f32>,            // 3D world transform
 };
 
+// Per-cell state data
 struct Cell {
-	raindrop : vec4<f32>,
-	symbol : vec4<f32>,
-	effect : vec4<f32>,
+	raindrop : vec4<f32>,  // (brightness, cursor, activated, introProgress)
+	symbol : vec4<f32>,    // (index, age, unused, unused)
+	effect : vec4<f32>,    // (multiplied, added, unused, unused)
 };
 
 // The array of cells that the compute shader updates, and the fragment shader draws.
@@ -73,6 +84,7 @@ struct CellData {
 	cells: array<Cell>,
 };
 
+// Intro animation progress per cell
 struct IntroCell {
 	progress : vec4<f32>,
 };
@@ -81,6 +93,10 @@ struct IntroCell {
 struct IntroCellData {
 	cells: array<IntroCell>,
 };
+
+// ============================================================================
+// Shader Bindings
+// ============================================================================
 
 // Shared bindings
 @group(0) @binding(0) var<uniform> config : Config;
@@ -102,7 +118,9 @@ struct IntroCellData {
 @group(0) @binding(7) var glintTexture : texture_2d<f32>;
 @group(0) @binding(8) var<storage, read> cells_RO : CellData;
 
-// Shader params
+// ============================================================================
+// Shader Input/Output Structures
+// ============================================================================
 
 struct ComputeInput {
 	@builtin(global_invocation_id) id : vec3<u32>,
@@ -119,20 +137,26 @@ struct VertOutput {
 };
 
 struct FragOutput {
-	@location(0) color : vec4<f32>,
-	@location(1) highPassColor : vec4<f32>,
+	@location(0) color : vec4<f32>,           // Main rendering output
+	@location(1) highPassColor : vec4<f32>,   // Bright areas for bloom
 };
 
+// ============================================================================
 // Constants
+// ============================================================================
 
-const NUM_VERTICES_PER_QUAD : i32 = 6; // 2 * 3
+const NUM_VERTICES_PER_QUAD : i32 = 6; // 2 triangles * 3 vertices
 const PI : f32 = 3.14159265359;
 const TWO_PI : f32 = 6.28318530718;
 const SQRT_2 : f32 = 1.4142135623730951;
 const SQRT_5 : f32 = 2.23606797749979;
 
-// Helper functions for generating randomness, borrowed from elsewhere
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
+// Pseudo-random number generator using hash function
+// "There is no spoon" - deterministic chaos creates the illusion of randomness
 fn randomFloat( uv : vec2<f32> ) -> f32 {
 	let a = 12.9898;
 	let b = 78.233;
@@ -142,74 +166,101 @@ fn randomFloat( uv : vec2<f32> ) -> f32 {
 	return fract(sin(sn) * c);
 }
 
+// Random 2D vector generator
 fn randomVec2( uv : vec2<f32> ) -> vec2<f32> {
 	return fract(vec2<f32>(sin(uv.x * 591.32 + uv.y * 154.077), cos(uv.x * 391.32 + uv.y * 49.077)));
 }
 
+// Add organic variation to timing using irrational numbers
 fn wobble(x : f32) -> f32 {
 	return x + 0.3 * sin(SQRT_2 * x) + 0.2 * sin(SQRT_5 * x);
 }
 
-// Compute shader core functions
+// ============================================================================
+// Compute Shader Core Functions
+// ============================================================================
 
 // This is the code rain's key underlying concept.
 // It's why glyphs that share a column are lit simultaneously, and are brighter toward the bottom.
 // It's also why those bright areas are truncated into raindrops.
 fn getRainBrightness(simTime : f32, glyphPos : vec2<f32>) -> f32 {
+	// Each column has unique timing and speed
 	var columnTimeOffset = randomFloat(vec2<f32>(glyphPos.x, 0.0)) * 1000.0;
 	var columnSpeedOffset = randomFloat(vec2<f32>(glyphPos.x + 0.1, 0.0)) * 0.5 + 0.5;
 	if (bool(config.loops)) {
+		// Uniform speed in looping mode
 		columnSpeedOffset = 0.5;
 	}
+	// Calculate current time for this column
 	var columnTime = columnTimeOffset + simTime * config.fallSpeed * columnSpeedOffset;
+	// Position in the raindrop wave
 	var rainTime = (glyphPos.y * 0.01 + columnTime) / config.raindropLength;
 	if (!bool(config.loops)) {
+		// Add organic wobble
 		rainTime = wobble(rainTime);
 	}
+	// fract creates repeating raindrops, 1.0 - inverts so bright at bottom
 	return 1.0 - fract(rainTime);
 }
 
-// Compute shader additional effects
+// ============================================================================
+// Special Effects Functions
+// ============================================================================
 
+// Calculate lightning/thunder flash effect
 fn getThunder(simTime : f32, screenPos : vec2<f32>) -> f32 {
 	if (!bool(config.hasThunder)) {
 		return 0.0;
 	}
 
+	// Generate irregular thunder timing
 	var thunderTime = simTime * 0.5;
 	var thunder = 1.0 - fract(wobble(thunderTime));
 	if (bool(config.loops)) {
+		// Simpler pattern for looping
 		thunder = 1.0 - fract(thunderTime + 0.3);
 	}
 
+	// Sharpen the thunder pulse using logarithmic curve
 	thunder = log(thunder * 1.5) * 4.0;
+	// Stronger at the top of the screen (lightning from above)
 	thunder = clamp(thunder, 0.0, 1.0) * 10.0 * pow(screenPos.y, 2.0);
 	return thunder;
 }
 
+// Calculate expanding ripple effect (circular or square waves)
 fn getRipple(simTime : f32, screenPos : vec2<f32>) -> f32 {
 	if (config.rippleType == -1) {
 		return 0.0;
 	}
 
-	var rippleTime = (simTime * 0.5 + sin(simTime) * 0.2) * config.rippleSpeed + 1.0; // TODO: clarify
+	// Calculate ripple animation time with wobble
+	var rippleTime = (simTime * 0.5 + sin(simTime) * 0.2) * config.rippleSpeed + 1.0;
 	if (bool(config.loops)) {
+		// Smoother timing for loops
 		rippleTime = (simTime * 0.5) * config.rippleSpeed + 1.0;
 	}
 
+	// Random offset for ripple origin
 	var offset = randomVec2(vec2<f32>(floor(rippleTime), 0.0)) - 0.5;
 	if (bool(config.loops)) {
+		// Centered ripples in looping mode
 		offset = vec2<f32>(0.0);
 	}
+	
+	// Calculate distance from ripple center
 	var ripplePos = screenPos * 2.0 - 1.0 + offset;
 	var rippleDistance : f32;
 	if (config.rippleType == 0) {
+		// Square/diamond ripple (Chebyshev distance)
 		var boxDistance = abs(ripplePos) * vec2<f32>(1.0, config.glyphHeightToWidth);
 		rippleDistance = max(boxDistance.x, boxDistance.y);
 	} else if (config.rippleType == 1) {
+		// Circular ripple (Euclidean distance)
 		rippleDistance = length(ripplePos);
 	}
 
+	// Check if pixel is within ripple ring
 	var rippleValue = fract(rippleTime) * config.rippleScale - rippleDistance;
 
 	if (rippleValue > 0.0 && rippleValue < config.rippleThickness) {
