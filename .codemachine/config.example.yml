@@ -1,0 +1,256 @@
+# Matrix Digital Rain - CodeMachine Configuration Example
+# Copy this file to config.yml and customize for your needs
+
+project:
+  name: matrix-digital-rain
+  type: webgl-visualization
+  version: 1.0.0
+  description: Web-based Matrix digital rain effect with WebGL/WebGPU rendering
+
+# AI Agent Configuration
+agents:
+  # Shader development specialist
+  shader-expert:
+    model: claude-3-opus
+    temperature: 0.3
+    max_tokens: 4000
+    context: |
+      You are an expert in creating WebGL/WebGPU shaders for the Matrix digital rain effect.
+      
+      Key responsibilities:
+      - Write optimized GLSL and WGSL shader code
+      - Understand Matrix digital rain aesthetics (green glowing code, bloom effects)
+      - Optimize for performance on mobile and desktop devices
+      - Follow existing shader patterns in /shaders directory
+      - Add Matrix-themed comments to explain complex techniques
+      
+      Technical constraints:
+      - Target WebGL 2.0 and WebGPU compatibility
+      - Use MSDF (multi-channel signed distance fields) for glyph rendering
+      - Maintain 60 FPS on mid-range hardware
+      - Support various bloom and post-processing effects
+      
+      Style guidelines:
+      - Use descriptive variable names
+      - Comment complex mathematical operations
+      - Reference Matrix movie themes in comments where appropriate
+      - Example: "Like Neo bending reality, we distort texture coordinates..."
+  
+  # WebGL compatibility validator
+  webgl-specialist:
+    model: gpt-4-turbo
+    temperature: 0.2
+    max_tokens: 3000
+    context: |
+      You validate WebGL/WebGPU code for cross-browser compatibility and performance.
+      
+      Responsibilities:
+      - Check for deprecated WebGL features
+      - Validate GLSL shader syntax
+      - Ensure cross-browser compatibility (Chrome, Firefox, Safari)
+      - Identify performance bottlenecks
+      - Suggest optimizations for mobile devices
+      
+      Testing approach:
+      - Simulate different GPU capabilities
+      - Check for common WebGL errors
+      - Validate texture formats and sizes
+      - Ensure proper resource cleanup
+  
+  # Asset pipeline manager
+  asset-optimizer:
+    model: claude-3-sonnet
+    temperature: 0.3
+    max_tokens: 3000
+    context: |
+      You manage the Matrix asset pipeline: fonts, textures, and MSDF generation.
+      
+      Responsibilities:
+      - Automate MSDF texture generation from SVG sources
+      - Optimize texture sizes for web delivery
+      - Update configuration files (js/config.js) with new assets
+      - Validate asset integrity and quality
+      - Generate asset documentation
+      
+      Tools:
+      - msdfgen for distance field generation
+      - Image optimization tools
+      - SVG validation
+      
+      Matrix-specific knowledge:
+      - Glyph grid layouts (8x8, 12x12, etc.)
+      - Texture atlas organization
+      - Font sequence lengths for different variants
+  
+  # Documentation and lore keeper
+  matrix-lore-keeper:
+    model: claude-3-opus
+    temperature: 0.6
+    max_tokens: 4000
+    context: |
+      You maintain Matrix movie themes and write engaging documentation.
+      
+      Responsibilities:
+      - Keep documentation consistent with Matrix aesthetic
+      - Add appropriate Matrix movie references and quotes
+      - Write clear, accessible technical documentation
+      - Maintain thematic consistency across the project
+      - Generate example URLs and usage patterns
+      
+      Matrix lore expertise:
+      - Character quotes (Neo, Morpheus, Trinity, Oracle, Architect)
+      - Film themes: red pill/blue pill, simulation, freedom, choice
+      - Technical concepts: the Construct, digital rain, code
+      
+      Writing style:
+      - Use Matrix terminology naturally
+      - Balance technical accuracy with thematic flair
+      - Include relevant emojis (🤖💚🔴🔵)
+      - Make documentation both informative and engaging
+
+# Workflow Configuration
+workflows:
+  # Default test suite for all changes
+  default_test_suite:
+    enabled: true
+    steps:
+      - visual_regression
+      - performance_benchmark
+      - cross_browser_validation
+  
+  # Shader development workflow
+  shader_development:
+    enabled: true
+    steps:
+      - specification_analysis
+      - code_generation
+      - webgl_validation
+      - visual_testing
+      - performance_profiling
+      - documentation_generation
+  
+  # Asset pipeline workflow
+  asset_pipeline:
+    enabled: true
+    steps:
+      - asset_validation
+      - msdf_generation
+      - optimization
+      - configuration_update
+      - visual_verification
+  
+  # Release preparation workflow
+  release_preparation:
+    enabled: true
+    steps:
+      - version_bump
+      - changelog_generation
+      - test_execution
+      - package_creation
+      - documentation_update
+
+# Output Configuration
+outputs:
+  # Where generated code is placed
+  generated_code: generated/
+  
+  # Test reports and screenshots
+  test_reports: tests/reports/
+  screenshots: screenshots/
+  
+  # Generated documentation
+  documentation: docs/generated/
+  
+  # Temporary build artifacts
+  temp: .codemachine/temp/
+
+# Quality Standards
+quality:
+  # Code formatting
+  code_style: prettier
+  prettier_config:
+    use_tabs: true
+    print_width: 160
+    tab_width: 1
+  
+  # Testing thresholds
+  test_threshold: 0.95
+  visual_diff_threshold: 0.01
+  
+  # Performance targets
+  performance_baseline:
+    fps_min: 60
+    fps_target: 60
+    memory_limit_mb: 512
+    gpu_usage_max: 80
+
+# Integration Settings
+integrations:
+  # GitHub integration
+  github:
+    enabled: true
+    auto_pr_comments: true
+    status_checks: true
+  
+  # CI/CD integration
+  ci:
+    enabled: true
+    run_on_pr: true
+    run_on_push: true
+
+# Development Settings
+development:
+  # Local server configuration
+  server:
+    port: 8000
+    auto_reload: true
+  
+  # Debug settings
+  debug:
+    verbose_logging: false
+    trace_agent_calls: false
+    save_intermediate_results: true
+
+# Matrix-Specific Settings
+matrix_project:
+  # Default Matrix version for testing
+  default_version: classic
+  
+  # Versions to test for compatibility
+  test_versions:
+    - classic
+    - 3d
+    - resurrections
+    - operator
+  
+  # Performance testing configurations
+  performance_configs:
+    - name: desktop-high
+      resolution: 1.0
+      fps: 60
+      bloom: true
+    - name: mobile-optimized
+      resolution: 0.5
+      fps: 30
+      bloom: false
+  
+  # URL parameter validation
+  validate_url_params: true
+  
+  # Asset paths
+  assets:
+    fonts: assets/
+    shaders: shaders/
+    textures: assets/
+
+# Notes for Users
+notes: |
+  This is an example configuration for CodeMachine-CLI integration with the Matrix Digital Rain project.
+  
+  To use:
+  1. Copy this file to .codemachine/config.yml
+  2. Customize agent models and settings for your needs
+  3. Enable/disable workflows based on your workflow
+  4. Adjust quality thresholds to match your requirements
+  
+  Remember: "There is no spoon" - the configuration is flexible, adapt it to your needs!
