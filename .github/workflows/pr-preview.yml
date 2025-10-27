@@ -97,7 +97,13 @@ jobs:
         cp -r lib "gh-pages/${PREVIEW_PATH}/"
         cp -r assets "gh-pages/${PREVIEW_PATH}/"
         cp -r shaders "gh-pages/${PREVIEW_PATH}/"
-        cp -r gallery "gh-pages/${PREVIEW_PATH}/" 2>/dev/null || mkdir -p "gh-pages/${PREVIEW_PATH}/gallery"
+        
+        # Copy gallery directory if it exists, otherwise create empty directory
+        if [ -d "gallery" ]; then
+          cp -r gallery "gh-pages/${PREVIEW_PATH}/"
+        else
+          mkdir -p "gh-pages/${PREVIEW_PATH}/gallery"
+        fi
         
         # Copy PWA files (service worker, manifest, icons)
         cp service-worker.js "gh-pages/${PREVIEW_PATH}/"
