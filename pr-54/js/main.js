@@ -1,6 +1,5 @@
 import makeConfig from "./config.js";
 import SpotifyIntegration from "./spotify.js";
-import MusicVisualizer from "./visualizer.js";
 import SpotifyUI from "./spotify-ui.js";
 import MusicIntegration from "./music-integration.js";
 import ModeManager from "./mode-manager.js";
@@ -116,7 +115,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), {
  */
 // Initialize Spotify integration
 let spotifyIntegration = null;
-let musicVisualizer = null;
 let spotifyUI = null;
 let musicIntegration = null;
 let matrixConfig = null;
@@ -366,18 +364,12 @@ function initializeSpotifyIntegration(config) {
 	});
 	musicIntegration.setBaseConfig(config);
 
-	// Create music visualizer
-	musicVisualizer = new MusicVisualizer(document.body, {
-		position: config.visualizerPosition,
-	});
-
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
 		visible: config.spotifyControlsVisible,
 	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
-	spotifyUI.setVisualizer(musicVisualizer);
 
 	// Set up event listeners
 	setupSpotifyEventListeners(config);
@@ -392,9 +384,6 @@ function initializeSpotifyIntegration(config) {
 	if (uiConfig.musicSyncEnabled) {
 		musicIntegration.activate();
 	}
-	if (!uiConfig.visualizerEnabled) {
-		musicVisualizer.hide();
-	}
 
 	// Set up regular config updates based on music (only if music sync is enabled)
 	if (uiConfig.musicSyncEnabled) {
@@ -404,20 +393,14 @@ function initializeSpotifyIntegration(config) {
 /**
  * Set up Spotify event listeners
  */
-/**
- * Set up Spotify event listeners
- */
 function setupSpotifyEventListeners() {
 	// Track changes
 	spotifyIntegration.on("trackChange", (data) => {
 		if (data) {
-			musicVisualizer.updateTrackInfo(data.track);
-			musicVisualizer.updateAudioFeatures(data.audioFeatures);
 			musicIntegration.updateTrackInfo(data.track);
 			musicIntegration.updateAudioFeatures(data.audioFeatures);
 			spotifyUI.updateCurrentTrack(data.track);
 		} else {
-			musicVisualizer.hide();
 			musicIntegration.updateTrackInfo(null);
 			musicIntegration.updateAudioFeatures(null);
 		}
@@ -426,13 +409,6 @@ function setupSpotifyEventListeners() {
 	// Authentication changes
 	spotifyIntegration.on("authChange", (isAuthenticated) => {
 		console.log("Spotify authentication changed:", isAuthenticated);
-
-		// Enable/disable visualizer toggle based on authentication
-		if (isAuthenticated) {
-			spotifyUI.enableVisualizerToggle();
-		} else {
-			spotifyUI.disableVisualizerToggle();
-		}
 	});
 
 	// Errors
@@ -462,16 +438,6 @@ function setupSpotifyEventListeners() {
 					clearInterval(window.musicUpdateInterval);
 					window.musicUpdateInterval = null;
 				}
-			}
-		}
-	});
-
-	spotifyUI.on("visualizerToggle", (enabled) => {
-		if (musicVisualizer) {
-			if (enabled) {
-				musicVisualizer.show();
-			} else {
-				musicVisualizer.hide();
 			}
 		}
 	});
