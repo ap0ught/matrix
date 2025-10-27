@@ -300,11 +300,6 @@ const defaults = {
 	spotifyEnabled: false, // Whether Spotify integration is active
 	spotifyClientId: null, // Spotify application client ID
 	spotifyControlsVisible: false, // Whether Spotify controls UI is visible by default
-	musicSyncEnabled: false, // Whether Matrix reacts to music
-	musicInfluenceColors: true, // Whether music affects the color palette
-	musicInfluenceSpeed: true, // Whether music affects animation speed
-	musicInfluenceBrightness: true, // Whether music affects brightness
-	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
 
 	// Screensaver mode settings
 	screensaverMode: true, // Whether to enable automatic mode switching
@@ -696,11 +691,6 @@ const paramMapping = {
 	spotifyEnabled: { key: "spotifyEnabled", parser: isTrue },
 	spotifyClientId: { key: "spotifyClientId", parser: (s) => s },
 	spotifyControls: { key: "spotifyControlsVisible", parser: isTrue },
-	musicSync: { key: "musicSyncEnabled", parser: isTrue },
-	musicColors: { key: "musicInfluenceColors", parser: isTrue },
-	musicSpeed: { key: "musicInfluenceSpeed", parser: isTrue },
-	musicBrightness: { key: "musicInfluenceBrightness", parser: isTrue },
-	musicSensitivity: { key: "musicSensitivity", parser: (s) => nullNaN(range(parseFloat(s), 0.1, 3.0)) },
 
 	// Screensaver mode parameters
 	screensaver: { key: "screensaverMode", parser: isTrue },
