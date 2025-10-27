@@ -224,6 +224,51 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 - **Software Fallback**: Works with SwiftShader when hardware acceleration disabled
 - **Mobile Support**: Responsive design, touch interactions for effects
 
+## Gallery Feature Architecture
+
+The gallery mode (`?effect=gallery`) follows the same architectural patterns as other core modules:
+
+### Design Patterns
+- **Class-based with event system**: Like `ModeManager`, uses `on()` and `emit()` for event handling
+- **Lifecycle methods**: `start()`, `stop()`, `on()`, `emit()` matching other managers
+- **Configuration-driven**: Accepts config object in constructor
+- **Self-contained UI**: Creates and manages its own DOM elements and styles
+
+### Key Features
+1. **Fortune Cookie Title Screens** - Random Matrix quotes shown before playlist starts (3 seconds)
+2. **Smart Screenshot Generation** - Automatically captures missing screenshots (12 seconds)
+3. **Random Playlist System** - Shuffles gallery items, generates new playlist when complete
+4. **Collapsible Playlist Menu** - Upper-right menu with thumbnails and item selection
+5. **42-Second Intervals** - Time between shader transitions (homage to "42")
+
+### File Structure
+```
+js/gallery.js           # Gallery manager class (follows ModeManager pattern)
+gallery/                # Screenshot storage directory
+  *.png                 # Auto-generated shader screenshots
+  README.md             # Gallery directory documentation
+```
+
+### Event System
+```javascript
+galleryManager.on("itemChange", ({ item, index }) => {
+    // Fired when switching to new shader
+});
+
+galleryManager.on("screenshotCapture", ({ item, duration }) => {
+    // Fired when capturing screenshot for missing image
+});
+
+galleryManager.on("playlistComplete", () => {
+    // Fired when playlist finishes, triggers new playlist generation
+});
+```
+
+### Integration Points
+- **main.js**: Detects `effect=gallery` and calls `initializeGalleryMode()`
+- **config.js**: Includes "gallery" in available effects list
+- **effects.js**: Maps "gallery" effect (handled before renderer initialization)
+
 ## Troubleshooting
 
 ### "Software rendering" warning
