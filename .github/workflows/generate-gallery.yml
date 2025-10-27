@@ -56,5 +56,5 @@ jobs:
         if: ${{ inputs.update_readme == true }}
         run: |
           node .github/scripts/update-readme-gallery.js
-          git add README.md
+          git add README.md gallery/README.md
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update README with gallery screenshots" && git push)
