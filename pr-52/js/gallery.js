@@ -386,11 +386,13 @@ export default class GalleryManager {
 	/**
 	 * Check if screenshot exists
 	 */
-	checkScreenshotExists(path, callback) {
-		const img = new Image();
-		img.onload = () => callback(true);
-		img.onerror = () => callback(false);
-		img.src = path;
+	checkScreenshotExists(path) {
+		return new Promise((resolve) => {
+			const img = new Image();
+			img.onload = () => resolve(true);
+			img.onerror = () => resolve(false);
+			img.src = path;
+		});
 	}
 
 	/**
