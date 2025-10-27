@@ -122,7 +122,7 @@ The gallery automatically cycles through 15 different Matrix configurations, sho
 - Debug and development views
 
 
-Each configuration runs for 8 seconds with smooth transitions between effects.
+Each configuration runs for 42 seconds with smooth transitions between effects.
 
 ## Customization
 
