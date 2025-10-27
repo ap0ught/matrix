@@ -49,11 +49,13 @@ const MATRIX_FORTUNES = [
 /**
  * Gallery configuration - defines all the shader variations to showcase
  * Each entry specifies a unique combination of version, effect, and parameters
+ * The filename must match the screenshots in the gallery/ directory
  */
 export const galleryItems = [
 	{
 		title: "Classic Matrix",
 		description: "The iconic green code rain from the original trilogy",
+		filename: "classic-matrix.png",
 		config: {
 			version: "classic",
 			effect: "palette",
@@ -62,6 +64,7 @@ export const galleryItems = [
 	{
 		title: "Matrix Resurrections",
 		description: "Updated glyphs from the 2021 film",
+		filename: "resurrections.png",
 		config: {
 			version: "resurrections",
 			effect: "palette",
@@ -70,6 +73,7 @@ export const galleryItems = [
 	{
 		title: "3D Volumetric Mode",
 		description: "Glyphs falling through three-dimensional space",
+		filename: "3d-volumetric.png",
 		config: {
 			version: "3d",
 			effect: "palette",
@@ -78,6 +82,7 @@ export const galleryItems = [
 	{
 		title: "Operator Console",
 		description: "Flat, crowded Matrix code as seen on operators' screens",
+		filename: "operator.png",
 		config: {
 			version: "operator",
 			effect: "palette",
@@ -86,6 +91,7 @@ export const galleryItems = [
 	{
 		title: "Nightmare Matrix",
 		description: "The harsh, Hobbesian predecessor Matrix",
+		filename: "nightmare.png",
 		config: {
 			version: "nightmare",
 			effect: "palette",
@@ -94,6 +100,7 @@ export const galleryItems = [
 	{
 		title: "Paradise Matrix",
 		description: "The idyllic but flawed predecessor",
+		filename: "paradise.png",
 		config: {
 			version: "paradise",
 			effect: "palette",
@@ -102,6 +109,7 @@ export const galleryItems = [
 	{
 		title: "Rainbow Spectrum",
 		description: "Colorful variation with rainbow gradients",
+		filename: "rainbow.png",
 		config: {
 			version: "classic",
 			effect: "rainbow",
@@ -110,6 +118,7 @@ export const galleryItems = [
 	{
 		title: "Light Spectrum",
 		description: "Physics-inspired color gradients",
+		filename: "spectrum.png",
 		config: {
 			version: "classic",
 			effect: "spectrum",
@@ -118,6 +127,7 @@ export const galleryItems = [
 	{
 		title: "Custom Stripes (RGB)",
 		description: "Red, orange, yellow, and green vertical bands",
+		filename: "stripes-rgb.png",
 		config: {
 			version: "classic",
 			effect: "stripes",
@@ -127,6 +137,7 @@ export const galleryItems = [
 	{
 		title: "Trinity Mode",
 		description: "Dedicated to the One who believed",
+		filename: "trinity.png",
 		config: {
 			version: "trinity",
 			effect: "palette",
@@ -135,6 +146,7 @@ export const galleryItems = [
 	{
 		title: "Morpheus Mode",
 		description: "What if I told you... this was another Matrix variant",
+		filename: "morpheus.png",
 		config: {
 			version: "morpheus",
 			effect: "palette",
@@ -143,6 +155,7 @@ export const galleryItems = [
 	{
 		title: "Megacity",
 		description: "As seen in the opening of Revolutions",
+		filename: "megacity.png",
 		config: {
 			version: "megacity",
 			effect: "palette",
@@ -151,6 +164,7 @@ export const galleryItems = [
 	{
 		title: "Palimpsest",
 		description: "Custom variant inspired by Rob Dougan's Furious Angels",
+		filename: "palimpsest.png",
 		config: {
 			version: "palimpsest",
 			effect: "palette",
@@ -159,6 +173,7 @@ export const galleryItems = [
 	{
 		title: "Twilight",
 		description: "A mysterious custom variant",
+		filename: "twilight.png",
 		config: {
 			version: "twilight",
 			effect: "palette",
@@ -167,6 +182,7 @@ export const galleryItems = [
 	{
 		title: "Debug View",
 		description: "Behind-the-scenes computational visualization",
+		filename: "debug.png",
 		config: {
 			version: "classic",
 			effect: "none",
@@ -378,8 +394,8 @@ export default class GalleryManager {
 	 * Get screenshot path for an item
 	 */
 	getScreenshotPath(item) {
-		const filename = item.title.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, "") + ".png";
-		return `gallery/${filename}`;
+		// Use the explicit filename from the item config to match pre-generated screenshots
+		return `gallery/${item.filename}`;
 	}
 
 	/**

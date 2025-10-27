@@ -494,7 +494,8 @@ async function initializeGalleryMode() {
 		// Update URL without reloading
 		const url = buildGalleryURL(item);
 		const params = new URLSearchParams(url.substring(1)); // Remove leading ?
-		params.set("effect", "gallery"); // Keep gallery mode active
+		// Note: We don't set effect=gallery here because gallery state is managed by galleryManager
+		// Setting it would override the actual effect (rainbow, palette, etc.) from the gallery item
 		history.replaceState({}, "", "?" + params.toString());
 
 		// Update configuration and restart renderer
