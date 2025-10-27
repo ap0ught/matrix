@@ -109,20 +109,28 @@ The number of implementations out there of this effect is a testament to the siz
 
 Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matrix.c), [roughest](https://github.com/Zygo/xscreensaver/blob/d1f484cfa47f4a0862140421480bb536ad66ede9/hacks/xmatrix.c) versions were made after the film hit theaters in March, but before it was released on home media in October— people were recreating the effect purely from memory. Others probably used the official screensaver as a reference, which was made by the time-strappped developers of [the (excellent, defunct) official site](https://web.archive.org/web/*/http://whatisthematrix.com) from the images and multimedia tools they had available.
 
+
 ## 🎨 Gallery
 
-_"I can only show you the door. You're the one that has to walk through it."_
+_Explore the full range of Matrix shader variations:_
 
-Explore the full range of Matrix shader variations with our **[Interactive Gallery Slideshow](https://ap0ught.github.io/matrix/?effect=gallery)**
+**[View Live Gallery Slideshow](https://ap0ught.github.io/matrix/?effect=gallery)**
 
-The gallery automatically cycles through 15 different Matrix configurations, showcasing:
-- Classic and modern Matrix versions (Original, Resurrections, 3D)
-- Special variants (Nightmare, Paradise, Trinity, Morpheus)
-- Visual effects (Rainbow, Spectrum, Custom stripes)
-- Debug and development views
+| ![Classic Matrix](gallery/classic-matrix.png) | ![Matrix Resurrections](gallery/resurrections.png) | ![3D Volumetric Mode](gallery/3d-volumetric.png) | 
+| :---: | :---: | :---: | 
+| **Classic Matrix** | **Matrix Resurrections** | **3D Volumetric Mode** | 
 
+| ![Operator Console](gallery/operator.png) | ![Nightmare Matrix](gallery/nightmare.png) | ![Paradise Matrix](gallery/paradise.png) | 
+| **Operator Console** | **Nightmare Matrix** | **Paradise Matrix** | 
 
-Each configuration runs for 42 seconds with smooth transitions between effects.
+| ![Rainbow Spectrum](gallery/rainbow.png) | ![Light Spectrum](gallery/spectrum.png) | ![Custom Stripes (RGB)](gallery/stripes-rgb.png) | 
+| **Rainbow Spectrum** | **Light Spectrum** | **Custom Stripes (RGB)** | 
+
+| ![Trinity Mode](gallery/trinity.png) | ![Morpheus Mode](gallery/morpheus.png) | ![Megacity](gallery/megacity.png) | 
+| **Trinity Mode** | **Morpheus Mode** | **Megacity** | 
+
+| ![Palimpsest](gallery/palimpsest.png) | ![Twilight](gallery/twilight.png) | ![Debug View](gallery/debug.png) | 
+| **Palimpsest** | **Twilight** | **Debug View** | 
 
 ## Customization
 
