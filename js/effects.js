@@ -30,6 +30,7 @@ function createEffectsMapping(renderer, passModules) {
 		trans: passModules.makeStripePass,
 		image: passModules.makeImagePass,
 		mirror: passModules.makeMirrorPass,
+		gallery: null, // Gallery mode is handled in main.js before rendering
 	};
 
 	// Add all base effects

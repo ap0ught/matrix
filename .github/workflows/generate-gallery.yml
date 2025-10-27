@@ -1,0 +1,60 @@
+name: Generate Gallery Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_readme:
+        description: 'Update README with gallery'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  generate-screenshots:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Playwright
+        run: |
+          npm install -D @playwright/test
+          npx playwright install chromium
+          npx playwright install-deps chromium
+          
+      - name: Start HTTP server
+        run: |
+          python3 -m http.server 8000 &
+          echo "HTTP_SERVER_PID=$!" >> $GITHUB_ENV
+          sleep 3
+          
+      - name: Generate screenshots
+        run: |
+          node .github/scripts/generate-gallery-screenshots.js
+          
+      - name: Upload screenshots as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-screenshots
+          path: gallery/*.png
+          retention-days: 90
+          
+      - name: Commit and push screenshots
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add gallery/*.png
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update gallery screenshots" && git push)
+          
+      - name: Update README with gallery
+        if: ${{ inputs.update_readme == true }}
+        run: |
+          node .github/scripts/update-readme-gallery.js
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update README with gallery screenshots" && git push)
