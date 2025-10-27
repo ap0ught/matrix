@@ -109,6 +109,25 @@ The number of implementations out there of this effect is a testament to the siz
 
 Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matrix.c), [roughest](https://github.com/Zygo/xscreensaver/blob/d1f484cfa47f4a0862140421480bb536ad66ede9/hacks/xmatrix.c) versions were made after the film hit theaters in March, but before it was released on home media in October— people were recreating the effect purely from memory. Others probably used the official screensaver as a reference, which was made by the time-strappped developers of [the (excellent, defunct) official site](https://web.archive.org/web/*/http://whatisthematrix.com) from the images and multimedia tools they had available.
 
+## 🎨 Gallery
+
+_"I can only show you the door. You're the one that has to walk through it."_
+
+Explore the full range of Matrix shader variations with our **[Interactive Gallery Slideshow](https://ap0ught.github.io/matrix/?effect=gallery)**
+
+The gallery automatically cycles through 15 different Matrix configurations, showcasing:
+- Classic and modern Matrix versions (Original, Resurrections, 3D)
+- Special variants (Nightmare, Paradise, Trinity, Morpheus)
+- Visual effects (Rainbow, Spectrum, Custom stripes)
+- Debug and development views
+
+**Controls:**
+- `←/→` Arrow keys to navigate
+- `Space` to pause/play
+- `Esc` to exit gallery mode
+
+Each configuration runs for 8 seconds with smooth transitions between effects.
+
 ## Customization
 
 You can customize the digital rain quite a bit by stapling "URL variables" to its URL— by putting a '?' at the end of the link above, and then chaining together words, like this:
@@ -143,8 +162,9 @@ Now you know link fu. Here's a list of customization options:
 - `animationSpeed` - the overall speed of the animation. Can be any number.
 - `fallSpeed` - the speed of the rain's descent. Can be any number.
 - `cycleSpeed` - the speed that the glyphs change their symbol. Can be any number.
-- `effect` - alternatives to the default post-processing effect. Can be "plain", "rainbow", "spectrum", "stripes", "none", "image" or "mirror".
+- `effect` - alternatives to the default post-processing effect. Can be "plain", "rainbow", "spectrum", "stripes", "none", "image", "mirror", or "gallery".
   - ("none" displays the 'debug view', a behind-the-scenes look at the anatomy of the effect.)
+  - ("gallery" launches an auto-playing slideshow of all Matrix shader variations.)
 - `camera` - some effects, ie. the mirror effect, optionally support webcam input. Can be "true" or "false". Default is false.
 - `stripeColors` - if you set the effect to "stripes", you can specify the colors of vertical stripes as alternating _R,G,B_ numeric values, like so: [https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
 - `palette` — with the normal "palette" effect, you can specify the colors and placement of the colors along the color grade as alternating _R,G,B,%_ numeric values, like so: [https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
