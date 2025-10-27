@@ -305,7 +305,7 @@ export default class GalleryManager {
 	/**
 	 * Show the next item in the playlist
 	 */
-	showNextItem() {
+	async showNextItem() {
 		if (!this.isActive) return;
 
 		// Check if playlist is complete
@@ -322,18 +322,17 @@ export default class GalleryManager {
 		const screenshotPath = this.getScreenshotPath(item);
 
 		// Check if screenshot exists
-		this.checkScreenshotExists(screenshotPath, (exists) => {
-			if (!exists) {
-				// Need to capture screenshot
-				this.captureScreenshot(item, () => {
-					this.scheduleNextItem();
-				});
-			} else {
-				// Screenshot exists, just display
-				this.displayItem(item);
+		const exists = await this.checkScreenshotExists(screenshotPath);
+		if (!exists) {
+			// Need to capture screenshot
+			this.captureScreenshot(item, () => {
 				this.scheduleNextItem();
-			}
-		});
+			});
+		} else {
+			// Screenshot exists, just display
+			this.displayItem(item);
+			this.scheduleNextItem();
+		}
 	}
 
 	/**

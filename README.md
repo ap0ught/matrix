@@ -110,6 +110,7 @@ The number of implementations out there of this effect is a testament to the siz
 Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matrix.c), [roughest](https://github.com/Zygo/xscreensaver/blob/d1f484cfa47f4a0862140421480bb536ad66ede9/hacks/xmatrix.c) versions were made after the film hit theaters in March, but before it was released on home media in October— people were recreating the effect purely from memory. Others probably used the official screensaver as a reference, which was made by the time-strappped developers of [the (excellent, defunct) official site](https://web.archive.org/web/*/http://whatisthematrix.com) from the images and multimedia tools they had available.
 
 
+
 ## 🎨 Gallery
 
 _Explore the full range of Matrix shader variations:_
