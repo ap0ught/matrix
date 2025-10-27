@@ -5,7 +5,7 @@ import SpotifyUI from "./spotify-ui.js";
 import MusicIntegration from "./music-integration.js";
 import ModeManager from "./mode-manager.js";
 import ModeDisplay from "./mode-display.js";
-import { GalleryManager, buildGalleryURL } from "./gallery.js";
+import GalleryManager, { buildGalleryURL } from "./gallery.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -517,44 +517,42 @@ function startMatrix(matrixRenderer, canvas, config) {
 /**
  * Initialize Gallery Mode
  * Creates a slideshow of different Matrix shader configurations
+ * Following the new architecture with fortune screens and smart screenshot generation
  */
 async function initializeGalleryMode() {
-	// Load the first gallery item's configuration
-	const { GalleryManager, galleryItems } = await import("./gallery.js");
-	
-	// Create and start the gallery manager
-	galleryManager = new GalleryManager(8000); // 8 seconds per slide
-	
-	let isInitialLoad = true;
-	
-	galleryManager.start(async (item, index) => {
-		if (isInitialLoad) {
-			// On first load, just show the overlay - don't reload
-			isInitialLoad = false;
-			return;
-		}
-		
+	// Create gallery manager with configuration
+	galleryManager = new GalleryManager(matrixConfig);
+
+	// Set up event listeners
+	galleryManager.on("itemChange", async ({ item, index }) => {
 		// Update URL without reloading
 		const url = buildGalleryURL(item);
 		const params = new URLSearchParams(url.substring(1)); // Remove leading ?
 		params.set("effect", "gallery"); // Keep gallery mode active
 		history.replaceState({}, "", "?" + params.toString());
-		
+
 		// Update configuration and restart renderer
 		const newConfig = makeConfig(Object.fromEntries(params.entries()));
-		await restartMatrixWithNewConfig(newConfig);
+
+		// Initialize renderer if not yet started
+		if (!currentMatrixRenderer) {
+			const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(newConfig.renderer?.toLowerCase());
+			const solution = await import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
+			currentMatrixRenderer = solution;
+			startMatrix(currentMatrixRenderer, canvas, newConfig);
+		} else {
+			await restartMatrixWithNewConfig(newConfig);
+		}
 	});
-	
-	// Load the initial configuration (first gallery item)
-	const firstItem = galleryItems[0];
-	const url = buildGalleryURL(firstItem);
-	const params = new URLSearchParams(url.substring(1));
-	params.set("effect", "gallery");
-	matrixConfig = makeConfig(Object.fromEntries(params.entries()));
-	
-	// Start the renderer with the initial configuration
-	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(matrixConfig.renderer?.toLowerCase());
-	const solution = await import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
-	currentMatrixRenderer = solution;
-	startMatrix(currentMatrixRenderer, canvas, matrixConfig);
+
+	galleryManager.on("screenshotCapture", ({ item, duration }) => {
+		console.log(`Capturing screenshot for ${item.title} (${duration}ms)`);
+	});
+
+	galleryManager.on("playlistComplete", () => {
+		console.log("Playlist complete - generating new playlist");
+	});
+
+	// Start the gallery
+	galleryManager.start();
 }
