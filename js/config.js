@@ -225,7 +225,7 @@ const defaults = {
 	font: "matrixcode", // Default to classic Matrix typography
 
 	/* === Visual Effects === */
-	effect: "mirror", // Post-processing effect to apply (mirror, palette, etc.)
+	effect: "palette", // Post-processing effect to apply (palette is the classic Matrix look)
 
 	baseTexture: null, // Optional texture applied to the glyph base layer
 	glintTexture: null, // Optional texture applied to glyph highlights
