@@ -121,10 +121,6 @@ The gallery automatically cycles through 15 different Matrix configurations, sho
 - Visual effects (Rainbow, Spectrum, Custom stripes)
 - Debug and development views
 
-**Controls:**
-- `←/→` Arrow keys to navigate
-- `Space` to pause/play
-- `Esc` to exit gallery mode
 
 Each configuration runs for 8 seconds with smooth transitions between effects.
 
