@@ -305,8 +305,6 @@ const defaults = {
 	musicInfluenceSpeed: true, // Whether music affects animation speed
 	musicInfluenceBrightness: true, // Whether music affects brightness
 	musicSensitivity: 1.0, // Multiplier for music influence strength (0.1 to 3.0)
-	visualizerEnabled: false, // Whether to show the music visualizer minimap
-	visualizerPosition: "bottom-right", // Position of the visualizer
 
 	// Screensaver mode settings
 	screensaverMode: true, // Whether to enable automatic mode switching
@@ -703,8 +701,6 @@ const paramMapping = {
 	musicSpeed: { key: "musicInfluenceSpeed", parser: isTrue },
 	musicBrightness: { key: "musicInfluenceBrightness", parser: isTrue },
 	musicSensitivity: { key: "musicSensitivity", parser: (s) => nullNaN(range(parseFloat(s), 0.1, 3.0)) },
-	visualizer: { key: "visualizerEnabled", parser: isTrue },
-	visualizerPos: { key: "visualizerPosition", parser: (s) => s },
 
 	// Screensaver mode parameters
 	screensaver: { key: "screensaverMode", parser: isTrue },

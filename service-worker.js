@@ -23,7 +23,6 @@ const STATIC_ASSETS = [
 	"js/spotify-ui.js",
 	"js/music-integration.js",
 	"js/mode-manager.js",
-	"js/visualizer.js",
 	"js/effects.js",
 	"js/mode-display.js",
 	"js/colorToRGB.js",

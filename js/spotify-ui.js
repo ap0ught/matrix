@@ -38,38 +38,6 @@ export default class SpotifyUI {
 		}
 	}
 
-	/**
-	 * Enable the visualizer toggle when Spotify connects
-	 */
-	enableVisualizerToggle() {
-		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
-		if (visualizerToggle) {
-			visualizerToggle.disabled = false;
-
-			// Restore saved state if available
-			const savedState = localStorage.getItem("visualizer_enabled");
-			if (savedState === "true" && this.visualizer) {
-				visualizerToggle.checked = true;
-				this.visualizer.show();
-			}
-		}
-	}
-
-	/**
-	 * Disable the visualizer toggle when Spotify disconnects
-	 */
-	disableVisualizerToggle() {
-		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
-		if (visualizerToggle) {
-			visualizerToggle.disabled = true;
-			visualizerToggle.checked = false;
-
-			// Hide visualizer
-			if (this.visualizer) {
-				this.visualizer.hide();
-			}
-		}
-	}
 	constructor(config = {}) {
 		this.config = {
 			position: "top-left",
@@ -81,13 +49,11 @@ export default class SpotifyUI {
 
 		this.element = null;
 		this.spotify = null;
-		this.visualizer = null;
 		this.isExpanded = false;
 		this.isVisible = this.config.visible;
 		this.callbacks = {
 			onClientIdChange: [],
 			onToggleMusicSync: [],
-			onVisualizerToggle: [],
 		};
 
 		this.init();
@@ -116,13 +82,6 @@ export default class SpotifyUI {
 		spotify.on("error", (error) => {
 			this.showError(error);
 		});
-	}
-
-	/**
-	 * Set visualizer instance
-	 */
-	setVisualizer(visualizer) {
-		this.visualizer = visualizer;
 	}
 
 	/**
@@ -183,20 +142,6 @@ export default class SpotifyUI {
 						<input type="checkbox" class="music-sync-toggle" style="margin-right: 5px;" />
 						Sync Matrix with Music
 					</label>
-					<label style="display: block; margin-bottom: 5px;">
-						<input type="checkbox" class="visualizer-toggle" style="margin-right: 5px;" />
-						Show Visualizer
-					</label>
-				</div>
-				
-				<div class="visualizer-config" style="margin-bottom: 10px;">
-					<label style="display: block; margin-bottom: 5px; font-size: 10px;">Visualizer Position:</label>
-					<select class="visualizer-position" style="width: 100%; padding: 4px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 10px; border-radius: 3px;">
-						<option value="bottom-right">Bottom Right</option>
-						<option value="bottom-left">Bottom Left</option>
-						<option value="top-right">Top Right</option>
-						<option value="top-left">Top Left</option>
-					</select>
 				</div>
 				
 				<div class="current-track" style="font-size: 10px; opacity: 0.8; padding-top: 5px; border-top: 1px solid rgba(0, 255, 0, 0.2); display: none;">
@@ -268,38 +213,6 @@ export default class SpotifyUI {
 			musicSyncToggle.checked = savedMusicSync === "true";
 		}
 
-		// Visualizer toggle
-		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
-		visualizerToggle.checked = false; // Start unchecked
-		visualizerToggle.disabled = true; // Disabled until connected (FIXED)
-
-		visualizerToggle.addEventListener("change", (e) => {
-			this.emit("visualizerToggle", e.target.checked);
-			if (this.visualizer) {
-				if (e.target.checked) {
-					this.visualizer.show();
-				} else {
-					this.visualizer.hide();
-				}
-			}
-			localStorage.setItem("visualizer_enabled", e.target.checked);
-		});
-
-		// Visualizer position
-		const visualizerPosition = this.element.querySelector(".visualizer-position");
-		visualizerPosition.addEventListener("change", (e) => {
-			if (this.visualizer) {
-				this.visualizer.setPosition(e.target.value);
-			}
-			localStorage.setItem("visualizer_position", e.target.value);
-		});
-
-		// Load saved visualizer position
-		const savedPosition = localStorage.getItem("visualizer_position");
-		if (savedPosition) {
-			visualizerPosition.value = savedPosition;
-		}
-
 		// Button hover effects
 		this.element.addEventListener("mouseover", (e) => {
 			if (e.target.tagName === "BUTTON") {
@@ -342,23 +255,12 @@ export default class SpotifyUI {
 		const connectBtn = this.element.querySelector(".connect-btn");
 		const disconnectBtn = this.element.querySelector(".disconnect-btn");
 		const currentTrack = this.element.querySelector(".current-track");
-		const visualizerToggle = this.element.querySelector(".visualizer-toggle");
 
 		if (this.spotify && this.spotify.getConnectionStatus().isAuthenticated) {
 			indicator.style.background = "#00ff00";
 			statusText.textContent = "Connected";
 			connectBtn.style.display = "none";
 			disconnectBtn.style.display = "inline-block";
-
-			// Enable visualizer toggle first
-			visualizerToggle.disabled = true;
-
-			// Then apply saved state
-			const savedVisualizer = localStorage.getItem("visualizer_enabled");
-			if (savedVisualizer === "true") {
-				visualizerToggle.checked = true;
-				if (this.visualizer) this.visualizer.show();
-			}
 
 			// Show current track if available
 			const trackInfo = this.spotify.getCurrentTrackInfo();
@@ -382,9 +284,6 @@ export default class SpotifyUI {
 			statusText.textContent = "Disconnected";
 			connectBtn.style.display = "inline-block";
 			disconnectBtn.style.display = "none";
-			visualizerToggle.checked = false;
-			visualizerToggle.disabled = true;
-			if (this.visualizer) this.visualizer.hide();
 			currentTrack.style.display = "none";
 		}
 	}
@@ -417,8 +316,6 @@ export default class SpotifyUI {
 		return {
 			clientId: this.config.clientId,
 			musicSyncEnabled: this.element.querySelector(".music-sync-toggle").checked,
-			visualizerEnabled: this.element.querySelector(".visualizer-toggle").checked,
-			visualizerPosition: this.element.querySelector(".visualizer-position").value,
 		};
 	}
 
