@@ -200,10 +200,10 @@ export default class GalleryManager {
 		this.playlistMenu = null;
 		this.infoOverlay = null;
 
-		// Timing constants (in milliseconds)
-		this.FORTUNE_DURATION = 3000; // 3 seconds
-		this.SHADER_DISPLAY_DURATION = 42000; // 42 seconds
-		this.SCREENSHOT_CAPTURE_DURATION = 12000; // 12 seconds for capture
+		// Timing constants (in milliseconds), configurable via URL parameters
+		this.FORTUNE_DURATION = typeof config.fortuneDuration === "number" ? config.fortuneDuration : 3000; // 3 seconds, override with ?fortuneDuration=5000
+		this.SHADER_DISPLAY_DURATION = typeof config.shaderDisplayDuration === "number" ? config.shaderDisplayDuration : 42000; // 42 seconds, override with ?shaderDisplayDuration=60000
+		this.SCREENSHOT_CAPTURE_DURATION = typeof config.screenshotCaptureDuration === "number" ? config.screenshotCaptureDuration : 12000; // 12 seconds, override with ?screenshotCaptureDuration=15000
 	}
 
 	/**
