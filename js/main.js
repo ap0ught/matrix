@@ -1,7 +1,6 @@
 import makeConfig from "./config.js";
 import SpotifyIntegration from "./spotify.js";
 import SpotifyUI from "./spotify-ui.js";
-import MusicIntegration from "./music-integration.js";
 import ModeManager from "./mode-manager.js";
 import ModeDisplay from "./mode-display.js";
 import GalleryManager, { buildGalleryURL } from "./gallery.js";
@@ -116,7 +115,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), {
 // Initialize Spotify integration
 let spotifyIntegration = null;
 let spotifyUI = null;
-let musicIntegration = null;
 let matrixConfig = null;
 let modeManager = null;
 let modeDisplay = null;
@@ -355,15 +353,6 @@ function initializeSpotifyIntegration(config) {
 	// Create Spotify integration instance
 	spotifyIntegration = new SpotifyIntegration();
 
-	// Create music integration for modifying Matrix parameters
-	musicIntegration = new MusicIntegration({
-		influenceColors: config.musicInfluenceColors,
-		influenceSpeed: config.musicInfluenceSpeed,
-		influenceBrightness: config.musicInfluenceBrightness,
-		sensitivity: config.musicSensitivity,
-	});
-	musicIntegration.setBaseConfig(config);
-
 	// Create UI controls
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
@@ -378,17 +367,6 @@ function initializeSpotifyIntegration(config) {
 	if (config.spotifyClientId) {
 		spotifyIntegration.init(config.spotifyClientId);
 	}
-
-	// Initialize with saved settings
-	const uiConfig = spotifyUI.getConfig();
-	if (uiConfig.musicSyncEnabled) {
-		musicIntegration.activate();
-	}
-
-	// Set up regular config updates based on music (only if music sync is enabled)
-	if (uiConfig.musicSyncEnabled) {
-		window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100); // Update 10 times per second
-	}
 }
 /**
  * Set up Spotify event listeners
@@ -397,12 +375,7 @@ function setupSpotifyEventListeners() {
 	// Track changes
 	spotifyIntegration.on("trackChange", (data) => {
 		if (data) {
-			musicIntegration.updateTrackInfo(data.track);
-			musicIntegration.updateAudioFeatures(data.audioFeatures);
 			spotifyUI.updateCurrentTrack(data.track);
-		} else {
-			musicIntegration.updateTrackInfo(null);
-			musicIntegration.updateAudioFeatures(null);
 		}
 	});
 
@@ -422,58 +395,10 @@ function setupSpotifyEventListeners() {
 			spotifyIntegration.init(clientId);
 		}
 	});
-
-	spotifyUI.on("toggleMusicSync", (enabled) => {
-		if (musicIntegration) {
-			if (enabled) {
-				musicIntegration.activate();
-				// Start updating config based on music
-				if (!window.musicUpdateInterval) {
-					window.musicUpdateInterval = setInterval(updateMatrixConfigFromMusic, 100);
-				}
-			} else {
-				musicIntegration.deactivate();
-				// Stop updating config
-				if (window.musicUpdateInterval) {
-					clearInterval(window.musicUpdateInterval);
-					window.musicUpdateInterval = null;
-				}
-			}
-		}
-	});
-}
-/**
- * Update Matrix configuration based on music data
- */
-function updateMatrixConfigFromMusic() {
-	if (!musicIntegration || !musicIntegration.isActive || !matrixConfig) {
-		return;
-	}
-
-	const modifiedConfig = musicIntegration.getModifiedConfig();
-
-	// Update only the properties that can change dynamically
-	const dynamicProperties = [
-		"animationSpeed",
-		"fallSpeed",
-		"cycleSpeed",
-		"baseBrightness",
-		"cursorIntensity",
-		"bloomStrength",
-		"palette",
-		"cursorColor",
-		"raindropLength",
-	];
-
-	dynamicProperties.forEach((prop) => {
-		if (modifiedConfig[prop] !== undefined) {
-			matrixConfig[prop] = modifiedConfig[prop];
-		}
-	});
 }
 
 /**
- * Start the Matrix renderer with music integration
+ * Start the Matrix renderer
  */
 function startMatrix(matrixRenderer, canvas, config) {
 	// Start the Matrix renderer

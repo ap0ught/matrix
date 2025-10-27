@@ -137,13 +137,6 @@ export default class SpotifyUI {
 					</button>
 				</div>
 				
-				<div class="feature-controls" style="margin-bottom: 10px;">
-					<label style="display: block; margin-bottom: 5px;">
-						<input type="checkbox" class="music-sync-toggle" style="margin-right: 5px;" />
-						Sync Matrix with Music
-					</label>
-				</div>
-				
 				<div class="current-track" style="font-size: 10px; opacity: 0.8; padding-top: 5px; border-top: 1px solid rgba(0, 255, 0, 0.2); display: none;">
 					<div class="track-name"></div>
 					<div class="track-artist"></div>
@@ -199,19 +192,6 @@ export default class SpotifyUI {
 				this.spotify.disconnect();
 			}
 		});
-
-		// Music sync toggle
-		const musicSyncToggle = this.element.querySelector(".music-sync-toggle");
-		musicSyncToggle.addEventListener("change", (e) => {
-			this.emit("toggleMusicSync", e.target.checked);
-			localStorage.setItem("music_sync_enabled", e.target.checked);
-		});
-
-		// Load saved music sync setting
-		const savedMusicSync = localStorage.getItem("music_sync_enabled");
-		if (savedMusicSync !== null) {
-			musicSyncToggle.checked = savedMusicSync === "true";
-		}
 
 		// Button hover effects
 		this.element.addEventListener("mouseover", (e) => {
@@ -315,7 +295,6 @@ export default class SpotifyUI {
 	getConfig() {
 		return {
 			clientId: this.config.clientId,
-			musicSyncEnabled: this.element.querySelector(".music-sync-toggle").checked,
 		};
 	}
 
