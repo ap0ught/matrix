@@ -74,9 +74,12 @@ float getRipple(float simTime, vec2 screenPos) {
 	}
 
 	// Calculate ripple animation time with slight wobble
+	// The '+ 1.' offset ensures rippleTime is always positive, avoiding zero-value artifacts and
+	// synchronizing the ripple animation start so the first wave is visible immediately.
 	float rippleTime = (simTime * 0.5 + sin(simTime) * 0.2) * rippleSpeed + 1.;
 	if (loops) {
 		// Smoother ripple timing for looping mode
+		// The '+ 1.' offset serves the same purpose here.
 		rippleTime = (simTime * 0.5) * rippleSpeed + 1.;
 	}
 
