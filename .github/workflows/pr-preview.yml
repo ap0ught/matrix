@@ -97,6 +97,7 @@ jobs:
         cp -r lib "gh-pages/${PREVIEW_PATH}/"
         cp -r assets "gh-pages/${PREVIEW_PATH}/"
         cp -r shaders "gh-pages/${PREVIEW_PATH}/"
+        cp -r gallery "gh-pages/${PREVIEW_PATH}/" 2>/dev/null || mkdir -p "gh-pages/${PREVIEW_PATH}/gallery"
         
         # Copy PWA files (service worker, manifest, icons)
         cp service-worker.js "gh-pages/${PREVIEW_PATH}/"
@@ -239,6 +240,7 @@ jobs:
           
           ### Test Links:
           - [Default Matrix](${previewUrl}?suppressWarnings=true)
+          - [Gallery Mode](${previewUrl}?effect=gallery&suppressWarnings=true)
           - [Mirror Effect](${previewUrl}?effect=mirror&suppressWarnings=true)
           - [3D Mode](${previewUrl}?version=3d&suppressWarnings=true)
           - [Resurrections](${previewUrl}?version=resurrections&suppressWarnings=true)
@@ -286,5 +288,6 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Quick Test Links:" >> $GITHUB_STEP_SUMMARY
         echo "- [Default Matrix](${{ steps.preview.outputs.url }}?suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Gallery Mode](${{ steps.preview.outputs.url }}?effect=gallery&suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
         echo "- [Mirror Effect](${{ steps.preview.outputs.url }}?effect=mirror&suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
         echo "- [3D Mode](${{ steps.preview.outputs.url }}?version=3d&suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
