@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Matrix digital rain</title>
+		<meta charset="utf-8" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="#000000" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<link rel="manifest" href="manifest.webmanifest" />
+		<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+		<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+		<link rel="apple-touch-icon" href="icon-192.png" />
+		<style>
+			@supports (padding-top: env(safe-area-inset-top)) {
+				body {
+					padding: 0;
+					height: calc(100% + env(safe-area-inset-top));
+				}
+			}
+			body {
+				background: black;
+				overflow: hidden;
+				margin: 0;
+
+				font-family: monospace;
+				font-size: 2em;
+				text-align: center;
+			}
+
+			canvas {
+				width: 100vw;
+				height: 100vh;
+			}
+
+			p {
+				color: hsl(108, 90%, 70%);
+				text-shadow: hsl(108, 90%, 40%) 1px 0 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			// Redirect to the default effect if no query string is present
+			if (!window.location.search) {
+				window.location.search = "?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0";
+			}
+		</script>
+		<!--
+    This is an implementation of the green code seen in The Matrix film and video game franchise.
+    This project demonstrates five concepts:
+            1. Drawing to floating point frame buffer objects, or 'FBO's,
+                 for performing computation and post-processing
+            2. GPU-side computation, with fragment shaders
+                 updating two alternating FBOs
+            3. Rendering crisp "vector" graphics with a multiple-channel
+                 signed distance field (or 'MSDF')
+            4. Creating a blur/bloom effect from a texture pyramid
+            5. Color mapping with noise, to hide banding
+
+    For more information, please visit: https://github.com/Rezmason/matrix
+ -->
+		<script type="module" src="js/main.js"></script>
+		<script>
+			// Register service worker for offline functionality (PWA)
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker
+					.register("service-worker.js")
+					.then((registration) => {
+						console.log("[Matrix] Service Worker registered successfully:", registration.scope);
+					})
+					.catch((error) => {
+						console.error("[Matrix] Service Worker registration failed:", error);
+					});
+			}
+		</script>
+	</body>
+</html>
