@@ -4,9 +4,12 @@
  * Implements offline functionality through aggressive caching.
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
+ *
+ * Version: 2.0 - Now with dynamic cache versioning from VERSION file
  */
 
-const CACHE_NAME = "matrix-v1";
+// Cache version will be loaded from VERSION file during installation
+let CACHE_NAME = "matrix-v1"; // Default fallback
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -16,14 +19,17 @@ const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, "");
 const STATIC_ASSETS = [
 	"./",
 	"index.html",
+	"VERSION",
 	// JavaScript modules
 	"js/main.js",
 	"js/config.js",
+	"js/utils.js",
 	"js/spotify.js",
 	"js/spotify-ui.js",
 	"js/mode-manager.js",
 	"js/effects.js",
 	"js/mode-display.js",
+	"js/gallery.js",
 	"js/colorToRGB.js",
 	"js/fullscreen.js",
 	"js/camera.js",
@@ -104,12 +110,27 @@ const STATIC_ASSETS = [
 /*
  * Service Worker Installation
  * Cache all static assets during installation phase
+ * Loads version number from VERSION file to create unique cache names
  */
 self.addEventListener("install", (event) => {
 	console.log("[Matrix Service Worker] Installing...");
 	event.waitUntil(
-		caches
-			.open(CACHE_NAME)
+		// First, fetch the VERSION file to get the current version
+		// Use cache: 'reload' to ensure we get the latest version
+		fetch(new URL("VERSION", BASE_PATH + "/").href, { cache: "reload" })
+			.then((response) => response.text())
+			.then((versionText) => {
+				// Update cache name with version from VERSION file
+				const version = versionText.trim();
+				CACHE_NAME = `matrix-v${version}`;
+				console.log(`[Matrix Service Worker] Using cache version: ${CACHE_NAME}`);
+				return caches.open(CACHE_NAME);
+			})
+			.catch((error) => {
+				// If VERSION file fails to load, use default cache name
+				console.warn("[Matrix Service Worker] Failed to load VERSION file, using default cache name:", error);
+				return caches.open(CACHE_NAME);
+			})
 			.then((cache) => {
 				console.log("[Matrix Service Worker] Caching static assets");
 				// Convert relative paths to absolute URLs using BASE_PATH

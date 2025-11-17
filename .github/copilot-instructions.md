@@ -90,8 +90,11 @@ cp msdfgen/build/msdfgen out/
 
 ### Core Web Application Files
 - `index.html` - Main HTML entry point with inline CSS
+- `service-worker.js` - PWA service worker with dynamic cache versioning
+- `VERSION` - Version file used for cache busting (e.g., "1.0.0")
 - `js/main.js` - Application bootstrap and config loading
 - `js/config.js` - URL parameter parsing and configuration management
+- `js/utils.js` - Shared utility functions (formatModeName, etc.)
 - `js/music-integration.js` - Spotify music synchronization
 - `js/regl/` - WebGL implementation using REGL library
 - `js/webgpu/` - WebGPU implementation (next-generation graphics)
@@ -189,6 +192,42 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 6. Adjust bloom settings and resolution parameters
 7. Test on both WebGL and WebGPU renderers
 
+### Shared Utilities and DRY Principles
+The project uses shared utility functions to avoid code duplication:
+
+- **`js/utils.js`** - Central location for shared utility functions
+  - `formatModeName(name)` - Converts camelCase/snake_case/kebab-case to Title Case
+  - Used across `main.js`, `mode-manager.js`, and `mode-display.js`
+  
+**When adding new utilities:**
+1. Place shared functions in `js/utils.js` with clear JSDoc comments
+2. Export functions using ES6 export syntax
+3. Import where needed using `import { functionName } from "./utils.js"`
+4. Avoid duplicating utility functions across multiple files
+
+### Service Worker and Cache Versioning
+The service worker (`service-worker.js`) implements offline PWA functionality:
+
+- **Dynamic Cache Versioning**: Cache name is generated from `VERSION` file at install time
+  - Cache format: `matrix-v{version}` (e.g., `matrix-v1.0.0`)
+  - When `VERSION` file changes, service worker creates new cache automatically
+  - Old caches are cleaned up during activation phase
+  
+- **VERSION File Management**:
+  - Update `VERSION` file when creating new releases
+  - Service worker fetches `VERSION` during installation
+  - Falls back to `matrix-v1` if VERSION fetch fails
+  
+- **Cache Asset List**: Keep `STATIC_ASSETS` array updated when adding new files
+  - Include all JavaScript modules, shaders, assets, and PWA files
+  - Service worker caches all listed assets for offline use
+
+**When releasing new versions:**
+1. Update the `VERSION` file with new version number (e.g., "1.0.1")
+2. Use `create-release.sh` script which automatically includes VERSION in release
+3. Service worker will detect version change and create new cache
+4. Old cached versions are automatically cleaned up
+
 ## File Change Impact Analysis
 
 ### Changes Requiring Format Check
@@ -200,6 +239,9 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 - **Renderer files** (`js/regl/`, `js/webgpu/`): Test WebGL and WebGPU modes
 - **Config changes** (`js/config.js`): Test URL parameter parsing
 - **Main entry points** (`index.html`, `js/main.js`): Full application test
+- **Service worker** (`service-worker.js`): Test offline functionality and cache updates
+- **Shared utilities** (`js/utils.js`): Test all modules that import utilities
+- **VERSION file**: Update release documentation and test cache invalidation
 
 ### Safe Changes (Minimal Testing)
 - **Documentation files** (`*.md`): No validation required
