@@ -341,3 +341,74 @@ http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0&suppressWarnings=
 
 *The Matrix has you. Follow the white rabbit.* 🐰
 
+## UI Components Architecture
+
+### Mode Display Panel (`js/mode-display.js`)
+The Matrix Mode panel in the top-right corner provides user controls for customizing the experience:
+
+**Key Features**:
+- **Version Dropdown**: Interactive select element populated from `getAvailableModes()` in config.js
+  - Lists all available Matrix versions (classic, resurrections, trinity, etc.)
+  - Changing version triggers page reload with new URL parameter
+  - Current selection is synchronized with URL params
+  
+- **Effect Dropdown**: Interactive select element populated from `getAvailableEffects()` in config.js
+  - Lists all available effects (palette, rainbow, mirror, etc.)
+  - Changing effect triggers page reload with new URL parameter
+  - Current selection is synchronized with URL params
+
+- **Auto Mode Switching**: Checkbox to enable/disable screensaver-like mode rotation
+  - When enabled, automatically cycles through different version/effect combinations
+  - Interval configurable via dropdown (10-60 minutes)
+  
+- **Switch Mode Now**: Button to manually trigger a random mode change
+  - Calls `modeManager.switchToRandomMode(true)` with manual flag
+  - For manual switches, page reloads to ensure clean state
+  - For auto switches, attempts in-place config update
+
+**Event System**:
+```javascript
+modeDisplay.on("versionChange", (version) => { /* handle version change */ });
+modeDisplay.on("effectChange", (effect) => { /* handle effect change */ });
+modeDisplay.on("toggleScreensaver", (enabled) => { /* handle screensaver toggle */ });
+modeDisplay.on("changeSwitchInterval", (interval) => { /* handle interval change */ });
+```
+
+**Integration Points**:
+- Imports `getAvailableModes()` and `getAvailableEffects()` from config.js
+- Communicates with `ModeManager` for mode switching logic
+- Events handled in `main.js` `setupModeManagementEvents()` function
+
+### Page Title Updates
+The page title dynamically updates to reflect the current version and effect:
+- Format: `"Matrix - {Version Name} / {Effect Name}"`
+- Examples: 
+  - `"Matrix - Classic / Palette"`
+  - `"Matrix - Resurrections / Rainbow"`
+  - `"Matrix - Trinity / Mirror"`
+- Updated via `updatePageTitle(config)` function in main.js
+- Title updates occur on:
+  - Initial page load
+  - Version/effect dropdown changes (via page reload)
+  - Auto mode switching (via history.replaceState)
+- Works correctly in both normal browser and PWA modes
+- Name formatting uses camelCase-to-Title-Case conversion for readability
+
+### Spotify UI Component
+The Spotify integration UI (`js/spotify-ui.js`) is hidden by default:
+- Located in top-left corner when visible
+- Controlled via `spotifyControlsVisible` config parameter
+- **Note**: "Show Spotify Controls" checkbox removed from Mode Display as of QOL improvements
+- To enable Spotify UI: use URL parameter `?spotifyControls=true`
+- Component still functional for users who explicitly enable it via URL
+
+### Configuration System
+All UI options are controlled via URL parameters:
+- `version`: Matrix version (classic, resurrections, etc.)
+- `effect`: Visual effect (palette, rainbow, mirror, etc.)
+- `screensaver`: Enable auto mode switching (true/false)
+- `switchInterval`: Auto-switch interval in milliseconds
+- `suppressWarnings`: Hide hardware acceleration warnings (true/false)
+
+See `js/config.js` `paramMapping` object for complete list of supported parameters.
+

@@ -257,7 +257,7 @@ function initializeModeManagement(config) {
 	modeDisplay.setModeManager(modeManager);
 
 	// Set initial toggle states
-	modeDisplay.setToggleStates(config.screensaverMode || false, config.spotifyControlsVisible || false, config.modeSwitchInterval || 600000);
+	modeDisplay.setToggleStates(config.screensaverMode || false, config.modeSwitchInterval || 600000);
 
 	// Set up event listeners
 	setupModeManagementEvents(config);
@@ -266,6 +266,9 @@ function initializeModeManagement(config) {
 	if (config.screensaverMode) {
 		modeManager.start();
 	}
+
+	// Update page title with initial mode
+	updatePageTitle(config);
 }
 
 /**
@@ -282,15 +285,18 @@ function setupModeManagementEvents(config) {
 		}
 	});
 
-	modeDisplay.on("toggleSpotifyControls", (visible) => {
-		config.spotifyControlsVisible = visible;
-		if (spotifyUI) {
-			if (visible) {
-				spotifyUI.show();
-			} else {
-				spotifyUI.hide();
-			}
-		}
+	modeDisplay.on("versionChange", (version) => {
+		// Update URL and reload with new version
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set("version", version);
+		window.location.search = urlParams.toString();
+	});
+
+	modeDisplay.on("effectChange", (effect) => {
+		// Update URL and reload with new effect
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set("effect", effect);
+		window.location.search = urlParams.toString();
 	});
 
 	modeDisplay.on("changeSwitchInterval", (interval) => {
@@ -318,8 +324,32 @@ function setupModeManagementEvents(config) {
 			// Update the configuration and restart the renderer
 			const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
 			restartMatrixWithNewConfig(newConfig);
+
+			// Update page title
+			updatePageTitle(newConfig);
 		}
 	});
+}
+
+/**
+ * Update page title with current version and effect
+ */
+function updatePageTitle(config) {
+	const version = config.version || "classic";
+	const effect = config.effect || "palette";
+
+	// Format names for display
+	const formatName = (name) => {
+		return name
+			.split(/(?=[A-Z])|[_-]/)
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(" ");
+	};
+
+	const versionName = formatName(version);
+	const effectName = formatName(effect);
+
+	document.title = `Matrix - ${versionName} / ${effectName}`;
 }
 
 /**
@@ -353,10 +383,10 @@ function initializeSpotifyIntegration(config) {
 	// Create Spotify integration instance
 	spotifyIntegration = new SpotifyIntegration();
 
-	// Create UI controls
+	// Create UI controls - hidden by default
 	spotifyUI = new SpotifyUI({
 		clientId: config.spotifyClientId,
-		visible: config.spotifyControlsVisible,
+		visible: false, // Always hide Spotify controls
 	});
 	spotifyUI.setSpotifyIntegration(spotifyIntegration);
 
