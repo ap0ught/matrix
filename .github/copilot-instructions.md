@@ -406,9 +406,13 @@ The Spotify integration UI (`js/spotify-ui.js`) is hidden by default:
 All UI options are controlled via URL parameters:
 - `version`: Matrix version (classic, resurrections, etc.)
 - `effect`: Visual effect (palette, rainbow, mirror, etc.)
+  - **Note**: The "trans" effect was removed in a prior PR and is no longer available
 - `screensaver`: Enable auto mode switching (true/false)
 - `switchInterval`: Auto-switch interval in milliseconds
 - `suppressWarnings`: Hide hardware acceleration warnings (true/false)
 
 See `js/config.js` `paramMapping` object for complete list of supported parameters.
+
+Available effects are defined in `getAvailableEffects()` function in config.js:
+- none, plain, palette, customStripes, stripes, rainbow, spectrum, image, mirror, gallery
 
