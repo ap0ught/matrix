@@ -1,0 +1,198 @@
+name: Deploy to GitHub Pages
+
+# Deploy the main site to the root of gh-pages branch
+# This keeps the live site updated with the latest master branch
+
+on:
+  # Trigger on pushes to master
+  push:
+    branches:
+      - master
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-main-site:
+    name: Deploy Main Site to gh-pages
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout master branch
+      uses: actions/checkout@v4
+      with:
+        ref: master
+        fetch-depth: 1
+        submodules: false
+    
+    - name: Checkout gh-pages branch
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: gh-pages
+        fetch-depth: 1
+      continue-on-error: true
+    
+    - name: Initialize gh-pages if needed
+      run: |
+        if [ ! -d "gh-pages/.git" ]; then
+          echo "Creating new gh-pages branch"
+          rm -rf gh-pages
+          mkdir -p gh-pages
+          cd gh-pages
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b gh-pages
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        else
+          echo "gh-pages branch exists"
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+        fi
+    
+    - name: Clean root directory (preserve PR previews and version directories)
+      run: |
+        cd gh-pages
+        
+        # Remove all files in root (but not directories)
+        find . -maxdepth 1 -type f ! -name '.gitignore' ! -name 'CNAME' -delete 2>/dev/null || true
+        
+        # Remove application directories at root level
+        rm -rf assets js lib shaders gallery 2>/dev/null || true
+        
+        # Preserve pr-* and v* directories (PR previews and version releases)
+        # Everything else at root gets replaced with fresh master content
+        
+        echo "✅ Cleaned root directory (preserved pr-* and v* directories)"
+        ls -la
+    
+    - name: Copy main site files to gh-pages root
+      run: |
+        # Copy essential web application files to gh-pages root
+        cp index.html gh-pages/
+        cp service-worker.js gh-pages/
+        cp manifest.webmanifest gh-pages/
+        cp icon-192.png gh-pages/
+        cp icon-512.png gh-pages/
+        cp VERSION gh-pages/
+        
+        # Copy application directories
+        cp -r js gh-pages/
+        cp -r lib gh-pages/
+        cp -r assets gh-pages/
+        cp -r shaders gh-pages/
+        
+        # Copy gallery directory if it exists
+        if [ -d "gallery" ]; then
+          cp -r gallery gh-pages/
+        else
+          mkdir -p gh-pages/gallery
+        fi
+        
+        # Optional files (don't fail if missing)
+        cp README.md gh-pages/ 2>/dev/null || true
+        cp screenshot.png gh-pages/ 2>/dev/null || true
+        
+        echo "✅ Main site files copied to gh-pages root"
+        ls -la gh-pages/
+    
+    - name: Update or create index page listing
+      run: |
+        cd gh-pages
+        
+        # Create a versions list if we have version directories
+        VERSION_LINKS=""
+        for dir in v*/ ; do
+          if [ -d "$dir" ]; then
+            VERSION="${dir%/}"
+            VERSION_LINKS="${VERSION_LINKS}\n                <li><a href=\"/${VERSION}/\">${VERSION}</a></li>"
+          fi
+        done
+        
+        # Create a PR previews list
+        PR_LINKS=""
+        for dir in pr-*/ ; do
+          if [ -d "$dir" ]; then
+            PR="${dir%/}"
+            PR_LINKS="${PR_LINKS}\n                <li><a href=\"/${PR}/\">${PR}</a></li>"
+          fi
+        done
+        
+        # Create README for gh-pages branch
+        cat > README.md <<'MDEOF'
+# Matrix Digital Rain - GitHub Pages
+
+This branch hosts the GitHub Pages deployment for the Matrix Digital Rain project.
+
+## Structure
+
+- **Root (`/`)**: Latest code from master branch
+- **Version directories (`/vX.Y.Z/`)**: Specific release versions
+- **PR previews (`/pr-XX/`)**: Preview deployments for pull requests
+
+## Links
+
+- **Main site**: https://ap0ught.github.io/matrix/
+- **Repository**: https://github.com/ap0ught/matrix
+- **Latest release**: https://github.com/ap0ught/matrix/releases/latest
+
+## Deployments
+
+This branch is automatically updated by GitHub Actions workflows:
+- Master branch pushes update the root
+- Tagged releases create version directories
+- Pull requests create preview directories
+MDEOF
+        
+        echo "✅ Created README.md for gh-pages"
+    
+    - name: Commit and push to gh-pages
+      run: |
+        cd gh-pages
+        
+        # Ensure git config is set
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Set up authentication
+        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" || \
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        
+        # Ensure we're on gh-pages branch
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        if [ "$CURRENT_BRANCH" != "gh-pages" ]; then
+          git branch -M gh-pages
+        fi
+        
+        # Stage all changes
+        git add .
+        
+        # Check if there are changes
+        if git diff --staged --quiet; then
+          echo "No changes to deploy"
+        else
+          COMMIT_SHA="${GITHUB_SHA:0:7}"
+          git commit -m "Deploy main site from master@${COMMIT_SHA}"
+          git push origin gh-pages --force
+          echo "✅ Successfully deployed main site to gh-pages"
+        fi
+    
+    - name: Summary
+      run: |
+        echo "## 🎉 Main Site Deployed to GitHub Pages!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Live URL:** https://ap0ught.github.io/matrix/" >> $GITHUB_STEP_SUMMARY
+        echo "**Source:** master@${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
+        echo "- [Main Site](https://ap0ught.github.io/matrix/)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Classic Matrix](https://ap0ught.github.io/matrix/?suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
+        echo "- [3D Mode](https://ap0ught.github.io/matrix/?version=3d&suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Mirror Effect](https://ap0ught.github.io/matrix/?effect=mirror&suppressWarnings=true)" >> $GITHUB_STEP_SUMMARY

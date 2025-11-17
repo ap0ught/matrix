@@ -29,7 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: write  # Required to create releases
+      contents: write  # Required to create releases and push to gh-pages
+      pages: write     # Required for GitHub Pages deployment
+      id-token: write  # Required for GitHub Pages deployment
     
     steps:
     - name: Checkout code
@@ -151,6 +153,245 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Checkout gh-pages branch
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: gh-pages
+        fetch-depth: 1
+      continue-on-error: true
+    
+    - name: Initialize gh-pages if needed
+      run: |
+        if [ ! -d "gh-pages/.git" ]; then
+          echo "Creating new gh-pages branch"
+          rm -rf gh-pages
+          mkdir -p gh-pages
+          cd gh-pages
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b gh-pages
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        else
+          echo "gh-pages branch exists"
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+        fi
+    
+    - name: Deploy release to gh-pages version directory
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        VERSION_DIR="gh-pages/v${VERSION}"
+        
+        # Create version directory
+        mkdir -p "${VERSION_DIR}"
+        
+        # Copy web application files to version directory
+        cp index.html "${VERSION_DIR}/"
+        cp service-worker.js "${VERSION_DIR}/"
+        cp manifest.webmanifest "${VERSION_DIR}/"
+        cp icon-192.png "${VERSION_DIR}/"
+        cp icon-512.png "${VERSION_DIR}/"
+        cp README.md "${VERSION_DIR}/" 2>/dev/null || true
+        cp VERSION "${VERSION_DIR}/"
+        
+        # Copy application directories
+        cp -r js "${VERSION_DIR}/"
+        cp -r lib "${VERSION_DIR}/"
+        cp -r assets "${VERSION_DIR}/"
+        cp -r shaders "${VERSION_DIR}/"
+        
+        # Copy gallery directory if it exists
+        if [ -d "gallery" ]; then
+          cp -r gallery "${VERSION_DIR}/"
+        else
+          mkdir -p "${VERSION_DIR}/gallery"
+        fi
+        
+        echo "✅ Release v${VERSION} copied to gh-pages/v${VERSION}"
+        
+        # Create version-specific README
+        cat > "${VERSION_DIR}/README.md" <<MDEOF
+# Matrix Digital Rain v${VERSION}
+
+This is a versioned snapshot of the Matrix Digital Rain project.
+
+**Version:** ${VERSION}
+**Release Date:** $(date -u +"%Y-%m-%d")
+**Release Tag:** ${{ steps.version.outputs.tag }}
+
+## Links
+
+- [View this version](https://ap0ught.github.io/matrix/v${VERSION}/)
+- [Release notes](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }})
+- [Latest version](https://ap0ught.github.io/matrix/)
+- [Repository](https://github.com/${{ github.repository }})
+
+## Installation
+
+This version can be run by opening the index.html file or serving the directory with any HTTP server.
+MDEOF
+    
+    - name: Update gh-pages versions index
+      run: |
+        cd gh-pages
+        
+        # Create versions directory if it doesn't exist
+        mkdir -p versions
+        
+        # Create an index of all versions
+        cat > versions/index.html <<'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Digital Rain - Version Archive</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { 
+            color: #0f0; 
+            text-shadow: 0 0 10px #0f0;
+            text-align: center;
+        }
+        a { 
+            color: #0f0; 
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        a:hover { 
+            text-decoration: underline;
+            text-shadow: 0 0 8px #0f0;
+        }
+        .version { 
+            margin: 15px 0; 
+            padding: 15px;
+            border: 1px solid #0f0;
+            border-radius: 4px;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        .version-tag {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .latest-badge {
+            background: #0f0;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .main-link {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 2px solid #0f0;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Matrix Digital Rain - Version Archive</h1>
+    
+    <div class="main-link">
+        <strong>Latest Version:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
+    </div>
+    
+    <h2>Available Versions:</h2>
+    <div id="versions"></div>
+    
+    <script>
+        const versions = [];
+HTMLEOF
+        
+        # Add all version directories to the list
+        for dir in v*/ ; do
+          if [ -d "$dir" ]; then
+            VERSION="${dir%/}"
+            VERSION_NUM="${VERSION#v}"
+            echo "        versions.push({ tag: '$VERSION', num: '$VERSION_NUM' });" >> versions/index.html
+          fi
+        done
+        
+        cat >> versions/index.html <<'HTMLEOF'
+        
+        const container = document.getElementById('versions');
+        if (versions.length === 0) {
+            container.innerHTML = '<p>No versioned releases available yet.</p>';
+        } else {
+            // Sort versions in reverse order (newest first)
+            versions.sort((a, b) => {
+                const aParts = a.num.split('.').map(Number);
+                const bParts = b.num.split('.').map(Number);
+                for (let i = 0; i < 3; i++) {
+                    if (aParts[i] !== bParts[i]) return bParts[i] - aParts[i];
+                }
+                return 0;
+            });
+            
+            versions.forEach((version, index) => {
+                const div = document.createElement('div');
+                div.className = 'version';
+                const latestBadge = index === 0 ? '<span class="latest-badge">LATEST</span>' : '';
+                div.innerHTML = `
+                    <div class="version-tag">${version.tag}${latestBadge}</div>
+                    <div>
+                        <a href="/matrix/${version.tag}/">View This Version</a> | 
+                        <a href="https://github.com/ap0ught/matrix/releases/tag/${version.tag}">Release Notes</a>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
+HTMLEOF
+        
+        echo "✅ Created versions index page"
+    
+    - name: Commit and push to gh-pages
+      run: |
+        cd gh-pages
+        
+        # Ensure git config is set
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Set up authentication
+        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" || \
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        
+        # Ensure we're on gh-pages branch
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        if [ "$CURRENT_BRANCH" != "gh-pages" ]; then
+          git branch -M gh-pages
+        fi
+        
+        # Stage all changes
+        git add .
+        
+        # Check if there are changes
+        if git diff --staged --quiet; then
+          echo "No changes to deploy to gh-pages"
+        else
+          git commit -m "Deploy release v${{ steps.version.outputs.version }} to gh-pages"
+          git push origin gh-pages --force
+          echo "✅ Successfully deployed release to gh-pages"
+        fi
+    
     - name: Summary
       run: |
         echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
@@ -162,3 +403,5 @@ jobs:
         echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
         echo "- [View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }})" >> $GITHUB_STEP_SUMMARY
         echo "- [Download Package](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/matrix-${{ steps.version.outputs.version }}.zip)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Live Demo](https://ap0ught.github.io/matrix/v${{ steps.version.outputs.version }}/)" >> $GITHUB_STEP_SUMMARY
+        echo "- [All Versions](https://ap0ught.github.io/matrix/versions/)" >> $GITHUB_STEP_SUMMARY
