@@ -5,6 +5,8 @@
  * along with controls for the screensaver mode functionality.
  */
 
+import { getAvailableModes, getAvailableEffects } from "./config.js";
+
 export default class ModeDisplay {
 	constructor(config = {}) {
 		this.config = {
@@ -21,8 +23,9 @@ export default class ModeDisplay {
 		this.modeManager = null;
 		this.callbacks = {
 			toggleScreensaver: [],
-			toggleSpotifyControls: [],
 			changeSwitchInterval: [],
+			versionChange: [],
+			effectChange: [],
 		};
 
 		this.init();
@@ -65,6 +68,12 @@ export default class ModeDisplay {
 		this.element.className = "mode-display";
 		this.element.style.cssText = this.getBaseStyles();
 
+		const availableVersions = getAvailableModes();
+		const availableEffects = getAvailableEffects();
+
+		const versionOptions = availableVersions.map((v) => `<option value="${v}">${this.formatModeName(v)}</option>`).join("");
+		const effectOptions = availableEffects.map((e) => `<option value="${e}">${this.formatModeName(e)}</option>`).join("");
+
 		this.element.innerHTML = `
 			<div class="mode-header" style="cursor: pointer; padding: 8px; border-bottom: 1px solid rgba(0, 255, 0, 0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
 				<span class="mode-title">Matrix Mode</span>
@@ -72,8 +81,18 @@ export default class ModeDisplay {
 			</div>
 			<div class="mode-content" style="display: none;">
 				<div class="current-mode" style="margin-bottom: 10px; padding: 5px 0;">
-					<div class="mode-version" style="font-weight: bold; margin-bottom: 2px;">Version: <span class="version-name">Classic</span></div>
-					<div class="mode-effect" style="font-size: 10px; opacity: 0.8;">Effect: <span class="effect-name">Mirror</span></div>
+					<div class="mode-version" style="font-weight: bold; margin-bottom: 5px;">
+						<label style="display: block; font-size: 10px; margin-bottom: 2px;">Version:</label>
+						<select class="version-select" style="width: 100%; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 10px; padding: 3px; border-radius: 3px;">
+							${versionOptions}
+						</select>
+					</div>
+					<div class="mode-effect" style="margin-bottom: 5px;">
+						<label style="display: block; font-size: 10px; margin-bottom: 2px;">Effect:</label>
+						<select class="effect-select" style="width: 100%; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 10px; padding: 3px; border-radius: 3px;">
+							${effectOptions}
+						</select>
+					</div>
 				</div>
 				
 				<div class="mode-controls" style="border-top: 1px solid rgba(0, 255, 0, 0.2); padding-top: 8px;">
@@ -94,10 +113,6 @@ export default class ModeDisplay {
 							</select>
 						</label>
 					</div>
-					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
-						<input type="checkbox" class="spotify-controls-toggle" style="margin-right: 5px;" />
-						Show Spotify Controls
-					</label>
 					<button class="switch-mode-btn" style="width: 100%; padding: 4px; background: rgba(0, 255, 0, 0.2); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; border-radius: 3px; cursor: pointer; margin-top: 5px;">
 						Switch Mode Now
 					</button>
@@ -184,6 +199,18 @@ export default class ModeDisplay {
 			this.toggleExpanded();
 		});
 
+		// Version dropdown change
+		const versionSelect = this.element.querySelector(".version-select");
+		versionSelect.addEventListener("change", (e) => {
+			this.emit("versionChange", e.target.value);
+		});
+
+		// Effect dropdown change
+		const effectSelect = this.element.querySelector(".effect-select");
+		effectSelect.addEventListener("change", (e) => {
+			this.emit("effectChange", e.target.value);
+		});
+
 		// Screensaver toggle
 		const screensaverToggle = this.element.querySelector(".screensaver-toggle");
 		screensaverToggle.addEventListener("change", (e) => {
@@ -196,12 +223,6 @@ export default class ModeDisplay {
 				}
 			}
 			this.updateNextSwitchTime();
-		});
-
-		// Spotify controls toggle
-		const spotifyToggle = this.element.querySelector(".spotify-controls-toggle");
-		spotifyToggle.addEventListener("change", (e) => {
-			this.emit("toggleSpotifyControls", e.target.checked);
 		});
 
 		// Interval selection
@@ -320,14 +341,14 @@ export default class ModeDisplay {
 		if (!this.modeManager) return;
 
 		const modeInfo = this.modeManager.getModeInfo();
-		const versionElement = this.element.querySelector(".version-name");
-		const effectElement = this.element.querySelector(".effect-name");
+		const versionSelect = this.element.querySelector(".version-select");
+		const effectSelect = this.element.querySelector(".effect-select");
 
-		if (versionElement) {
-			versionElement.textContent = modeInfo.versionName;
+		if (versionSelect) {
+			versionSelect.value = modeInfo.version;
 		}
-		if (effectElement) {
-			effectElement.textContent = modeInfo.effectName;
+		if (effectSelect) {
+			effectSelect.value = modeInfo.effect;
 		}
 
 		this.updateNextSwitchTime();
@@ -355,22 +376,28 @@ export default class ModeDisplay {
 	/**
 	 * Set toggle states
 	 */
-	setToggleStates(screensaverEnabled, spotifyControlsVisible, switchInterval = 600000) {
+	setToggleStates(screensaverEnabled, switchInterval = 600000) {
 		const screensaverToggle = this.element.querySelector(".screensaver-toggle");
-		const spotifyToggle = this.element.querySelector(".spotify-controls-toggle");
 		const intervalSelect = this.element.querySelector(".interval-select");
 
 		if (screensaverToggle) {
 			screensaverToggle.checked = screensaverEnabled;
-		}
-		if (spotifyToggle) {
-			spotifyToggle.checked = spotifyControlsVisible;
 		}
 		if (intervalSelect) {
 			intervalSelect.value = switchInterval.toString();
 		}
 
 		this.updateNextSwitchTime();
+	}
+
+	/**
+	 * Format mode name for display
+	 */
+	formatModeName(name) {
+		return name
+			.split(/(?=[A-Z])|[_-]/) // Split on camelCase, underscores, and hyphens
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(" ");
 	}
 
 	/**

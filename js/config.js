@@ -58,7 +58,7 @@ export function getAvailableModes() {
  * Returns a list of all available effect names
  */
 export function getAvailableEffects() {
-	return ["none", "plain", "palette", "customStripes", "stripes", "rainbow", "spectrum", "trans", "image", "mirror", "gallery"];
+	return ["none", "plain", "palette", "customStripes", "stripes", "rainbow", "spectrum", "image", "mirror", "gallery"];
 }
 
 /*
