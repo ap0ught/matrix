@@ -213,26 +213,26 @@ jobs:
         echo "✅ Release v${VERSION} copied to gh-pages/v${VERSION}"
         
         # Create version-specific README
-        cat > "${VERSION_DIR}/README.md" <<MDEOF
-# Matrix Digital Rain v${VERSION}
-
-This is a versioned snapshot of the Matrix Digital Rain project.
-
-**Version:** ${VERSION}
-**Release Date:** $(date -u +"%Y-%m-%d")
-**Release Tag:** ${{ steps.version.outputs.tag }}
-
-## Links
-
-- [View this version](https://ap0ught.github.io/matrix/v${VERSION}/)
-- [Release notes](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }})
-- [Latest version](https://ap0ught.github.io/matrix/)
-- [Repository](https://github.com/${{ github.repository }})
-
-## Installation
-
-This version can be run by opening the index.html file or serving the directory with any HTTP server.
-MDEOF
+        cat > "${VERSION_DIR}/README.md" << MDEOF
+        # Matrix Digital Rain v${VERSION}
+        
+        This is a versioned snapshot of the Matrix Digital Rain project.
+        
+        Version: ${VERSION}
+        Release Date: $(date -u +"%Y-%m-%d")
+        Release Tag: ${{ steps.version.outputs.tag }}
+        
+        ## Links
+        
+        - View this version: https://ap0ught.github.io/matrix/v${VERSION}/
+        - Release notes: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
+        - Latest version: https://ap0ught.github.io/matrix/
+        - Repository: https://github.com/${{ github.repository }}
+        
+        ## Installation
+        
+        This version can be run by opening the index.html file or serving the directory with any HTTP server.
+        MDEOF
     
     - name: Update gh-pages versions index
       run: |
@@ -242,79 +242,79 @@ MDEOF
         mkdir -p versions
         
         # Create an index of all versions
-        cat > versions/index.html <<'HTMLEOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix Digital Rain - Version Archive</title>
-    <style>
-        body {
-            font-family: 'Courier New', monospace;
-            background: #000;
-            color: #0f0;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 { 
-            color: #0f0; 
-            text-shadow: 0 0 10px #0f0;
-            text-align: center;
-        }
-        a { 
-            color: #0f0; 
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        a:hover { 
-            text-decoration: underline;
-            text-shadow: 0 0 8px #0f0;
-        }
-        .version { 
-            margin: 15px 0; 
-            padding: 15px;
-            border: 1px solid #0f0;
-            border-radius: 4px;
-            background: rgba(0, 255, 0, 0.05);
-        }
-        .version-tag {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .latest-badge {
-            background: #0f0;
-            color: #000;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 10px;
-        }
-        .main-link {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            padding: 15px;
-            border: 2px solid #0f0;
-            border-radius: 4px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <h1>Matrix Digital Rain - Version Archive</h1>
-    
-    <div class="main-link">
-        <strong>Latest Version:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
-    </div>
-    
-    <h2>Available Versions:</h2>
-    <div id="versions"></div>
-    
-    <script>
-        const versions = [];
-HTMLEOF
+        cat > versions/index.html << 'HTMLEOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Matrix Digital Rain - Version Archive</title>
+            <style>
+                body {
+                    font-family: 'Courier New', monospace;
+                    background: #000;
+                    color: #0f0;
+                    padding: 20px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                h1 { 
+                    color: #0f0; 
+                    text-shadow: 0 0 10px #0f0;
+                    text-align: center;
+                }
+                a { 
+                    color: #0f0; 
+                    text-decoration: none;
+                    transition: all 0.3s;
+                }
+                a:hover { 
+                    text-decoration: underline;
+                    text-shadow: 0 0 8px #0f0;
+                }
+                .version { 
+                    margin: 15px 0; 
+                    padding: 15px;
+                    border: 1px solid #0f0;
+                    border-radius: 4px;
+                    background: rgba(0, 255, 0, 0.05);
+                }
+                .version-tag {
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    margin-bottom: 8px;
+                }
+                .latest-badge {
+                    background: #0f0;
+                    color: #000;
+                    padding: 2px 8px;
+                    border-radius: 3px;
+                    font-size: 0.8em;
+                    margin-left: 10px;
+                }
+                .main-link {
+                    font-size: 1.2em;
+                    margin-bottom: 30px;
+                    padding: 15px;
+                    border: 2px solid #0f0;
+                    border-radius: 4px;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Matrix Digital Rain - Version Archive</h1>
+            
+            <div class="main-link">
+                <strong>Latest Version:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
+            </div>
+            
+            <h2>Available Versions:</h2>
+            <div id="versions"></div>
+            
+            <script>
+                const versions = [];
+        HTMLEOF
         
         # Add all version directories to the list
         for dir in v*/ ; do
@@ -325,40 +325,40 @@ HTMLEOF
           fi
         done
         
-        cat >> versions/index.html <<'HTMLEOF'
-        
-        const container = document.getElementById('versions');
-        if (versions.length === 0) {
-            container.innerHTML = '<p>No versioned releases available yet.</p>';
-        } else {
-            // Sort versions in reverse order (newest first)
-            versions.sort((a, b) => {
-                const aParts = a.num.split('.').map(Number);
-                const bParts = b.num.split('.').map(Number);
-                for (let i = 0; i < 3; i++) {
-                    if (aParts[i] !== bParts[i]) return bParts[i] - aParts[i];
+        cat >> versions/index.html << 'HTMLEOF'
+                
+                const container = document.getElementById('versions');
+                if (versions.length === 0) {
+                    container.innerHTML = '<p>No versioned releases available yet.</p>';
+                } else {
+                    // Sort versions in reverse order (newest first)
+                    versions.sort((a, b) => {
+                        const aParts = a.num.split('.').map(Number);
+                        const bParts = b.num.split('.').map(Number);
+                        for (let i = 0; i < 3; i++) {
+                            if (aParts[i] !== bParts[i]) return bParts[i] - aParts[i];
+                        }
+                        return 0;
+                    });
+                    
+                    versions.forEach((version, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'version';
+                        const latestBadge = index === 0 ? '<span class="latest-badge">LATEST</span>' : '';
+                        div.innerHTML = `
+                            <div class="version-tag">${version.tag}${latestBadge}</div>
+                            <div>
+                                <a href="/matrix/${version.tag}/">View This Version</a> | 
+                                <a href="https://github.com/ap0ught/matrix/releases/tag/${version.tag}">Release Notes</a>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
                 }
-                return 0;
-            });
-            
-            versions.forEach((version, index) => {
-                const div = document.createElement('div');
-                div.className = 'version';
-                const latestBadge = index === 0 ? '<span class="latest-badge">LATEST</span>' : '';
-                div.innerHTML = `
-                    <div class="version-tag">${version.tag}${latestBadge}</div>
-                    <div>
-                        <a href="/matrix/${version.tag}/">View This Version</a> | 
-                        <a href="https://github.com/ap0ught/matrix/releases/tag/${version.tag}">Release Notes</a>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-    </script>
-</body>
-</html>
-HTMLEOF
+            </script>
+        </body>
+        </html>
+        HTMLEOF
         
         echo "✅ Created versions index page"
     
