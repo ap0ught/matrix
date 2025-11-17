@@ -6,6 +6,7 @@
  */
 
 import { getRandomVersion, getAvailableModes, getAvailableEffects, versions } from "./config.js";
+import { formatModeName } from "./utils.js";
 
 export default class ModeManager {
 	constructor(config = {}) {
@@ -133,8 +134,8 @@ export default class ModeManager {
 	 */
 	getModeInfo() {
 		const versionConfig = versions[this.currentMode.version] || {};
-		const versionName = this.formatModeName(this.currentMode.version);
-		const effectName = this.formatModeName(this.currentMode.effect);
+		const versionName = formatModeName(this.currentMode.version);
+		const effectName = formatModeName(this.currentMode.effect);
 
 		return {
 			version: this.currentMode.version,
@@ -143,16 +144,6 @@ export default class ModeManager {
 			effectName,
 			displayText: `${versionName} / ${effectName}`,
 		};
-	}
-
-	/**
-	 * Format mode name for display
-	 */
-	formatModeName(name) {
-		return name
-			.split(/(?=[A-Z])|[_-]/) // Split on camelCase, underscores, and hyphens
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-			.join(" ");
 	}
 
 	/**

@@ -4,6 +4,7 @@ import SpotifyUI from "./spotify-ui.js";
 import ModeManager from "./mode-manager.js";
 import ModeDisplay from "./mode-display.js";
 import GalleryManager, { buildGalleryURL } from "./gallery.js";
+import { formatModeName } from "./utils.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -338,16 +339,8 @@ function updatePageTitle(config) {
 	const version = config.version || "classic";
 	const effect = config.effect || "palette";
 
-	// Format names for display
-	const formatName = (name) => {
-		return name
-			.split(/(?=[A-Z])|[_-]/)
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-			.join(" ");
-	};
-
-	const versionName = formatName(version);
-	const effectName = formatName(effect);
+	const versionName = formatModeName(version);
+	const effectName = formatModeName(effect);
 
 	document.title = `Matrix - ${versionName} / ${effectName}`;
 }

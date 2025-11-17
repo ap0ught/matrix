@@ -6,6 +6,7 @@
  */
 
 import { getAvailableModes, getAvailableEffects } from "./config.js";
+import { formatModeName } from "./utils.js";
 
 export default class ModeDisplay {
 	constructor(config = {}) {
@@ -71,8 +72,8 @@ export default class ModeDisplay {
 		const availableVersions = getAvailableModes();
 		const availableEffects = getAvailableEffects();
 
-		const versionOptions = availableVersions.map((v) => `<option value="${v}">${this.formatModeName(v)}</option>`).join("");
-		const effectOptions = availableEffects.map((e) => `<option value="${e}">${this.formatModeName(e)}</option>`).join("");
+		const versionOptions = availableVersions.map((v) => `<option value="${v}">${formatModeName(v)}</option>`).join("");
+		const effectOptions = availableEffects.map((e) => `<option value="${e}">${formatModeName(e)}</option>`).join("");
 
 		this.element.innerHTML = `
 			<div class="mode-header" style="cursor: pointer; padding: 8px; border-bottom: 1px solid rgba(0, 255, 0, 0.2); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -388,16 +389,6 @@ export default class ModeDisplay {
 		}
 
 		this.updateNextSwitchTime();
-	}
-
-	/**
-	 * Format mode name for display
-	 */
-	formatModeName(name) {
-		return name
-			.split(/(?=[A-Z])|[_-]/) // Split on camelCase, underscores, and hyphens
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-			.join(" ");
 	}
 
 	/**
