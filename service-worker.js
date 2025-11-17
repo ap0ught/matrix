@@ -4,6 +4,8 @@
  * Implements offline functionality through aggressive caching.
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
+ *
+ * Version: 2.0 - Now with dynamic cache versioning from VERSION file
  */
 
 // Cache version will be loaded from VERSION file during installation
@@ -114,7 +116,8 @@ self.addEventListener("install", (event) => {
 	console.log("[Matrix Service Worker] Installing...");
 	event.waitUntil(
 		// First, fetch the VERSION file to get the current version
-		fetch(new URL("VERSION", BASE_PATH + "/").href)
+		// Use cache: 'reload' to ensure we get the latest version
+		fetch(new URL("VERSION", BASE_PATH + "/").href, { cache: "reload" })
 			.then((response) => response.text())
 			.then((versionText) => {
 				// Update cache name with version from VERSION file
