@@ -159,7 +159,7 @@ This ensures:
 ### Browse All Versions
 - Version archive: https://ap0ught.github.io/matrix/versions/
 - Lists all released versions with links
-- Sorted newest to latest
+- Sorted newest to oldest
 - Includes links to release notes
 
 ## Technical Details
