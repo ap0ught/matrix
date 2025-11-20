@@ -38,6 +38,7 @@ The workflow will:
 - Generate a changelog from git history
 - Package the web application
 - Create a GitHub release with the package
+- **Deploy to GitHub Pages** at `https://ap0ught.github.io/matrix/vX.Y.Z/`
 
 #### Option B: Push a Git Tag
 
@@ -233,8 +234,25 @@ The README includes a release badge that automatically displays the latest versi
 
 This badge updates automatically when new releases are created.
 
+## GitHub Pages Deployment
+
+Each release is automatically deployed to GitHub Pages at a version-specific URL:
+
+- **Main site** (latest master): https://ap0ught.github.io/matrix/
+- **Versioned releases**: https://ap0ught.github.io/matrix/vX.Y.Z/
+- **Version archive**: https://ap0ught.github.io/matrix/versions/
+
+This allows users to:
+- Access specific versions via permanent URLs
+- Compare different versions side-by-side
+- Reference specific versions in documentation
+- Test releases without downloading
+
+For more details, see [GitHub Pages Deployment Documentation](.github/GITHUB_PAGES.md).
+
 ## Additional Resources
 
+- [GitHub Pages Deployment](.github/GITHUB_PAGES.md)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Semantic Versioning](https://semver.org/)
 - [Git Tagging](https://git-scm.com/book/en/v2/Git-Basics-Tagging)
