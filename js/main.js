@@ -5,6 +5,7 @@ import ModeManager from "./mode-manager.js";
 import ModeDisplay from "./mode-display.js";
 import GalleryManager, { buildGalleryURL } from "./gallery.js";
 import { formatModeName } from "./utils.js";
+import { setMultiMonitorConfig } from "./fullscreen.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -259,9 +260,13 @@ function initializeModeManagement(config) {
 
 	// Set initial toggle states
 	modeDisplay.setToggleStates(config.screensaverMode || false, config.modeSwitchInterval || 600000);
+	modeDisplay.setMultiMonitorMode(config.multiMonitorMode || "none");
 
 	// Set up event listeners
 	setupModeManagementEvents(config);
+
+	// Pass config to fullscreen module for multi-monitor support
+	setMultiMonitorConfig(config);
 
 	// Start screensaver mode if enabled in config
 	if (config.screensaverMode) {
@@ -305,6 +310,26 @@ function setupModeManagementEvents(config) {
 		if (modeManager) {
 			modeManager.updateInterval(interval);
 		}
+	});
+
+	modeDisplay.on("multiMonitorChange", (mode) => {
+		// Update config and URL parameter
+		config.multiMonitorMode = mode;
+		const urlParams = new URLSearchParams(window.location.search);
+
+		if (mode === "none") {
+			urlParams.delete("multiMonitor");
+		} else {
+			urlParams.set("multiMonitor", mode);
+		}
+
+		// Update URL without reloading
+		history.replaceState({}, "", "?" + urlParams.toString());
+
+		// Update fullscreen module config
+		setMultiMonitorConfig(config);
+
+		console.log(`Multi-monitor mode set to: ${mode}`);
 	});
 
 	// Mode manager events

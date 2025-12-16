@@ -27,6 +27,7 @@ export default class ModeDisplay {
 			changeSwitchInterval: [],
 			versionChange: [],
 			effectChange: [],
+			multiMonitorChange: [],
 		};
 
 		this.init();
@@ -117,6 +118,21 @@ export default class ModeDisplay {
 					<button class="switch-mode-btn" style="width: 100%; padding: 4px; background: rgba(0, 255, 0, 0.2); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; border-radius: 3px; cursor: pointer; margin-top: 5px;">
 						Switch Mode Now
 					</button>
+				</div>
+
+				<div class="multimonitor-controls" style="border-top: 1px solid rgba(0, 255, 0, 0.2); padding-top: 8px; margin-top: 8px;">
+					<div style="font-size: 9px; margin-bottom: 5px; opacity: 0.8;">Multi-Monitor Fullscreen:</div>
+					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+						<input type="checkbox" class="multimonitor-multiple-toggle" style="margin-right: 5px;" />
+						Multiple (Random Variations)
+					</label>
+					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+						<input type="checkbox" class="multimonitor-uniform-toggle" style="margin-right: 5px;" />
+						Uniform (Same Config)
+					</label>
+					<div style="font-size: 8px; opacity: 0.6; margin-top: 5px; line-height: 1.3;">
+						Enable one mode, then double-click to span across all displays.
+					</div>
 				</div>
 				
 				<div class="mode-info" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0, 255, 0, 0.1); font-size: 8px; opacity: 0.6;">
@@ -239,6 +255,32 @@ export default class ModeDisplay {
 		switchBtn.addEventListener("click", () => {
 			if (this.modeManager) {
 				this.modeManager.switchToRandomMode(true); // Pass true to indicate manual switch
+			}
+		});
+
+		// Multi-monitor multiple toggle
+		const multiMonitorMultipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
+		multiMonitorMultipleToggle.addEventListener("change", (e) => {
+			if (e.target.checked) {
+				// Uncheck uniform toggle
+				const uniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
+				uniformToggle.checked = false;
+				this.emit("multiMonitorChange", "multiple");
+			} else {
+				this.emit("multiMonitorChange", "none");
+			}
+		});
+
+		// Multi-monitor uniform toggle
+		const multiMonitorUniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
+		multiMonitorUniformToggle.addEventListener("change", (e) => {
+			if (e.target.checked) {
+				// Uncheck multiple toggle
+				const multipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
+				multipleToggle.checked = false;
+				this.emit("multiMonitorChange", "uniform");
+			} else {
+				this.emit("multiMonitorChange", "none");
 			}
 		});
 
@@ -389,6 +431,21 @@ export default class ModeDisplay {
 		}
 
 		this.updateNextSwitchTime();
+	}
+
+	/**
+	 * Set multi-monitor toggle state
+	 */
+	setMultiMonitorMode(mode) {
+		const multipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
+		const uniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
+
+		if (multipleToggle) {
+			multipleToggle.checked = mode === "multiple";
+		}
+		if (uniformToggle) {
+			uniformToggle.checked = mode === "uniform";
+		}
 	}
 
 	/**

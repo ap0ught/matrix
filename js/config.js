@@ -307,6 +307,9 @@ const defaults = {
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)
 	showModeInfo: true, // Whether to display the current version and effect info
+
+	// Multi-monitor fullscreen settings
+	multiMonitorMode: "none", // none, multiple, uniform - type of multi-monitor fullscreen
 };
 
 export const versions = {
@@ -697,6 +700,9 @@ const paramMapping = {
 	modeDisplay: { key: "modeDisplayEnabled", parser: isTrue },
 	switchInterval: { key: "modeSwitchInterval", parser: (s) => nullNaN(Math.max(60000, parseInt(s))) }, // Minimum 1 minute
 	showModeInfo: { key: "showModeInfo", parser: isTrue },
+
+	// Multi-monitor fullscreen parameters
+	multiMonitor: { key: "multiMonitorMode", parser: (s) => (["none", "multiple", "uniform"].includes(s) ? s : "none") },
 };
 
 paramMapping.paletteRGB = paramMapping.palette;
@@ -770,3 +776,78 @@ export default (urlParams) => {
 
 	return config;
 };
+
+/**
+ * Serialize configuration to URL parameters
+ * Used for multi-monitor uniform mode to pass config to child windows
+ * @param {Object} config - Configuration object to serialize
+ * @returns {string} URL query string with serialized config
+ */
+export function serializeConfig(config) {
+	const params = new URLSearchParams();
+
+	// Core parameters that should be passed to child windows
+	const serializableParams = [
+		"version",
+		"font",
+		"effect",
+		"numColumns",
+		"resolution",
+		"animationSpeed",
+		"forwardSpeed",
+		"cycleSpeed",
+		"fallSpeed",
+		"raindropLength",
+		"slant",
+		"bloomSize",
+		"bloomStrength",
+		"volumetric",
+		"fps",
+		"renderer",
+		"suppressWarnings",
+	];
+
+	// Add each parameter if it differs from default or is explicitly set
+	for (const key of serializableParams) {
+		if (config[key] !== undefined && config[key] !== null) {
+			// Special handling for different types
+			if (typeof config[key] === "boolean") {
+				params.set(key, config[key].toString());
+			} else if (typeof config[key] === "number") {
+				// For slant, convert back to degrees
+				if (key === "slant") {
+					params.set(key, ((config[key] * 180) / Math.PI).toString());
+				} else {
+					params.set(key, config[key].toString());
+				}
+			} else if (typeof config[key] === "string") {
+				params.set(key, config[key]);
+			}
+		}
+	}
+
+	// Handle color parameters (convert from internal format to URL format)
+	if (config.backgroundColor && config.backgroundColor.values) {
+		const values = config.backgroundColor.values.join(",");
+		params.set(config.backgroundColor.space === "hsl" ? "backgroundHSL" : "backgroundColor", values);
+	}
+
+	if (config.cursorColor && config.cursorColor.values) {
+		const values = config.cursorColor.values.join(",");
+		params.set(config.cursorColor.space === "hsl" ? "cursorHSL" : "cursorColor", values);
+	}
+
+	if (config.palette && Array.isArray(config.palette)) {
+		const paletteValues = config.palette.flatMap((p) => [...p.color.values, p.at]).join(",");
+		const space = config.palette[0]?.color.space || "hsl";
+		params.set(space === "hsl" ? "paletteHSL" : "palette", paletteValues);
+	}
+
+	if (config.stripeColors && Array.isArray(config.stripeColors)) {
+		const stripeValues = config.stripeColors.flatMap((c) => c.values).join(",");
+		const space = config.stripeColors[0]?.space || "rgb";
+		params.set(space === "hsl" ? "stripeHSL" : "stripeColors", stripeValues);
+	}
+
+	return params.toString();
+}
