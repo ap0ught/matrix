@@ -27,6 +27,8 @@ export default class ModeDisplay {
 			changeSwitchInterval: [],
 			versionChange: [],
 			effectChange: [],
+			toggleFullscreenMultiple: [],
+			toggleFullscreenUniform: [],
 		};
 
 		this.init();
@@ -117,6 +119,21 @@ export default class ModeDisplay {
 					<button class="switch-mode-btn" style="width: 100%; padding: 4px; background: rgba(0, 255, 0, 0.2); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; border-radius: 3px; cursor: pointer; margin-top: 5px;">
 						Switch Mode Now
 					</button>
+					
+					<div style="border-top: 1px solid rgba(0, 255, 0, 0.2); margin-top: 8px; padding-top: 8px;">
+						<div style="margin-bottom: 3px; font-size: 9px; opacity: 0.8;">Multi-Monitor Fullscreen:</div>
+						<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+							<input type="checkbox" class="fullscreen-multiple-toggle" style="margin-right: 5px;" />
+							Independent Instances
+						</label>
+						<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+							<input type="checkbox" class="fullscreen-uniform-toggle" style="margin-right: 5px;" />
+							Uniform Config
+						</label>
+						<div style="font-size: 8px; opacity: 0.6; margin-top: 3px; font-style: italic;">
+							Double-click to activate
+						</div>
+					</div>
 				</div>
 				
 				<div class="mode-info" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0, 255, 0, 0.1); font-size: 8px; opacity: 0.6;">
@@ -240,6 +257,26 @@ export default class ModeDisplay {
 			if (this.modeManager) {
 				this.modeManager.switchToRandomMode(true); // Pass true to indicate manual switch
 			}
+		});
+
+		// Multi-monitor fullscreen toggles
+		const fullscreenMultipleToggle = this.element.querySelector(".fullscreen-multiple-toggle");
+		const fullscreenUniformToggle = this.element.querySelector(".fullscreen-uniform-toggle");
+
+		fullscreenMultipleToggle.addEventListener("change", (e) => {
+			if (e.target.checked) {
+				// Uncheck uniform mode (only one can be active)
+				fullscreenUniformToggle.checked = false;
+			}
+			this.emit("toggleFullscreenMultiple", e.target.checked);
+		});
+
+		fullscreenUniformToggle.addEventListener("change", (e) => {
+			if (e.target.checked) {
+				// Uncheck multiple mode (only one can be active)
+				fullscreenMultipleToggle.checked = false;
+			}
+			this.emit("toggleFullscreenUniform", e.target.checked);
 		});
 
 		// Auto-hide on mouse leave
@@ -389,6 +426,21 @@ export default class ModeDisplay {
 		}
 
 		this.updateNextSwitchTime();
+	}
+
+	/**
+	 * Set multi-monitor fullscreen toggle states
+	 */
+	setFullscreenToggles(multipleEnabled, uniformEnabled) {
+		const fullscreenMultipleToggle = this.element.querySelector(".fullscreen-multiple-toggle");
+		const fullscreenUniformToggle = this.element.querySelector(".fullscreen-uniform-toggle");
+
+		if (fullscreenMultipleToggle) {
+			fullscreenMultipleToggle.checked = multipleEnabled;
+		}
+		if (fullscreenUniformToggle) {
+			fullscreenUniformToggle.checked = uniformEnabled;
+		}
 	}
 
 	/**
