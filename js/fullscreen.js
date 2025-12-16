@@ -211,28 +211,38 @@ async function openMultiMonitorFullscreen(config) {
 			const screen = screens[i];
 
 			// Skip the current screen (we'll fullscreen this window instead)
-			if (screen.left === window.screenLeft && screen.top === window.screenTop) {
+			// Handle both window.screenLeft/Top (Chrome) and window.screen.left/top (standard)
+			const currentScreenLeft = window.screenLeft ?? window.screen?.left ?? 0;
+			const currentScreenTop = window.screenTop ?? window.screen?.top ?? 0;
+			if (screen.left === currentScreenLeft && screen.top === currentScreenTop) {
 				continue;
 			}
 
 			try {
-				// Open window positioned on this screen
-				const newWindow = window.open(windowURL, `_blank`, `left=${screen.left},top=${screen.top},width=${screen.width},height=${screen.height}`);
+				// Open window positioned on this screen with minimal chrome
+				const features = `left=${screen.left},top=${screen.top},width=${screen.width},height=${screen.height},resizable=no,scrollbars=no,menubar=no,toolbar=no,status=no`;
+				const newWindow = window.open(windowURL, `_blank`, features);
 
 				if (newWindow) {
 					multiMonitorWindows.push(newWindow);
 
 					// Request fullscreen on the new window after it loads
-					newWindow.addEventListener("load", () => {
-						// Small delay to ensure page is fully loaded
-						setTimeout(() => {
-							if (newWindow.document.documentElement.requestFullscreen) {
-								newWindow.document.documentElement.requestFullscreen().catch((err) => {
-									console.error("Failed to request fullscreen on child window:", err);
-								});
-							}
-						}, 500);
-					});
+					// Use readyState check for more reliable timing
+					const requestFullscreenWhenReady = () => {
+						if (newWindow.document.readyState === "complete") {
+							// Additional small delay to ensure renderer is ready
+							setTimeout(() => {
+								if (newWindow.document.documentElement.requestFullscreen) {
+									newWindow.document.documentElement.requestFullscreen().catch((err) => {
+										console.error("Failed to request fullscreen on child window:", err);
+									});
+								}
+							}, 100);
+						} else {
+							newWindow.addEventListener("load", requestFullscreenWhenReady);
+						}
+					};
+					requestFullscreenWhenReady();
 				}
 			} catch (err) {
 				console.error(`Failed to open window on screen ${i}:`, err);

@@ -786,6 +786,9 @@ export default (urlParams) => {
 export function serializeConfig(config) {
 	const params = new URLSearchParams();
 
+	// Conversion constant for angle serialization
+	const RADIANS_TO_DEGREES = 180 / Math.PI;
+
 	// Core parameters that should be passed to child windows
 	const serializableParams = [
 		"version",
@@ -816,7 +819,7 @@ export function serializeConfig(config) {
 			} else if (typeof config[key] === "number") {
 				// For slant, convert back to degrees
 				if (key === "slant") {
-					params.set(key, ((config[key] * 180) / Math.PI).toString());
+					params.set(key, (config[key] * RADIANS_TO_DEGREES).toString());
 				} else {
 					params.set(key, config[key].toString());
 				}
