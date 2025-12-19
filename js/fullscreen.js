@@ -7,10 +7,17 @@
  * - Event prevention to avoid conflicts
  * - Error handling for unsupported browsers
  * - Wake lock management during fullscreen mode
+ * - Multi-monitor fullscreen support via Window Management API
  */
 
 // Global wake lock reference
 let currentWakeLock = null;
+
+// Multi-monitor manager reference (set externally)
+let multiMonitorManager = null;
+
+// Matrix config reference (set externally)
+let matrixConfig = null;
 
 /**
  * Request a screen wake lock to prevent the screen from turning off
@@ -62,6 +69,22 @@ async function releaseWakeLock() {
 			currentWakeLock = null;
 		}
 	}
+}
+
+/**
+ * Set the multi-monitor manager reference
+ * @param {Object} manager - MultiMonitorManager instance
+ */
+export function setMultiMonitorManager(manager) {
+	multiMonitorManager = manager;
+}
+
+/**
+ * Set the matrix config reference
+ * @param {Object} config - Matrix configuration object
+ */
+export function setMatrixConfig(config) {
+	matrixConfig = config;
 }
 
 /**
@@ -144,7 +167,7 @@ export function setupFullscreenToggle(element) {
 	 * Double-click event handler for fullscreen toggle
 	 * @param {Event} event - Double-click event
 	 */
-	const handleDoubleClick = (event) => {
+	const handleDoubleClick = async (event) => {
 		// Prevent default behavior and stop event propagation
 		event.preventDefault();
 		event.stopPropagation();
@@ -153,10 +176,30 @@ export function setupFullscreenToggle(element) {
 		const fullscreenElement = getFullscreenElement();
 
 		if (!fullscreenElement) {
-			// Not in fullscreen, request it
-			requestFullscreen(element);
+			// Not in fullscreen, check for multi-monitor mode
+			if (multiMonitorManager && multiMonitorManager.isActive() && matrixConfig) {
+				// Multi-monitor mode is active - spawn windows across all displays
+				console.log("Initiating multi-monitor fullscreen mode:", multiMonitorManager.getMode());
+				const success = await multiMonitorManager.spawnWindows(matrixConfig);
+
+				if (success) {
+					// Request fullscreen on all spawned windows
+					await multiMonitorManager.requestFullscreenAll();
+				} else {
+					// Fall back to single-screen fullscreen
+					console.warn("Multi-monitor fullscreen failed, falling back to single screen");
+					requestFullscreen(element);
+				}
+			} else {
+				// Normal single-screen fullscreen
+				requestFullscreen(element);
+			}
 		} else {
-			// In fullscreen, exit it - pass the element to avoid duplicate check
+			// In fullscreen, exit it
+			if (multiMonitorManager && multiMonitorManager.isCoordinator) {
+				// Exit fullscreen on all displays
+				multiMonitorManager.exitFullscreenAll();
+			}
 			exitFullscreen(fullscreenElement);
 		}
 	};

@@ -307,6 +307,12 @@ const defaults = {
 	modeSwitchInterval: 600000, // Time between mode switches in milliseconds (10 minutes)
 	availableModes: null, // Array of modes to cycle through (null = all modes)
 	showModeInfo: true, // Whether to display the current version and effect info
+
+	// Multi-monitor fullscreen settings
+	fullscreenMultiple: false, // Enable fullscreen on multiple displays (independent instances)
+	fullscreenUniform: false, // Enable fullscreen on multiple displays (uniform config)
+	multiMonitorChild: false, // Internal flag: indicates this is a child window spawned for multi-monitor
+	screenIndex: null, // Internal: screen index for child windows
 };
 
 export const versions = {
@@ -697,6 +703,12 @@ const paramMapping = {
 	modeDisplay: { key: "modeDisplayEnabled", parser: isTrue },
 	switchInterval: { key: "modeSwitchInterval", parser: (s) => nullNaN(Math.max(60000, parseInt(s))) }, // Minimum 1 minute
 	showModeInfo: { key: "showModeInfo", parser: isTrue },
+
+	// Multi-monitor fullscreen parameters
+	fullscreenMultiple: { key: "fullscreenMultiple", parser: isTrue },
+	fullscreenUniform: { key: "fullscreenUniform", parser: isTrue },
+	multiMonitorChild: { key: "multiMonitorChild", parser: isTrue },
+	screenIndex: { key: "screenIndex", parser: (s) => nullNaN(parseInt(s)) },
 };
 
 paramMapping.paletteRGB = paramMapping.palette;
