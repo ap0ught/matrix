@@ -227,8 +227,21 @@ jobs:
         else
           git commit -m "Deploy preview: ${{ steps.preview.outputs.path }}"
           
-          # Push to gh-pages branch
-          git push origin gh-pages --force
+          # Fetch latest changes from remote to avoid race conditions
+          echo "Fetching latest gh-pages from remote..."
+          git fetch origin gh-pages
+          
+          # Pull with rebase to handle concurrent updates
+          echo "Pulling latest gh-pages with rebase strategy..."
+          if git pull --rebase origin gh-pages; then
+            echo "✅ Rebase successful, pushing changes..."
+            git push origin gh-pages
+          else
+            echo "⚠️ Rebase conflict detected - this is rare but can happen with concurrent deployments"
+            echo "Aborting rebase and using force push to ensure deployment succeeds..."
+            git rebase --abort
+            git push origin gh-pages --force
+          fi
           echo "✅ Successfully deployed to gh-pages"
         fi
     
