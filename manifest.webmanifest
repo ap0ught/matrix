@@ -1,0 +1,24 @@
+{
+	"name": "Matrix Digital Rain",
+	"short_name": "Matrix",
+	"description": "Implementation of the iconic falling green code from The Matrix films",
+	"start_url": "./",
+	"display": "fullscreen",
+	"background_color": "#000000",
+	"theme_color": "#000000",
+	"orientation": "any",
+	"icons": [
+		{
+			"src": "icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	]
+}
