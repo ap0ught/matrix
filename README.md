@@ -75,6 +75,15 @@ This project runs right in the web browser; you can serve it with any HTTP/HTTPS
 
 Perfect for use as a screensaver or ambient display, even when offline. See [PWA_README.md](PWA_README.md) for more details on installation and usage.
 
+### 🖥️ Multi-Monitor Fullscreen
+
+**Span the Matrix across multiple displays!** Using the Window Management API, you can now display the Matrix effect across all your connected monitors:
+
+- **Independent Instances** - Each display shows its own unique Matrix variation
+- **Uniform Config** - All displays start with the same settings and drift naturally over time
+
+Double-click the canvas to enter multi-monitor fullscreen mode. See [MULTI_MONITOR.md](MULTI_MONITOR.md) for complete documentation and browser requirements.
+
 ## Goals
 
 There are four kinds of Matrix effects people call ["digital rain"](http://matrix.wikia.com/wiki/Matrix_code):
