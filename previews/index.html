@@ -44,3 +44,38 @@
     
     <script>
         const previews = [];
+                previews.push('pr-42');
+                previews.push('pr-44');
+                previews.push('pr-46');
+                previews.push('pr-48');
+                previews.push('pr-50');
+                previews.push('pr-52');
+                previews.push('pr-54');
+                previews.push('pr-57');
+                previews.push('pr-59');
+                previews.push('pr-61');
+                previews.push('pr-62');
+                previews.push('pr-64');
+                previews.push('pr-66');
+                previews.push('pr-68');
+                previews.push('pr-70');
+                previews.push('pr-71');
+                previews.push('pr-73');
+                previews.push('pr-74');
+                previews.push('pr-75');
+                previews.push('pr-77');
+        
+        const container = document.getElementById('previews');
+        if (previews.length === 0) {
+            container.innerHTML = '<p>No PR previews available yet.</p>';
+        } else {
+            previews.sort().reverse().forEach(preview => {
+                const div = document.createElement('div');
+                div.className = 'preview';
+                div.innerHTML = `<strong>${preview}</strong>: <a href="/matrix/${preview}/">View Preview</a>`;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
