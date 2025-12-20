@@ -5,7 +5,8 @@ import ModeManager from "./mode-manager.js";
 import ModeDisplay from "./mode-display.js";
 import GalleryManager, { buildGalleryURL } from "./gallery.js";
 import { formatModeName } from "./utils.js";
-import { setMultiMonitorConfig } from "./fullscreen.js";
+import MultiMonitorManager from "./multi-monitor.js";
+import { setMultiMonitorManager, setMatrixConfig, setupFullscreenToggle } from "./fullscreen.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -122,6 +123,7 @@ let modeManager = null;
 let modeDisplay = null;
 let currentMatrixRenderer = null;
 let galleryManager = null;
+let multiMonitorManager = null;
 
 const supportsWebGPU = async () => {
 	return window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
@@ -201,6 +203,9 @@ document.body.onload = async () => {
 	// Initialize mode management and display
 	initializeModeManagement(matrixConfig);
 
+	// Initialize multi-monitor manager
+	initializeMultiMonitorManager(matrixConfig);
+
 	if (!matrixConfig.suppressWarnings && isRunningSwiftShader()) {
 		// Inject the styles needed for the Matrix warning interface
 		injectMatrixWarningStyles();
@@ -260,13 +265,9 @@ function initializeModeManagement(config) {
 
 	// Set initial toggle states
 	modeDisplay.setToggleStates(config.screensaverMode || false, config.modeSwitchInterval || 600000);
-	modeDisplay.setMultiMonitorMode(config.multiMonitorMode || "none");
 
 	// Set up event listeners
 	setupModeManagementEvents(config);
-
-	// Pass config to fullscreen module for multi-monitor support
-	setMultiMonitorConfig(config);
 
 	// Start screensaver mode if enabled in config
 	if (config.screensaverMode) {
@@ -312,24 +313,39 @@ function setupModeManagementEvents(config) {
 		}
 	});
 
-	modeDisplay.on("multiMonitorChange", (mode) => {
-		// Update config and URL parameter
-		config.multiMonitorMode = mode;
-		const urlParams = new URLSearchParams(window.location.search);
-
-		if (mode === "none") {
-			urlParams.delete("multiMonitor");
-		} else {
-			urlParams.set("multiMonitor", mode);
+	// Multi-monitor fullscreen events
+	modeDisplay.on("toggleFullscreenMultiple", (enabled) => {
+		config.fullscreenMultiple = enabled;
+		config.fullscreenUniform = false; // Ensure only one is active
+		if (multiMonitorManager) {
+			multiMonitorManager.setMode(enabled ? "multiple" : null);
 		}
-
-		// Update URL without reloading
+		// Update URL params
+		const urlParams = new URLSearchParams(window.location.search);
+		if (enabled) {
+			urlParams.set("fullscreenMultiple", "true");
+			urlParams.delete("fullscreenUniform");
+		} else {
+			urlParams.delete("fullscreenMultiple");
+		}
 		history.replaceState({}, "", "?" + urlParams.toString());
+	});
 
-		// Update fullscreen module config
-		setMultiMonitorConfig(config);
-
-		console.log(`Multi-monitor mode set to: ${mode}`);
+	modeDisplay.on("toggleFullscreenUniform", (enabled) => {
+		config.fullscreenUniform = enabled;
+		config.fullscreenMultiple = false; // Ensure only one is active
+		if (multiMonitorManager) {
+			multiMonitorManager.setMode(enabled ? "uniform" : null);
+		}
+		// Update URL params
+		const urlParams = new URLSearchParams(window.location.search);
+		if (enabled) {
+			urlParams.set("fullscreenUniform", "true");
+			urlParams.delete("fullscreenMultiple");
+		} else {
+			urlParams.delete("fullscreenUniform");
+		}
+		history.replaceState({}, "", "?" + urlParams.toString());
 	});
 
 	// Mode manager events
@@ -368,6 +384,69 @@ function updatePageTitle(config) {
 	const effectName = formatModeName(effect);
 
 	document.title = `Matrix - ${versionName} / ${effectName}`;
+}
+
+/**
+ * Initialize multi-monitor manager
+ */
+function initializeMultiMonitorManager(config) {
+	// Don't initialize multi-monitor on child windows
+	if (config.multiMonitorChild) {
+		console.log("This is a multi-monitor child window, skipping multi-monitor manager initialization");
+		// Set up child window fullscreen handling
+		MultiMonitorManager.handleChildFullscreenRequest(canvas);
+		return;
+	}
+
+	// Create multi-monitor manager
+	multiMonitorManager = new MultiMonitorManager();
+
+	// Set the multi-monitor manager in fullscreen module
+	setMultiMonitorManager(multiMonitorManager);
+	setMatrixConfig(config);
+
+	// Set initial mode based on config
+	if (config.fullscreenMultiple) {
+		multiMonitorManager.setMode("multiple");
+		// Ensure uniform is disabled
+		config.fullscreenUniform = false;
+	} else if (config.fullscreenUniform) {
+		multiMonitorManager.setMode("uniform");
+		// Ensure multiple is disabled
+		config.fullscreenMultiple = false;
+	}
+
+	// Update mode display toggles
+	if (modeDisplay) {
+		modeDisplay.setFullscreenToggles(config.fullscreenMultiple || false, config.fullscreenUniform || false);
+	}
+
+	// Set up event listeners
+	multiMonitorManager.on("permissionGranted", ({ screens }) => {
+		console.log(`Multi-monitor permission granted. ${screens} displays available.`);
+	});
+
+	multiMonitorManager.on("permissionDenied", ({ error }) => {
+		console.warn("Multi-monitor permission denied:", error);
+		alert("Multi-monitor fullscreen requires permission to access display information. Please allow the permission and try again.");
+	});
+
+	multiMonitorManager.on("error", ({ code, message }) => {
+		console.error(`Multi-monitor error [${code}]:`, message);
+		if (code === "NOT_SUPPORTED") {
+			alert("Multi-monitor fullscreen is not supported in this browser. Please use a browser that supports the Window Management API.");
+		} else if (code === "INSUFFICIENT_SCREENS") {
+			alert("Multi-monitor fullscreen requires at least 2 displays. Only one display was detected.");
+		}
+	});
+
+	multiMonitorManager.on("windowsOpened", ({ count }) => {
+		console.log(`Opened ${count} windows for multi-monitor fullscreen`);
+	});
+
+	multiMonitorManager.on("allWindowsClosed", () => {
+		console.log("All multi-monitor windows have been closed");
+	});
 }
 
 /**
@@ -451,6 +530,9 @@ function setupSpotifyEventListeners() {
 function startMatrix(matrixRenderer, canvas, config) {
 	// Start the Matrix renderer
 	matrixRenderer.default(canvas, config);
+
+	// Setup fullscreen toggle on the canvas
+	setupFullscreenToggle(canvas);
 }
 
 /**
