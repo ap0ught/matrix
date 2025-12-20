@@ -814,6 +814,13 @@ export function serializeConfig(config) {
 		"fps",
 		"renderer",
 		"suppressWarnings",
+		"cursorIntensity",
+		"glyphIntensity",
+		"ditherMagnitude",
+		"glyphFlip",
+		"glyphRotation",
+		"isometric",
+		"loops",
 	];
 
 	// Add each parameter if it differs from default or is explicitly set
@@ -844,6 +851,11 @@ export function serializeConfig(config) {
 	if (config.cursorColor && config.cursorColor.values) {
 		const values = config.cursorColor.values.join(",");
 		params.set(config.cursorColor.space === "hsl" ? "cursorHSL" : "cursorColor", values);
+	}
+
+	if (config.glintColor && config.glintColor.values) {
+		const values = config.glintColor.values.join(",");
+		params.set(config.glintColor.space === "hsl" ? "glintHSL" : "glintColor", values);
 	}
 
 	if (config.palette && Array.isArray(config.palette)) {
