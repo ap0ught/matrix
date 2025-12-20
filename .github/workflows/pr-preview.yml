@@ -119,11 +119,16 @@ jobs:
         echo "✅ Preview files copied to gh-pages/${PREVIEW_PATH}"
         ls -la "gh-pages/${PREVIEW_PATH}"
     
-    - name: Update gh-pages index
+    - name: Update gh-pages previews index
       run: |
         cd gh-pages
         
         # Create or update previews/index.html with list of previews
+        # Create previews directory if it doesn't exist
+        mkdir -p previews
+        
+        # Create or update previews/index.html with list of PR previews
+        # Note: We don't overwrite the root index.html (main site)
         cat > previews/index.html <<'HTMLEOF'
         <!DOCTYPE html>
         <html lang="en">
@@ -162,7 +167,8 @@ jobs:
             <h1>Matrix PR Preview Deployments</h1>
             
             <div class="main-link">
-                <strong>Main Site:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
+                <strong>Main Site:</strong> <a href="/">https://ap0ught.github.io/matrix/</a><br>
+                <strong>All Versions:</strong> <a href="/versions/">Version Archive</a>
             </div>
             
             <h2>Available PR Previews:</h2>
@@ -228,9 +234,23 @@ jobs:
         else
           git commit -m "Deploy preview: ${{ steps.preview.outputs.path }}"
           
-          # Push to gh-pages branch
-          git push origin gh-pages --force
-          echo "✅ Successfully deployed to gh-pages"
+          # Fetch latest changes from remote to avoid race conditions
+          echo "Fetching latest gh-pages from remote..."
+          git fetch origin gh-pages
+          
+          # Rebase our local changes on top of the fetched remote branch
+          echo "Rebasing local gh-pages on top of origin/gh-pages..."
+          if git rebase origin/gh-pages; then
+            echo "✅ Rebase successful, pushing changes with force-with-lease..."
+            git push --force-with-lease origin gh-pages
+            echo "✅ Successfully deployed to gh-pages via rebase (no force push required)"
+          else
+            echo "⚠️ Rebase conflict detected - this is rare but can happen with concurrent deployments"
+            echo "Aborting rebase and using force push to ensure deployment succeeds..."
+            git rebase --abort
+            git push origin gh-pages --force
+            echo "✅ Successfully deployed to gh-pages via force push after rebase conflict"
+          fi
         fi
     
     - name: Comment on PR with preview URL
