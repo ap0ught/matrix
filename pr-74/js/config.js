@@ -309,7 +309,10 @@ const defaults = {
 	showModeInfo: true, // Whether to display the current version and effect info
 
 	// Multi-monitor fullscreen settings
-	multiMonitorMode: "none", // none, multiple, uniform - type of multi-monitor fullscreen
+	fullscreenMultiple: false, // Enable fullscreen on multiple displays (independent instances)
+	fullscreenUniform: false, // Enable fullscreen on multiple displays (uniform config)
+	multiMonitorChild: false, // Internal flag: indicates this is a child window spawned for multi-monitor
+	screenIndex: null, // Internal: screen index for child windows
 };
 
 export const versions = {
@@ -702,7 +705,10 @@ const paramMapping = {
 	showModeInfo: { key: "showModeInfo", parser: isTrue },
 
 	// Multi-monitor fullscreen parameters
-	multiMonitor: { key: "multiMonitorMode", parser: (s) => (["none", "multiple", "uniform"].includes(s) ? s : "none") },
+	fullscreenMultiple: { key: "fullscreenMultiple", parser: isTrue },
+	fullscreenUniform: { key: "fullscreenUniform", parser: isTrue },
+	multiMonitorChild: { key: "multiMonitorChild", parser: isTrue },
+	screenIndex: { key: "screenIndex", parser: (s) => nullNaN(parseInt(s)) },
 };
 
 paramMapping.paletteRGB = paramMapping.palette;

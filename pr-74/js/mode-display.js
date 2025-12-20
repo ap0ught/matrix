@@ -27,7 +27,8 @@ export default class ModeDisplay {
 			changeSwitchInterval: [],
 			versionChange: [],
 			effectChange: [],
-			multiMonitorChange: [],
+			toggleFullscreenMultiple: [],
+			toggleFullscreenUniform: [],
 		};
 
 		this.init();
@@ -118,20 +119,20 @@ export default class ModeDisplay {
 					<button class="switch-mode-btn" style="width: 100%; padding: 4px; background: rgba(0, 255, 0, 0.2); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; border-radius: 3px; cursor: pointer; margin-top: 5px;">
 						Switch Mode Now
 					</button>
-				</div>
-
-				<div class="multimonitor-controls" style="border-top: 1px solid rgba(0, 255, 0, 0.2); padding-top: 8px; margin-top: 8px;">
-					<div style="font-size: 9px; margin-bottom: 5px; opacity: 0.8;">Multi-Monitor Fullscreen:</div>
-					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
-						<input type="checkbox" class="multimonitor-multiple-toggle" style="margin-right: 5px;" />
-						Multiple (Random Variations)
-					</label>
-					<label style="display: block; margin-bottom: 5px; font-size: 10px;">
-						<input type="checkbox" class="multimonitor-uniform-toggle" style="margin-right: 5px;" />
-						Uniform (Same Config)
-					</label>
-					<div style="font-size: 8px; opacity: 0.6; margin-top: 5px; line-height: 1.3;">
-						Enable one mode, then double-click to span across all displays.
+					
+					<div style="border-top: 1px solid rgba(0, 255, 0, 0.2); margin-top: 8px; padding-top: 8px;">
+						<div style="margin-bottom: 3px; font-size: 9px; opacity: 0.8;">Multi-Monitor Fullscreen:</div>
+						<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+							<input type="checkbox" class="fullscreen-multiple-toggle" style="margin-right: 5px;" />
+							Independent Instances
+						</label>
+						<label style="display: block; margin-bottom: 5px; font-size: 10px;">
+							<input type="checkbox" class="fullscreen-uniform-toggle" style="margin-right: 5px;" />
+							Uniform Config
+						</label>
+						<div style="font-size: 8px; opacity: 0.6; margin-top: 3px; font-style: italic;">
+							Double-click to activate
+						</div>
 					</div>
 				</div>
 				
@@ -258,30 +259,24 @@ export default class ModeDisplay {
 			}
 		});
 
-		// Multi-monitor multiple toggle
-		const multiMonitorMultipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
-		multiMonitorMultipleToggle.addEventListener("change", (e) => {
+		// Multi-monitor fullscreen toggles
+		const fullscreenMultipleToggle = this.element.querySelector(".fullscreen-multiple-toggle");
+		const fullscreenUniformToggle = this.element.querySelector(".fullscreen-uniform-toggle");
+
+		fullscreenMultipleToggle.addEventListener("change", (e) => {
 			if (e.target.checked) {
-				// Uncheck uniform toggle
-				const uniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
-				uniformToggle.checked = false;
-				this.emit("multiMonitorChange", "multiple");
-			} else {
-				this.emit("multiMonitorChange", "none");
+				// Uncheck uniform mode (only one can be active)
+				fullscreenUniformToggle.checked = false;
 			}
+			this.emit("toggleFullscreenMultiple", e.target.checked);
 		});
 
-		// Multi-monitor uniform toggle
-		const multiMonitorUniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
-		multiMonitorUniformToggle.addEventListener("change", (e) => {
+		fullscreenUniformToggle.addEventListener("change", (e) => {
 			if (e.target.checked) {
-				// Uncheck multiple toggle
-				const multipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
-				multipleToggle.checked = false;
-				this.emit("multiMonitorChange", "uniform");
-			} else {
-				this.emit("multiMonitorChange", "none");
+				// Uncheck multiple mode (only one can be active)
+				fullscreenMultipleToggle.checked = false;
 			}
+			this.emit("toggleFullscreenUniform", e.target.checked);
 		});
 
 		// Auto-hide on mouse leave
@@ -434,17 +429,17 @@ export default class ModeDisplay {
 	}
 
 	/**
-	 * Set multi-monitor toggle state
+	 * Set multi-monitor fullscreen toggle states
 	 */
-	setMultiMonitorMode(mode) {
-		const multipleToggle = this.element.querySelector(".multimonitor-multiple-toggle");
-		const uniformToggle = this.element.querySelector(".multimonitor-uniform-toggle");
+	setFullscreenToggles(multipleEnabled, uniformEnabled) {
+		const fullscreenMultipleToggle = this.element.querySelector(".fullscreen-multiple-toggle");
+		const fullscreenUniformToggle = this.element.querySelector(".fullscreen-uniform-toggle");
 
-		if (multipleToggle) {
-			multipleToggle.checked = mode === "multiple";
+		if (fullscreenMultipleToggle) {
+			fullscreenMultipleToggle.checked = multipleEnabled;
 		}
-		if (uniformToggle) {
-			uniformToggle.checked = mode === "uniform";
+		if (fullscreenUniformToggle) {
+			fullscreenUniformToggle.checked = uniformEnabled;
 		}
 	}
 
