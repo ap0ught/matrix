@@ -118,12 +118,16 @@ jobs:
         echo "✅ Preview files copied to gh-pages/${PREVIEW_PATH}"
         ls -la "gh-pages/${PREVIEW_PATH}"
     
-    - name: Update gh-pages index
+    - name: Update gh-pages previews index
       run: |
         cd gh-pages
         
-        # Create or update index.html with list of previews
-        cat > index.html <<'HTMLEOF'
+        # Create previews directory if it doesn't exist
+        mkdir -p previews
+        
+        # Create or update previews/index.html with list of PR previews
+        # Note: We don't overwrite the root index.html (main site)
+        cat > previews/index.html <<'HTMLEOF'
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -161,7 +165,8 @@ jobs:
             <h1>Matrix PR Preview Deployments</h1>
             
             <div class="main-link">
-                <strong>Main Site:</strong> <a href="/">https://ap0ught.github.io/matrix/</a>
+                <strong>Main Site:</strong> <a href="/">https://ap0ught.github.io/matrix/</a><br>
+                <strong>All Versions:</strong> <a href="/versions/">Version Archive</a>
             </div>
             
             <h2>Available PR Previews:</h2>
@@ -197,7 +202,7 @@ jobs:
         </html>
         HTMLEOF
         
-        echo "✅ Updated gh-pages index.html"
+        echo "✅ Updated gh-pages previews/index.html"
     
     - name: Deploy to gh-pages
       run: |
