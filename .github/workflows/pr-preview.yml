@@ -90,6 +90,7 @@ jobs:
         
         # Create preview directory in gh-pages
         mkdir -p "gh-pages/${PREVIEW_PATH}"
+        mkdir -p "gh-pages/previews"
         
         # Copy web application files to preview directory
         cp index.html "gh-pages/${PREVIEW_PATH}/"
@@ -122,6 +123,7 @@ jobs:
       run: |
         cd gh-pages
         
+        # Create or update previews/index.html with list of previews
         # Create previews directory if it doesn't exist
         mkdir -p previews
         
@@ -180,11 +182,11 @@ jobs:
         for dir in pr-*/ ; do
           if [ -d "$dir" ]; then
             dir_name="${dir%/}"
-            echo "                previews.push('$dir_name');" >> index.html
+            echo "                previews.push('$dir_name');" >> previews/index.html
           fi
         done
         
-        cat >> index.html <<'HTMLEOF'
+        cat >> previews/index.html <<'HTMLEOF'
                 
                 const container = document.getElementById('previews');
                 if (previews.length === 0) {
