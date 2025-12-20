@@ -236,13 +236,14 @@ jobs:
           if git rebase origin/gh-pages; then
             echo "✅ Rebase successful, pushing changes with force-with-lease..."
             git push --force-with-lease origin gh-pages
+            echo "✅ Successfully deployed to gh-pages via rebase (no force push required)"
           else
             echo "⚠️ Rebase conflict detected - this is rare but can happen with concurrent deployments"
             echo "Aborting rebase and using force push to ensure deployment succeeds..."
             git rebase --abort
-            git push --force origin gh-pages
+            git push origin gh-pages --force
+            echo "✅ Successfully deployed to gh-pages via force push after rebase conflict"
           fi
-          echo "✅ Successfully deployed to gh-pages"
         fi
     
     - name: Comment on PR with preview URL
