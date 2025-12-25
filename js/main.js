@@ -17,6 +17,48 @@ import { setMultiMonitorManager, setMatrixConfig, setupFullscreenToggle } from "
  */
 
 /*
+ * Application Version Management
+ *
+ * Load version from VERSION file and display it for debugging and cache management.
+ * This helps users and developers understand which version is running and
+ * troubleshoot PWA caching issues.
+ */
+let appVersion = "unknown";
+
+/**
+ * Load application version from VERSION file
+ * @returns {Promise<string>} The version string (e.g., "1.0.0")
+ */
+async function loadVersion() {
+	try {
+		const response = await fetch("VERSION", { cache: "no-cache" });
+		const version = await response.text();
+		appVersion = version.trim();
+		return appVersion;
+	} catch (error) {
+		console.warn("[Matrix] Failed to load VERSION file:", error);
+		return "unknown";
+	}
+}
+
+/**
+ * Display version information to console
+ * Includes Matrix-themed messaging and helpful cache information
+ */
+function displayVersionInfo() {
+	const cacheName = `matrix-v${appVersion}`;
+	console.log("%c⎡ MATRIX DIGITAL RAIN ⎦", "color: #0F0; font-size: 16px; font-weight: bold; text-shadow: 0 0 10px #0F0");
+	console.log(`%cVersion: ${appVersion}`, "color: #0F0; font-size: 12px");
+	console.log(`%cCache: ${cacheName}`, "color: #0F0; font-size: 12px");
+	console.log(`%c"Wake up, Neo... The Matrix has you."`, "color: #0F0; font-style: italic; font-size: 10px");
+	console.log("");
+	console.log("%cPWA Cache Debug Commands:", "color: #0F0; font-size: 11px; font-weight: bold");
+	console.log(`%c  caches.open("${cacheName}").then(c => c.keys()).then(k => console.log(k.map(r => r.url)))`, "color: #0A0; font-size: 10px");
+	console.log(`%c  caches.keys().then(names => names.forEach(name => caches.delete(name)))`, "color: #0A0; font-size: 10px");
+	console.log("");
+}
+
+/*
  * Dynamic CSS Styles for Matrix Warning Interface
  *
  * These styles are injected when the SwiftShader warning is displayed,
@@ -158,6 +200,13 @@ const isRunningSwiftShader = () => {
  *    and red pill (optimize for truth/performance)
  */
 document.body.onload = async () => {
+	/*
+	 * Load and Display Version Information
+	 * Shows version and cache debugging info in console for PWA management
+	 */
+	await loadVersion();
+	displayVersionInfo();
+
 	/*
 	 * Configuration Parsing
 	 * URL parameters allow users to customize their Matrix experience,

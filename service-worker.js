@@ -114,6 +114,7 @@ const STATIC_ASSETS = [
  */
 self.addEventListener("install", (event) => {
 	console.log("[Matrix Service Worker] Installing...");
+	console.log("[Matrix Service Worker] 'There is no spoon' - Preparing to cache the Matrix...");
 	event.waitUntil(
 		// First, fetch the VERSION file to get the current version
 		// Use cache: 'reload' to ensure we get the latest version
@@ -123,26 +124,30 @@ self.addEventListener("install", (event) => {
 				// Update cache name with version from VERSION file
 				const version = versionText.trim();
 				CACHE_NAME = `matrix-v${version}`;
-				console.log(`[Matrix Service Worker] Using cache version: ${CACHE_NAME}`);
+				console.log(`[Matrix Service Worker] 🔋 Version: ${version}`);
+				console.log(`[Matrix Service Worker] 💾 Cache Name: ${CACHE_NAME}`);
+				console.log(`[Matrix Service Worker] 📦 Assets to cache: ${STATIC_ASSETS.length} files`);
 				return caches.open(CACHE_NAME);
 			})
 			.catch((error) => {
 				// If VERSION file fails to load, use default cache name
 				console.warn("[Matrix Service Worker] Failed to load VERSION file, using default cache name:", error);
+				console.log(`[Matrix Service Worker] 💾 Fallback Cache Name: ${CACHE_NAME}`);
 				return caches.open(CACHE_NAME);
 			})
 			.then((cache) => {
-				console.log("[Matrix Service Worker] Caching static assets");
+				console.log("[Matrix Service Worker] Caching static assets...");
 				// Convert relative paths to absolute URLs using BASE_PATH
 				const absoluteAssets = STATIC_ASSETS.map((path) => new URL(path, BASE_PATH + "/").href);
 				return cache.addAll(absoluteAssets);
 			})
 			.then(() => {
-				console.log("[Matrix Service Worker] Installation complete");
+				console.log("[Matrix Service Worker] ✅ Installation complete - The Matrix is cached!");
+				console.log(`[Matrix Service Worker] Cache '${CACHE_NAME}' is ready for offline use`);
 				return self.skipWaiting();
 			})
 			.catch((error) => {
-				console.error("[Matrix Service Worker] Installation failed:", error);
+				console.error("[Matrix Service Worker] ❌ Installation failed:", error);
 			}),
 	);
 });
@@ -153,21 +158,28 @@ self.addEventListener("install", (event) => {
  */
 self.addEventListener("activate", (event) => {
 	console.log("[Matrix Service Worker] Activating...");
+	console.log(`[Matrix Service Worker] Current cache: ${CACHE_NAME}`);
 	event.waitUntil(
 		caches
 			.keys()
 			.then((cacheNames) => {
+				console.log(`[Matrix Service Worker] Found ${cacheNames.length} cache(s):`, cacheNames);
+				const oldCaches = cacheNames.filter((cacheName) => cacheName !== CACHE_NAME);
+				if (oldCaches.length > 0) {
+					console.log(`[Matrix Service Worker] 🗑️  Cleaning up ${oldCaches.length} old cache(s)...`);
+				}
 				return Promise.all(
 					cacheNames.map((cacheName) => {
 						if (cacheName !== CACHE_NAME) {
-							console.log("[Matrix Service Worker] Deleting old cache:", cacheName);
+							console.log(`[Matrix Service Worker] 🗑️  Deleting old cache: ${cacheName}`);
 							return caches.delete(cacheName);
 						}
 					}),
 				);
 			})
 			.then(() => {
-				console.log("[Matrix Service Worker] Activation complete");
+				console.log(`[Matrix Service Worker] ✅ Activation complete - ${CACHE_NAME} is active`);
+				console.log("[Matrix Service Worker] 'I know kung fu.' - Ready to serve offline!");
 				return self.clients.claim();
 			}),
 	);
