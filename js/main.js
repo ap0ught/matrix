@@ -6,7 +6,7 @@ import ModeDisplay from "./mode-display.js";
 import GalleryManager, { buildGalleryURL } from "./gallery.js";
 import { formatModeName } from "./utils.js";
 import MultiMonitorManager from "./multi-monitor.js";
-import { setMultiMonitorManager, setMatrixConfig, setupFullscreenToggle } from "./fullscreen.js";
+import { setMultiMonitorManager, setMatrixConfig } from "./fullscreen.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -578,10 +578,9 @@ function setupSpotifyEventListeners() {
  */
 function startMatrix(matrixRenderer, canvas, config) {
 	// Start the Matrix renderer
+	// Note: setupFullscreenToggle is called within the renderer implementations
+	// (regl/main.js and webgpu/main.js) to avoid duplicate event listeners
 	matrixRenderer.default(canvas, config);
-
-	// Setup fullscreen toggle on the canvas
-	setupFullscreenToggle(canvas);
 }
 
 /**
