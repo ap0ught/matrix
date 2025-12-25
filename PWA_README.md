@@ -71,19 +71,43 @@ Defines the app's metadata:
 
 Implements the caching strategy:
 
-- Version: `matrix-v1` (increment when updating cache)
+- **Dynamic Version Management**: Cache name is automatically generated from `VERSION` file (e.g., `matrix-v1.0.0`)
 - Caches all static assets during installation
 - Serves from cache first, falls back to network
 - Cleans up old caches on activation
+- Provides detailed console logging for debugging
+
+### Version Output
+
+The application outputs version information to the browser console on startup:
+
+```
+⎡ MATRIX DIGITAL RAIN ⎦
+Version: 1.0.0
+Cache: matrix-v1.0.0
+"Wake up, Neo... The Matrix has you."
+
+PWA Cache Debug Commands:
+  caches.open("matrix-v1.0.0").then(c => c.keys()).then(k => console.log(k.map(r => r.url)))
+  caches.keys().then(names => names.forEach(name => caches.delete(name)))
+```
+
+This information helps with:
+- **Debugging cache issues** - Know which version is running
+- **Verifying updates** - Confirm new versions are deployed
+- **Cache management** - Easy access to debug commands
 
 ### Updating the Cache
 
 When updating the application:
 
-1. Change `CACHE_NAME` in `service-worker.js` (e.g., `matrix-v2`)
-2. Update `STATIC_ASSETS` array if adding/removing files
-3. The new service worker will install in parallel with the old one
-4. On activation, old caches are automatically deleted
+1. Update version number in `VERSION` file (e.g., `1.0.0` → `1.0.1`)
+2. Update `STATIC_ASSETS` array in `service-worker.js` if adding/removing files
+3. The service worker automatically reads `VERSION` file during installation
+4. Cache name is generated as `matrix-v{version}` (e.g., `matrix-v1.0.1`)
+5. On activation, old caches are automatically deleted
+
+**Note**: You no longer need to manually update `CACHE_NAME` in the service worker - it's dynamically generated from the `VERSION` file!
 
 ## Using as a Screensaver
 
@@ -145,23 +169,58 @@ caches.keys().then((names) => {
 
 ## Troubleshooting
 
+### Checking Version and Cache
+
+The application outputs detailed version information to the browser console on startup. Press **F12** to open DevTools and look for:
+
+```
+⎡ MATRIX DIGITAL RAIN ⎦
+Version: 1.0.0
+Cache: matrix-v1.0.0
+```
+
+This tells you:
+- **What version is running** - Compare with the `VERSION` file to confirm updates
+- **Which cache is active** - Look for this cache name in DevTools > Application > Cache Storage
+- **Debug commands** - Copy-paste commands to inspect or clear cache
+
 ### Service Worker Not Registering
 
 - Check browser console for errors
 - Ensure you're serving over HTTPS (or localhost for development)
-- Clear browser cache and try again
+- Look for "[Matrix Service Worker]" messages in console
+- Verify `service-worker.js` file is accessible
 
 ### Offline Mode Not Working
 
-- Verify service worker is active (DevTools > Application > Service Workers)
-- Check that all resources are being cached (DevTools > Application > Cache Storage)
-- Look for network errors when online
+- **Check version output** - Verify service worker registered successfully
+- **Inspect cache storage** - DevTools > Application > Cache Storage should show `matrix-v{version}`
+- **Verify service worker is active** - DevTools > Application > Service Workers should show "activated and is running"
+- **Check console logs** - Look for service worker installation/activation messages
+- **Test with network disabled** - DevTools > Network > Offline checkbox
 
 ### Cache Not Updating
 
-- Change `CACHE_NAME` in `service-worker.js`
-- Hard refresh the page (Ctrl+Shift+R or Cmd+Shift+R)
-- Unregister the old service worker and refresh
+1. **Check version number** - Look at console output to see current version
+2. **Update VERSION file** - Change version number (e.g., `1.0.0` → `1.0.1`)
+3. **Hard refresh** - Press Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
+4. **Verify new version** - Check console output shows new version
+5. **Check old cache cleanup** - Console should show "Deleting old cache: matrix-v{old-version}"
+
+### Manual Cache Clearing
+
+If automatic cache cleanup fails, use the debug commands from console output:
+
+```javascript
+// List all caches
+caches.keys().then(names => console.log(names));
+
+// Delete all caches (nuclear option)
+caches.keys().then(names => names.forEach(name => caches.delete(name)));
+
+// Then hard refresh the page
+location.reload(true);
+```
 
 ## References
 
