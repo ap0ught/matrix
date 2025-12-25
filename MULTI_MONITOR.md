@@ -29,7 +29,10 @@ The Matrix Digital Rain now supports fullscreen across multiple displays using t
 4. Check either:
    - **Independent Instances** - for varied effects across screens
    - **Uniform Config** - for synchronized effects across screens
-5. Double-click anywhere on the canvas to activate fullscreen across all displays
+5. Double-click anywhere on the canvas to activate multi-monitor mode
+   - The main window will attempt to enter fullscreen
+   - Additional windows will open on other displays
+   - **Important**: You must manually double-click each child window to enter fullscreen due to browser security restrictions
 
 #### Via URL Parameters
 
@@ -100,8 +103,9 @@ The implementation consists of:
    - Enumerates all connected displays
    - Opens a new window on each display with current URL
    - Each window initializes with its own random seed
-4. BroadcastChannel coordinates fullscreen requests
-5. Each window enters fullscreen independently
+4. Main window enters fullscreen
+5. Child windows log a message prompting user to double-click for fullscreen
+6. User must manually double-click each child window to activate fullscreen
 
 #### Uniform Mode Flow
 
@@ -113,8 +117,10 @@ The implementation consists of:
    - Serializes current config to URL parameters
    - Opens a new window on each display with serialized config
    - All windows start with identical settings
-4. BroadcastChannel coordinates fullscreen requests
-5. Natural drift occurs from random glyph timing
+4. Main window enters fullscreen
+5. Child windows log a message prompting user to double-click for fullscreen
+6. User must manually double-click each child window to activate fullscreen
+7. Natural drift occurs from random glyph timing
 
 #### Exit Flow
 
@@ -139,7 +145,7 @@ For uniform mode, the following config parameters are serialized to URL:
 The system uses `BroadcastChannel("matrix-multi-monitor")` for coordination:
 
 ```javascript
-// Request fullscreen on all windows
+// Notify child windows (they must manually enter fullscreen via double-click)
 { type: "requestFullscreen" }
 
 // Exit fullscreen on all windows
@@ -151,6 +157,8 @@ The system uses `BroadcastChannel("matrix-multi-monitor")` for coordination:
 // Window closed
 { type: "windowClosed", screenIndex: <number> }
 ```
+
+**Note**: Due to browser security restrictions, the `requestFullscreen` message cannot actually trigger fullscreen on child windows. It only serves as a notification. Users must manually double-click each window.
 
 ## Error Handling
 
@@ -171,14 +179,51 @@ The system gracefully handles various error conditions:
 - Shows alert: "Multi-monitor fullscreen requires at least 2 displays"
 - Falls back to standard single-screen fullscreen
 
-### Window Spawn Failure
-- Handles popup blocker interference
-- Logs failures to console
-- Continues with successfully opened windows
+### Fullscreen Request Failure
+- Fullscreen must be triggered by a direct user gesture (click, key press)
+- Programmatic fullscreen requests fail with "Permissions check failed"
+- Child windows cannot enter fullscreen automatically via message passing
+- Solution: Users must double-click each child window
+
+## Browser Security Restrictions
+
+Modern browsers enforce strict security policies around the Fullscreen API to prevent malicious websites from hijacking the user's screen. These restrictions affect multi-monitor fullscreen:
+
+### User Gesture Requirement
+
+The `requestFullscreen()` method can **only** be called in direct response to a user interaction event (click, key press, touch). The browser considers these as valid user gestures:
+
+- ✅ Mouse clicks (`click`, `dblclick`)
+- ✅ Keyboard events (`keydown`, `keyup`, `keypress`)
+- ✅ Touch events (`touchend`)
+
+The browser **does not** consider these as user gestures:
+
+- ❌ Timers (`setTimeout`, `setInterval`)
+- ❌ Promises resolving asynchronously
+- ❌ Message passing (`postMessage`, `BroadcastChannel`)
+- ❌ Page load events (`DOMContentLoaded`, `load`)
+- ❌ Network responses (`fetch`, `XMLHttpRequest`)
+
+### Impact on Multi-Monitor Fullscreen
+
+When the user double-clicks the main window:
+1. ✅ The main window can enter fullscreen (direct user gesture)
+2. ❌ Child windows cannot enter fullscreen via BroadcastChannel message (not a user gesture in that window)
+
+This is why users must manually double-click each child window to activate fullscreen on multiple displays.
+
+### Why This Matters
+
+This security restriction prevents malicious scenarios like:
+- Websites automatically entering fullscreen without user consent
+- Phishing attacks that mimic system dialogs in fullscreen mode
+- Unwanted fullscreen popups or advertisements
+- Cross-window fullscreen hijacking attempts
+
+The browser vendors (Chrome, Firefox, Safari) all enforce these restrictions to protect users.
 
 ## Backward Compatibility
-
-The feature is fully backward compatible:
 
 - **Single-monitor systems**: Work exactly as before
 - **Existing URL parameters**: All respected and functional
@@ -225,6 +270,7 @@ The feature is fully backward compatible:
 3. **Popup Blockers**: May interfere with window spawning (users must allow popups)
 4. **No Explicit Sync**: Uniform mode uses same initial config but doesn't maintain frame-perfect synchronization
 5. **Wake Lock**: Each window manages its own wake lock independently
+6. **Manual Fullscreen**: Due to browser security policies, each child window must be manually set to fullscreen by double-clicking it. Programmatic fullscreen requests across windows via BroadcastChannel are not allowed as they're not considered user gestures
 
 ## Future Enhancements
 

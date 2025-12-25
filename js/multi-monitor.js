@@ -302,32 +302,40 @@ export default class MultiMonitorManager {
 
 	/**
 	 * Request fullscreen on all spawned windows
+	 *
+	 * NOTE: Due to browser security restrictions, child windows cannot enter
+	 * fullscreen programmatically via BroadcastChannel. This method notifies
+	 * child windows, but users must manually double-click each window to enter
+	 * fullscreen mode.
 	 */
 	async requestFullscreenAll() {
-		// Use broadcast channel to tell all child windows to enter fullscreen
+		// Use broadcast channel to notify child windows
+		// They will log a message prompting the user to double-click
 		if (this.broadcastChannel) {
 			this.broadcastChannel.postMessage({ type: "requestFullscreen" });
 		}
 
-		// Child windows will handle their own fullscreen requests
+		// Note: Child windows cannot enter fullscreen automatically
 		return true;
 	}
 
 	/**
 	 * Handle fullscreen request from child window
 	 * This is called by child windows when they receive the broadcast
+	 *
+	 * NOTE: Due to browser security restrictions, fullscreen cannot be requested
+	 * programmatically via BroadcastChannel as it's not considered a user gesture.
+	 * Child windows must enter fullscreen manually (e.g., via double-click).
 	 */
 	static handleChildFullscreenRequest(canvas) {
 		const channel = new BroadcastChannel("matrix-multi-monitor");
 
 		channel.addEventListener("message", (event) => {
 			if (event.data.type === "requestFullscreen") {
-				// Request fullscreen on this child window
-				if (canvas.requestFullscreen) {
-					canvas.requestFullscreen().catch((err) => {
-						console.error("Fullscreen request failed:", err);
-					});
-				}
+				// Cannot request fullscreen programmatically via broadcast message
+				// as it's not considered a user gesture by the browser.
+				// Users should double-click each window to enter fullscreen.
+				console.log("Fullscreen request received. Double-click the window to enter fullscreen mode.");
 			} else if (event.data.type === "exitFullscreen") {
 				// Exit fullscreen on this child window
 				if (document.fullscreenElement) {
