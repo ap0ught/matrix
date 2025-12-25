@@ -183,16 +183,47 @@ export function setupFullscreenToggle(element) {
 				const success = await multiMonitorManager.spawnWindows(matrixConfig);
 
 				if (success) {
-					// Request fullscreen on all spawned windows
+					// Notify child windows (they must enter fullscreen manually via double-click)
 					await multiMonitorManager.requestFullscreenAll();
+					console.log("Multi-monitor windows opened. Double-click each window to enter fullscreen.");
+
+					// Request fullscreen on main window
+					try {
+						const result = requestFullscreen(element);
+						if (result && result.catch) {
+							result.catch((error) => {
+								console.error("Fullscreen request failed:", error.message);
+							});
+						}
+					} catch (error) {
+						console.error("Fullscreen request failed:", error.message);
+					}
 				} else {
 					// Fall back to single-screen fullscreen
 					console.warn("Multi-monitor fullscreen failed, falling back to single screen");
-					requestFullscreen(element);
+					try {
+						const result = requestFullscreen(element);
+						if (result && result.catch) {
+							result.catch((error) => {
+								console.error("Fullscreen request failed:", error.message);
+							});
+						}
+					} catch (error) {
+						console.error("Fullscreen request failed:", error.message);
+					}
 				}
 			} else {
 				// Normal single-screen fullscreen
-				requestFullscreen(element);
+				try {
+					const result = requestFullscreen(element);
+					if (result && result.catch) {
+						result.catch((error) => {
+							console.error("Fullscreen request failed:", error.message);
+						});
+					}
+				} catch (error) {
+					console.error("Fullscreen request failed:", error.message);
+				}
 			}
 		} else {
 			// In fullscreen, exit it
