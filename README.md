@@ -28,6 +28,7 @@ _Variants_
 - [A custom variant I call "Twilight"](https://ap0ught.github.io/matrix?version=twilight)
 - [Morpheus mode](https://ap0ught.github.io/matrix?version=morpheus)
 - [Bugs mode](https://ap0ught.github.io/matrix?version=bugs)
+- [Mathcode mode — mathematical symbols and arrows (∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ ඞ)](https://ap0ught.github.io/matrix?version=mathcode)
 - [Rainbow colors](https://ap0ught.github.io/matrix/?effect=rainbow)
 - [Light spectrum colors](https://ap0ught.github.io/matrix/?effect=spectrum)
 - [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
