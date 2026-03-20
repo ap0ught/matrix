@@ -184,7 +184,7 @@ const fonts = {
 		 * Mathematical symbols, Greek letters, set-theory notation, directional arrows,
 		 * stars, music notes, and more — the universal grammar of the Matrix's reality.
 		 *
-		 * Glyph order (8×8 grid, 42 glyphs):
+		 * Glyph order (8×8 grid, 42 active glyphs; remaining 22 cells are empty reserve):
 		 *   0:∑  1:∆  2:∇  3:∞  4:≠  5:≈  6:∈  7:∉
 		 *   8:←  9:→ 10:↑ 11:↓ 12:↔ 13:↕ 14:⇒ 15:⇔
 		 *  16:ඞ 17:∫ 18:π 19:τ 20:ψ 21:φ 22:Ω 23:Φ

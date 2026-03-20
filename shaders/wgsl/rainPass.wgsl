@@ -152,6 +152,13 @@ const TWO_PI : f32 = 6.28318530718;
 const SQRT_2 : f32 = 1.4142135623730951;
 const SQRT_5 : f32 = 2.23606797749979;
 
+// Flip flag encoding (stored in symbol state .b channel):
+//   0.0=none, 0.25=H-flip only, 0.5=V-flip only, 0.75=H+V flip
+// Thresholds use midpoints between each value to handle low-precision texture storage.
+const FLIP_H_MIN : f32 = 0.125;   // midpoint between 0.0 and 0.25
+const FLIP_HV_MIN : f32 = 0.375;  // midpoint between 0.25 and 0.5 (also: V-flip threshold)
+const FLIP_HH_MIN : f32 = 0.625;  // midpoint between 0.5 and 0.75
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -555,8 +562,8 @@ fn getSymbol(cellUV : vec2<f32>, index : i32, flipFlags : f32) -> vec2<f32> {
 	// Apply per-glyph random flip when enabled:
 	// flipFlags: 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip
 	if (bool(config.glyphRandomFlip)) {
-		var hFlip = select(1.0, -1.0, (flipFlags >= 0.2 && flipFlags < 0.45) || flipFlags >= 0.7);
-		var vFlip = select(1.0, -1.0, flipFlags >= 0.45);
+		var hFlip = select(1.0, -1.0, (flipFlags >= FLIP_H_MIN && flipFlags < FLIP_HV_MIN) || flipFlags >= FLIP_HH_MIN);
+		var vFlip = select(1.0, -1.0, flipFlags >= FLIP_HV_MIN);
 		uv *= vec2<f32>(hFlip, vFlip);
 	}
 	uv *= clamp(1.0 - config.glyphEdgeCrop, 0.0, 1.0);

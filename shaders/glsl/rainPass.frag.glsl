@@ -160,6 +160,14 @@ vec2 getSymbolUV(float index) {
 // Render a glyph using MSDF (Multi-channel Signed Distance Fields)
 // "There is no spoon" - the glyph doesn't move, only its illumination changes
 // Returns vec2: (base symbol alpha, glint symbol alpha)
+//
+// Flip flag encoding (stored in symbol state B channel):
+//   0.0  = no flip,  0.25 = H-flip only,  0.5 = V-flip only,  0.75 = H+V flip
+// Thresholds use midpoints between each value to handle low-precision texture storage.
+#define FLIP_H_MIN 0.125   // midpoint between 0.0 and 0.25
+#define FLIP_HV_MIN 0.375  // midpoint between 0.25 and 0.5 (also: V-flip threshold)
+#define FLIP_HH_MIN 0.625  // midpoint between 0.5 and 0.75
+
 vec2 getSymbol(vec2 uv, float index, float flipFlags) {
 	// Resolve UV to cropped position of glyph in MSDF texture
 	// First, map to individual glyph cell in the grid
@@ -172,8 +180,8 @@ vec2 getSymbol(vec2 uv, float index, float flipFlags) {
 	// Apply per-glyph random flip when enabled:
 	// flipFlags encodes: 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip
 	if (glyphRandomFlip) {
-		float hFlip = (flipFlags >= 0.2 && flipFlags < 0.45) || flipFlags >= 0.7 ? -1. : 1.;
-		float vFlip = flipFlags >= 0.45 ? -1. : 1.;
+		float hFlip = (flipFlags >= FLIP_H_MIN && flipFlags < FLIP_HV_MIN) || flipFlags >= FLIP_HH_MIN ? -1. : 1.;
+		float vFlip = flipFlags >= FLIP_HV_MIN ? -1. : 1.;
 		uv *= vec2(hFlip, vFlip);
 	}
 
