@@ -43,6 +43,9 @@ uniform bool isolateCursor, isolateGlint;
 // Glyph transformation matrix
 uniform mat2 glyphTransform;
 
+// Whether to apply per-glyph random flip from symbol state B channel
+uniform bool glyphRandomFlip;
+
 // Inputs from vertex shader
 varying vec2 vUV;
 varying vec4 vRaindrop, vSymbol, vEffect;
@@ -157,15 +160,23 @@ vec2 getSymbolUV(float index) {
 // Render a glyph using MSDF (Multi-channel Signed Distance Fields)
 // "There is no spoon" - the glyph doesn't move, only its illumination changes
 // Returns vec2: (base symbol alpha, glint symbol alpha)
-vec2 getSymbol(vec2 uv, float index) {
+vec2 getSymbol(vec2 uv, float index, float flipFlags) {
 	// Resolve UV to cropped position of glyph in MSDF texture
 	// First, map to individual glyph cell in the grid
 	uv = fract(uv * vec2(numColumns, numRows));
 	uv -= 0.5;
-	
-	// Apply any rotation or skew transformations
+
+	// Apply global rotation/flip transformation
 	uv = glyphTransform * uv;
-	
+
+	// Apply per-glyph random flip when enabled:
+	// flipFlags encodes: 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip
+	if (glyphRandomFlip) {
+		float hFlip = (flipFlags >= 0.2 && flipFlags < 0.45) || flipFlags >= 0.7 ? -1. : 1.;
+		float vFlip = flipFlags >= 0.45 ? -1. : 1.;
+		uv *= vec2(hFlip, vFlip);
+	}
+
 	// Crop edges if needed (for tighter glyph spacing)
 	uv *= clamp(1. - glyphEdgeCrop, 0., 1.);
 	uv += 0.5;
@@ -224,7 +235,7 @@ void main() {
 	);
 	
 	// Render the glyph using MSDF for crisp edges at any scale
-	vec2 symbol = getSymbol(uv, symbolData.r);
+	vec2 symbol = getSymbol(uv, symbolData.r, symbolData.b);
 
 	// Debug view shows the raw computational state (useful for development)
 	if (showDebugView) {

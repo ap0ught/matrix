@@ -9,7 +9,7 @@ precision highp float;
 // It writes each glyph's state to the channels of a data texture:
 // 		R: symbol index (which glyph to display)
 // 		G: age (time until next glyph change)
-// 		B: unused
+// 		B: flip flags — 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip (only when glyphRandomFlip)
 // 		A: unused
 
 #define PI 3.14159265359
@@ -30,6 +30,9 @@ uniform bool loops, showDebugView;
 // Number of available glyphs in the font
 uniform float glyphSequenceLength;
 
+// Whether to randomly flip individual glyphs horizontally and/or vertically
+uniform bool glyphRandomFlip;
+
 // ============================================================================
 // Helper functions for generating randomness, borrowed from elsewhere
 // ============================================================================
@@ -48,7 +51,8 @@ vec4 computeResult(float simTime, bool isFirstFrame, vec2 glyphPos, vec2 screenP
 
 	float previousSymbol = previous.r;
 	float previousAge = previous.g;
-	
+	float previousFlip = previous.b;
+
 	// Reset glyph on first frame or when raindrop resets
 	bool resetGlyph = isFirstFrame;
 	if (loops) {
@@ -58,24 +62,28 @@ vec4 computeResult(float simTime, bool isFirstFrame, vec2 glyphPos, vec2 screenP
 		// Start with random age and symbol
 		previousAge = randomFloat(screenPos + 0.5);
 		previousSymbol = floor(glyphSequenceLength * randomFloat(screenPos));
+		// Assign a random flip flag: 0=none, 1=H, 2=V, 3=H+V (encoded as 0.0/0.25/0.5/0.75)
+		previousFlip = glyphRandomFlip ? floor(4. * randomFloat(screenPos + 0.1)) * 0.25 : 0.;
 	}
-	
+
 	// Calculate how fast glyphs cycle
 	float cycleSpeed = animationSpeed * cycleSpeed;
 	float age = previousAge;
 	float symbol = previousSymbol;
-	
+	float flip = previousFlip;
+
 	// Only update on certain frames for performance (frame skip)
 	if (mod(tick, cycleFrameSkip) == 0.) {
 		age += cycleSpeed * cycleFrameSkip;
-		// When age exceeds 1.0, pick a new random glyph
+		// When age exceeds 1.0, pick a new random glyph (and a new random flip)
 		if (age >= 1.) {
 			symbol = floor(glyphSequenceLength * randomFloat(screenPos + simTime));
 			age = fract(age);
+			flip = glyphRandomFlip ? floor(4. * randomFloat(screenPos + simTime + 0.1)) * 0.25 : 0.;
 		}
 	}
 
-	vec4 result = vec4(symbol, age, 0., 0.);
+	vec4 result = vec4(symbol, age, flip, 0.);
 	return result;
 }
 
