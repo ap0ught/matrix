@@ -93,6 +93,10 @@ const DEFAULT_CHARS = FONT_CHARS.matrixcode;
 const FAVICON_BG_COLOR = "#00cc44";
 const FAVICON_FG_COLOR = "#000000";
 
+// Glyph rendering constants
+const GLYPH_SIZE_RATIO = 0.68; // Fraction of canvas height used for the glyph font size
+const GLYPH_VERTICAL_OFFSET = 2; // Pixel nudge to better centre glyphs within their metrics box
+
 /** @type {HTMLCanvasElement|null} */
 let faviconCanvas = null;
 
@@ -129,10 +133,10 @@ function generateFaviconDataURL(chars) {
 
 	// Draw the glyph in black — bold for visibility at small sizes
 	ctx.fillStyle = FAVICON_FG_COLOR;
-	ctx.font = `bold ${Math.floor(size * 0.68)}px sans-serif`;
+	ctx.font = `bold ${Math.floor(size * GLYPH_SIZE_RATIO)}px sans-serif`;
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
-	ctx.fillText(char, size / 2, size / 2 + 2);
+	ctx.fillText(char, size / 2, size / 2 + GLYPH_VERTICAL_OFFSET);
 
 	return canvas.toDataURL("image/png");
 }
