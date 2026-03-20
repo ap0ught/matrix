@@ -20,7 +20,9 @@ export default class ModeDisplay {
 
 		this.element = null;
 		this.isVisible = false;
+		this.isMouseOverPanel = false;
 		this.hideTimer = null;
+		this.mouseMoveHandler = null;
 		this.modeManager = null;
 		this.callbacks = {
 			toggleScreensaver: [],
@@ -42,6 +44,8 @@ export default class ModeDisplay {
 		this.setupEventListeners();
 
 		if (this.config.autoHide) {
+			// Show briefly on load so users know the panel exists, then auto-hide
+			this.show();
 			this.scheduleAutoHide();
 		}
 	}
@@ -194,16 +198,17 @@ export default class ModeDisplay {
 
 	/**
 	 * Get transform for hidden state
+	 * Uses 120% to ensure the panel is fully off-screen regardless of panel width
 	 */
 	getHiddenTransform() {
 		switch (this.config.position) {
 			case "top-left":
 			case "bottom-left":
-				return "translateX(-90%)";
+				return "translateX(-120%)";
 			case "top-right":
 			case "bottom-right":
 			default:
-				return "translateX(90%)";
+				return "translateX(120%)";
 		}
 	}
 
@@ -281,6 +286,7 @@ export default class ModeDisplay {
 
 		// Auto-hide on mouse leave
 		this.element.addEventListener("mouseleave", () => {
+			this.isMouseOverPanel = false;
 			if (this.config.autoHide && this.isVisible) {
 				this.scheduleAutoHide();
 			}
@@ -288,8 +294,26 @@ export default class ModeDisplay {
 
 		// Cancel auto-hide on mouse enter
 		this.element.addEventListener("mouseenter", () => {
+			this.isMouseOverPanel = true;
 			this.cancelAutoHide();
 		});
+
+		// Show panel on any mouse movement (re-triggers auto-hide timer when not hovering panel)
+		// Throttled to ~100ms to avoid excessive calls during continuous mouse movement
+		let mouseMoveThrottle = null;
+		this.mouseMoveHandler = () => {
+			if (mouseMoveThrottle) return;
+			mouseMoveThrottle = setTimeout(() => {
+				mouseMoveThrottle = null;
+				if (!this.isVisible) {
+					this.show();
+				}
+				if (this.config.autoHide && !this.isMouseOverPanel) {
+					this.scheduleAutoHide();
+				}
+			}, 100);
+		};
+		document.addEventListener("mousemove", this.mouseMoveHandler);
 
 		// Button hover effects
 		this.element.addEventListener("mouseover", (e) => {
@@ -472,6 +496,10 @@ export default class ModeDisplay {
 	 */
 	destroy() {
 		this.cancelAutoHide();
+		if (this.mouseMoveHandler) {
+			document.removeEventListener("mousemove", this.mouseMoveHandler);
+			this.mouseMoveHandler = null;
+		}
 		if (this.element && this.element.parentNode) {
 			this.element.parentNode.removeChild(this.element);
 		}
