@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
 	"js/main.js",
 	"js/config.js",
 	"js/utils.js",
+	"js/favicon.js",
 	"js/spotify.js",
 	"js/spotify-ui.js",
 	"js/mode-manager.js",

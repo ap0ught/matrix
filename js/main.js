@@ -7,6 +7,7 @@ import GalleryManager, { buildGalleryURL } from "./gallery.js";
 import { formatModeName } from "./utils.js";
 import MultiMonitorManager from "./multi-monitor.js";
 import { setMultiMonitorManager, setMatrixConfig } from "./fullscreen.js";
+import { updateFavicon } from "./favicon.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -323,8 +324,9 @@ function initializeModeManagement(config) {
 		modeManager.start();
 	}
 
-	// Update page title with initial mode
+	// Update page title and favicon with initial mode
 	updatePageTitle(config);
+	updateFavicon(config);
 }
 
 /**
@@ -416,8 +418,9 @@ function setupModeManagementEvents(config) {
 			const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
 			restartMatrixWithNewConfig(newConfig);
 
-			// Update page title
+			// Update page title and favicon
 			updatePageTitle(newConfig);
+			updateFavicon(newConfig);
 		}
 	});
 }
