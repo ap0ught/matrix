@@ -178,6 +178,23 @@ const fonts = {
 		glyphSequenceLength: 12,
 		glyphTextureGridSize: [4, 4],
 	},
+	mathcode: {
+		/*
+		 * Mathcode - The Language of the Simulation
+		 * Mathematical symbols, set-theory notation, and directional arrows —
+		 * the universal grammar underlying the Matrix's calculated reality.
+		 * Includes ∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ and the iconic ඞ crewmate symbol.
+		 *
+		 * Glyph order (5×4 grid, 17 glyphs):
+		 *   0:∑  1:∆  2:∇  3:∞  4:≠
+		 *   5:≈  6:∈  7:∉  8:←  9:→
+		 *  10:↑ 11:↓ 12:↔ 13:↕ 14:⇒
+		 *  15:⇔ 16:ඞ
+		 */
+		glyphMSDFURL: "assets/mathcode_msdf.png",
+		glyphSequenceLength: 17,
+		glyphTextureGridSize: [5, 4],
+	},
 };
 
 /*
@@ -573,6 +590,33 @@ export const versions = {
 		baseBrightness: -0.9,
 		baseContrast: 1.5,
 		raindropLength: 0.3,
+	},
+
+	mathcode: {
+		/*
+		 * Mathcode — The Universal Language
+		 * Mathematical notation, set theory, and directional arrows rendered
+		 * as cascading digital rain. The simulation speaks in equations:
+		 * ∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ and the ඞ that started it all.
+		 */
+		font: "mathcode",
+		numColumns: 50,
+		animationSpeed: 0.7,
+		cycleSpeed: 0.05,
+		fallSpeed: 0.6,
+		bloomStrength: 0.7,
+		bloomSize: 0.4,
+		baseBrightness: -0.5,
+		baseContrast: 1.2,
+		cursorColor: hsl(0.55, 1, 0.9),
+		cursorIntensity: 2,
+		palette: [
+			{ color: hsl(0.55, 0.9, 0.0), at: 0.0 },
+			{ color: hsl(0.55, 1.0, 0.4), at: 0.6 },
+			{ color: hsl(0.56, 1.0, 0.8), at: 0.9 },
+			{ color: hsl(0.57, 1.0, 1.0), at: 1.0 },
+		],
+		raindropLength: 1.2,
 	},
 };
 versions.throwback = versions.operator;
