@@ -606,6 +606,7 @@ export const versions = {
 		fallSpeed: 0.6,
 		bloomStrength: 0.7,
 		bloomSize: 0.4,
+		highPassThreshold: 0,
 		baseBrightness: -0.5,
 		baseContrast: 1.2,
 		cursorColor: hsl(0.55, 1, 0.9),
