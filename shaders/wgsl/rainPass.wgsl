@@ -57,6 +57,7 @@ struct Config {
 	loops : i32,                        // Seamless looping mode
 	skipIntro : i32,                    // Skip intro animation
 	highPassThreshold : f32,            // Bloom threshold
+	glyphRandomFlip : i32,              // Whether to randomly flip individual glyphs H/V
 };
 
 // The properties that change over time get their own buffer.
@@ -150,6 +151,13 @@ const PI : f32 = 3.14159265359;
 const TWO_PI : f32 = 6.28318530718;
 const SQRT_2 : f32 = 1.4142135623730951;
 const SQRT_5 : f32 = 2.23606797749979;
+
+// Flip flag encoding (stored in symbol state .b channel):
+//   0.0=none, 0.25=H-flip only, 0.5=V-flip only, 0.75=H+V flip
+// Thresholds use midpoints between each value to handle low-precision texture storage.
+const FLIP_H_MIN : f32 = 0.125;   // midpoint between 0.0 and 0.25
+const FLIP_HV_MIN : f32 = 0.375;  // midpoint between 0.25 and 0.5 (also: V-flip threshold)
+const FLIP_HH_MIN : f32 = 0.625;  // midpoint between 0.5 and 0.75
 
 // ============================================================================
 // Helper Functions
@@ -321,6 +329,7 @@ fn computeSymbol (simTime : f32, isFirstFrame : bool, glyphPos : vec2<f32>, scre
 
 	var previousSymbol = previous.r;
 	var previousAge = previous.g;
+	var previousFlip = previous.b;
 	var resetGlyph = isFirstFrame;
 	if (bool(config.loops)) {
 		resetGlyph = resetGlyph || raindrop.r < 0.0;
@@ -328,20 +337,32 @@ fn computeSymbol (simTime : f32, isFirstFrame : bool, glyphPos : vec2<f32>, scre
 	if (resetGlyph) {
 		previousAge = randomFloat(screenPos + 0.5);
 		previousSymbol = floor(config.glyphSequenceLength * randomFloat(screenPos));
+		// Assign a random flip flag: 0=none, 1=H, 2=V, 3=H+V (encoded as 0.0/0.25/0.5/0.75)
+		if (bool(config.glyphRandomFlip)) {
+			previousFlip = floor(4.0 * randomFloat(screenPos + 0.1)) * 0.25;
+		} else {
+			previousFlip = 0.0;
+		}
 	}
 	var cycleSpeed = config.animationSpeed * config.cycleSpeed;
 	var age = previousAge;
 	var symbol = previousSymbol;
+	var flip = previousFlip;
 	if (time.frames % config.cycleFrameSkip == 0) {
 		age += cycleSpeed * f32(config.cycleFrameSkip);
 		var advance = floor(age);
 		if (age > 1.0) {
 			symbol = floor(config.glyphSequenceLength * randomFloat(screenPos + simTime));
 			age = fract(age);
+			if (bool(config.glyphRandomFlip)) {
+				flip = floor(4.0 * randomFloat(screenPos + simTime + 0.1)) * 0.25;
+			} else {
+				flip = 0.0;
+			}
 		}
 	}
 
-	var result = vec4<f32>(symbol, age, 0.0, 0.0);
+	var result = vec4<f32>(symbol, age, flip, 0.0);
 	return result;
 }
 
@@ -541,11 +562,18 @@ fn getSymbolUV(symbol : i32) -> vec2<f32> {
 	return vec2<f32>(f32(symbolX), f32(symbolY));
 }
 
-fn getSymbol(cellUV : vec2<f32>, index : i32) -> vec2<f32> {
+fn getSymbol(cellUV : vec2<f32>, index : i32, flipFlags : f32) -> vec2<f32> {
 	// resolve UV to cropped position of glyph in MSDF texture
 	var uv = fract(cellUV * config.gridSize);
 	uv -= 0.5;
 	uv = config.glyphTransform * uv;
+	// Apply per-glyph random flip when enabled:
+	// flipFlags: 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip
+	if (bool(config.glyphRandomFlip)) {
+		var hFlip = select(1.0, -1.0, (flipFlags >= FLIP_H_MIN && flipFlags < FLIP_HV_MIN) || flipFlags >= FLIP_HH_MIN);
+		var vFlip = select(1.0, -1.0, flipFlags >= FLIP_HV_MIN);
+		uv *= vec2<f32>(hFlip, vFlip);
+	}
 	uv *= clamp(1.0 - config.glyphEdgeCrop, 0.0, 1.0);
 	uv += 0.5;
 	uv = (uv + getSymbolUV(index)) / vec2<f32>(config.glyphTextureGridSize);
@@ -600,7 +628,7 @@ fn getSymbol(cellUV : vec2<f32>, index : i32) -> vec2<f32> {
 		uv,
 		input.quadDepth
 	);
-	var symbol = getSymbol(uv, i32(cell.symbol.r));
+	var symbol = getSymbol(uv, i32(cell.symbol.r), cell.symbol.b);
 
 	var output : FragOutput;
 
