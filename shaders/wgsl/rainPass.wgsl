@@ -338,7 +338,11 @@ fn computeSymbol (simTime : f32, isFirstFrame : bool, glyphPos : vec2<f32>, scre
 		previousAge = randomFloat(screenPos + 0.5);
 		previousSymbol = floor(config.glyphSequenceLength * randomFloat(screenPos));
 		// Assign a random flip flag: 0=none, 1=H, 2=V, 3=H+V (encoded as 0.0/0.25/0.5/0.75)
-		previousFlip = select(0.0, floor(4.0 * randomFloat(screenPos + 0.1)) * 0.25, bool(config.glyphRandomFlip));
+		if (bool(config.glyphRandomFlip)) {
+			previousFlip = floor(4.0 * randomFloat(screenPos + 0.1)) * 0.25;
+		} else {
+			previousFlip = 0.0;
+		}
 	}
 	var cycleSpeed = config.animationSpeed * config.cycleSpeed;
 	var age = previousAge;
@@ -350,7 +354,11 @@ fn computeSymbol (simTime : f32, isFirstFrame : bool, glyphPos : vec2<f32>, scre
 		if (age > 1.0) {
 			symbol = floor(config.glyphSequenceLength * randomFloat(screenPos + simTime));
 			age = fract(age);
-			flip = select(0.0, floor(4.0 * randomFloat(screenPos + simTime + 0.1)) * 0.25, bool(config.glyphRandomFlip));
+			if (bool(config.glyphRandomFlip)) {
+				flip = floor(4.0 * randomFloat(screenPos + simTime + 0.1)) * 0.25;
+			} else {
+				flip = 0.0;
+			}
 		}
 	}
 
