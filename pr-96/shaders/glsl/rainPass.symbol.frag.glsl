@@ -67,14 +67,14 @@ vec4 computeResult(float simTime, bool isFirstFrame, vec2 glyphPos, vec2 screenP
 	}
 
 	// Calculate how fast glyphs cycle
-	float cycleSpeed = animationSpeed * cycleSpeed;
+	float glyphCycleSpeed = animationSpeed * cycleSpeed;
 	float age = previousAge;
 	float symbol = previousSymbol;
 	float flip = previousFlip;
 
 	// Only update on certain frames for performance (frame skip)
 	if (mod(tick, cycleFrameSkip) == 0.) {
-		age += cycleSpeed * cycleFrameSkip;
+		age += glyphCycleSpeed * cycleFrameSkip;
 		// When age exceeds 1.0, pick a new random glyph (and a new random flip)
 		if (age >= 1.) {
 			symbol = floor(glyphSequenceLength * randomFloat(screenPos + simTime));
