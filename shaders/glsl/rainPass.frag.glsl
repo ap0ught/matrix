@@ -43,6 +43,9 @@ uniform bool isolateCursor, isolateGlint;
 // Glyph transformation matrix
 uniform mat2 glyphTransform;
 
+// Whether to apply per-glyph random flip from symbol state B channel
+uniform bool glyphRandomFlip;
+
 // Inputs from vertex shader
 varying vec2 vUV;
 varying vec4 vRaindrop, vSymbol, vEffect;
@@ -157,15 +160,31 @@ vec2 getSymbolUV(float index) {
 // Render a glyph using MSDF (Multi-channel Signed Distance Fields)
 // "There is no spoon" - the glyph doesn't move, only its illumination changes
 // Returns vec2: (base symbol alpha, glint symbol alpha)
-vec2 getSymbol(vec2 uv, float index) {
+//
+// Flip flag encoding (stored in symbol state B channel):
+//   0.0  = no flip,  0.25 = H-flip only,  0.5 = V-flip only,  0.75 = H+V flip
+// Thresholds use midpoints between each value to handle low-precision texture storage.
+#define FLIP_H_MIN 0.125   // midpoint between 0.0 and 0.25
+#define FLIP_HV_MIN 0.375  // midpoint between 0.25 and 0.5 (also: V-flip threshold)
+#define FLIP_HH_MIN 0.625  // midpoint between 0.5 and 0.75
+
+vec2 getSymbol(vec2 uv, float index, float flipFlags) {
 	// Resolve UV to cropped position of glyph in MSDF texture
 	// First, map to individual glyph cell in the grid
 	uv = fract(uv * vec2(numColumns, numRows));
 	uv -= 0.5;
-	
-	// Apply any rotation or skew transformations
+
+	// Apply global rotation/flip transformation
 	uv = glyphTransform * uv;
-	
+
+	// Apply per-glyph random flip when enabled:
+	// flipFlags encodes: 0.0=none, 0.25=H-flip, 0.5=V-flip, 0.75=H+V flip
+	if (glyphRandomFlip) {
+		float hFlip = (flipFlags >= FLIP_H_MIN && flipFlags < FLIP_HV_MIN) || flipFlags >= FLIP_HH_MIN ? -1. : 1.;
+		float vFlip = flipFlags >= FLIP_HV_MIN ? -1. : 1.;
+		uv *= vec2(hFlip, vFlip);
+	}
+
 	// Crop edges if needed (for tighter glyph spacing)
 	uv *= clamp(1. - glyphEdgeCrop, 0., 1.);
 	uv += 0.5;
@@ -224,7 +243,7 @@ void main() {
 	);
 	
 	// Render the glyph using MSDF for crisp edges at any scale
-	vec2 symbol = getSymbol(uv, symbolData.r);
+	vec2 symbol = getSymbol(uv, symbolData.r, symbolData.b);
 
 	// Debug view shows the raw computational state (useful for development)
 	if (showDebugView) {
