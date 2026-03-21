@@ -98,7 +98,7 @@ export default ({ regl, config, lkg }) => {
 	const rainPassSymbol = loadText("shaders/glsl/rainPass.symbol.frag.glsl");
 	const symbolUniforms = {
 		...commonUniforms,
-		...extractEntries(config, ["cycleSpeed", "cycleFrameSkip", "loops"]),
+		...extractEntries(config, ["cycleSpeed", "cycleFrameSkip", "loops", "glyphRandomFlip"]),
 	};
 	const symbol = regl({
 		frag: regl.prop("frag"),
@@ -164,6 +164,7 @@ export default ({ regl, config, lkg }) => {
 			"isolateGlint",
 			"glyphEdgeCrop",
 			"isPolar",
+			"glyphRandomFlip",
 		]),
 		glyphTransform,
 		density,
