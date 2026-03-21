@@ -2,7 +2,7 @@
  * Dynamic Favicon Generator for Matrix Digital Rain
  *
  * Generates a favicon by drawing a random glyph from the current mode's character set
- * onto a green background with black strokes — styled after the Matrix digital rain.
+ * onto a green background with black-stroked fill — styled after the Matrix digital rain.
  *
  * "You take the blue pill — the story ends. You take the red pill — and the favicon changes."
  */
@@ -128,14 +128,20 @@ function generateFaviconDataURL(chars) {
 	ctx.fillStyle = FAVICON_BG_COLOR;
 	ctx.fillRect(0, 0, size, size);
 
-	// Pick a random glyph
-	const char = chars[Math.floor(Math.random() * chars.length)];
+	// Ensure we always have a non-empty character set to choose from
+	const effectiveChars = Array.isArray(chars) && chars.length > 0 ? chars : DEFAULT_CHARS;
 
-	// Draw the glyph in black — bold for visibility at small sizes
-	ctx.fillStyle = FAVICON_FG_COLOR;
+	// Pick a random glyph
+	const char = effectiveChars[Math.floor(Math.random() * effectiveChars.length)];
+
+	// Draw the glyph with a black stroke and fill — matches the Matrix "black strokes on green" aesthetic
 	ctx.font = `bold ${Math.floor(size * GLYPH_SIZE_RATIO)}px sans-serif`;
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
+	ctx.strokeStyle = FAVICON_FG_COLOR;
+	ctx.lineWidth = 2;
+	ctx.strokeText(char, size / 2, size / 2 + GLYPH_VERTICAL_OFFSET);
+	ctx.fillStyle = FAVICON_FG_COLOR;
 	ctx.fillText(char, size / 2, size / 2 + GLYPH_VERTICAL_OFFSET);
 
 	return canvas.toDataURL("image/png");
@@ -156,15 +162,15 @@ export function updateFavicon(config) {
 
 	const dataURL = generateFaviconDataURL(chars);
 
-	// Update every <link rel="icon"> element in the document
-	const links = document.querySelectorAll('link[rel="icon"]');
+	// Update every <link> whose rel token list contains "icon"
+	const links = document.querySelectorAll('link[rel~="icon"]');
 	links.forEach((link) => {
 		link.href = dataURL;
 	});
 
-	// Also update apple-touch-icon if present
-	const appleLink = document.querySelector('link[rel="apple-touch-icon"]');
-	if (appleLink) {
+	// Also update all apple-touch-icon links if present (may be multiple sizes/variants)
+	const appleLinks = document.querySelectorAll('link[rel~="apple-touch-icon"]');
+	appleLinks.forEach((appleLink) => {
 		appleLink.href = dataURL;
-	}
+	});
 }
