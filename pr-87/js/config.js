@@ -178,6 +178,24 @@ const fonts = {
 		glyphSequenceLength: 12,
 		glyphTextureGridSize: [4, 4],
 	},
+	mathcode: {
+		/*
+		 * Mathcode - The Language of the Simulation
+		 * Mathematical symbols, Greek letters, set-theory notation, directional arrows,
+		 * stars, music notes, and more — the universal grammar of the Matrix's reality.
+		 *
+		 * Glyph order (7×6 grid, 42 glyphs):
+		 *   0:∑  1:∆  2:∇  3:∞  4:≠  5:≈  6:∈
+		 *   7:∉  8:←  9:→ 10:↑ 11:↓ 12:↔ 13:↕
+		 *  14:⇒ 15:⇔ 16:ඞ 17:∫ 18:π 19:τ 20:ψ
+		 *  21:φ 22:Ω 23:Φ 24:ε 25:β 26:α 27:Σ
+		 *  28:♬ 29:☆ 30:✮ 31:★ 32:✯ 33:✫ 34:₊
+		 *  35:˚ 36:˙ 37:⁂ 38:◇ 39:⋄ 40:⁺ 41:𝝿
+		 */
+		glyphMSDFURL: "assets/mathcode_msdf.png",
+		glyphSequenceLength: 42,
+		glyphTextureGridSize: [7, 6],
+	},
 };
 
 /*
@@ -270,6 +288,7 @@ const defaults = {
 	glyphVerticalSpacing: 1, // The ratio of the vertical distance between glyphs to their height
 	glyphFlip: false, // Whether to horizontally reflect the glyphs
 	glyphRotation: 0, // An angle to rotate the glyphs. Currently limited to 90° increments
+	glyphRandomFlip: false, // Whether to randomly flip individual glyphs horizontally and vertically
 	hasThunder: false, // An effect that adds dramatic lightning flashes
 	isPolar: false, // Whether the glyphs arc across the screen or sit in a standard grid
 	rippleTypeName: null, // The variety of the ripple effect
@@ -574,6 +593,36 @@ export const versions = {
 		baseContrast: 1.5,
 		raindropLength: 0.3,
 	},
+
+	mathcode: {
+		/*
+		 * Mathcode — The Universal Language
+		 * Mathematical notation, Greek letters, set theory, directional arrows, stars, and
+		 * music symbols rendered as cascading digital rain. The simulation speaks in equations:
+		 * ∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ ∫πτψφΩΦεβαΣ ♬☆✮★✯✫ ₊˚˙⁂◇⋄⁺𝝿 and the ඞ that started it all.
+		 * Symbols randomly flip horizontally and vertically for added visual variety.
+		 */
+		font: "mathcode",
+		numColumns: 50,
+		animationSpeed: 0.7,
+		cycleSpeed: 0.05,
+		fallSpeed: 0.6,
+		bloomStrength: 0.7,
+		bloomSize: 0.4,
+		highPassThreshold: 0,
+		baseBrightness: -0.5,
+		baseContrast: 1.2,
+		cursorColor: hsl(0.55, 1, 0.9),
+		cursorIntensity: 2,
+		palette: [
+			{ color: hsl(0.55, 0.9, 0.0), at: 0.0 },
+			{ color: hsl(0.55, 1.0, 0.4), at: 0.6 },
+			{ color: hsl(0.56, 1.0, 0.8), at: 0.9 },
+			{ color: hsl(0.57, 1.0, 1.0), at: 1.0 },
+		],
+		raindropLength: 1.2,
+		glyphRandomFlip: true,
+	},
 };
 versions.throwback = versions.operator;
 versions.updated = versions.resurrections;
@@ -682,6 +731,7 @@ const paramMapping = {
 
 	volumetric: { key: "volumetric", parser: isTrue },
 	glyphFlip: { key: "glyphFlip", parser: isTrue },
+	glyphRandomFlip: { key: "glyphRandomFlip", parser: isTrue },
 	glyphRotation: {
 		key: "glyphRotation",
 		parser: (s) => nullNaN(range(parseFloat(s), 0, Infinity)),
