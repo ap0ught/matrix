@@ -91,6 +91,7 @@ const STATIC_ASSETS = [
 	"assets/coptic_msdf.png",
 	"assets/neomatrixology_msdf.png",
 	"assets/mathcode_msdf.png",
+	"assets/alphabet_msdf.png",
 	"assets/huberfish_a_msdf.png",
 	"assets/huberfish_d_msdf.png",
 	"assets/gtarg_tenretniolleh_msdf.png",

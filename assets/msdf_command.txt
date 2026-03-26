@@ -1,4 +1,5 @@
-./out/msdfgen msdf -svg ./svg\ sources/texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/matrixcode_msdf.png
-./out/msdfgen msdf -svg ./svg\ sources/gothic_texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/gothic_msdf.png
-./out/msdfgen msdf -svg ./svg\ sources/coptic_texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/coptic_msdf.png
-./out/msdfgen msdf -svg ./svg\ sources/mathcode_texture.svg -size 512 512 -pxrange 4 -o ./assets/mathcode_msdf.png
+1. ./out/msdfgen msdf -svg ./svg\ sources/texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/matrixcode_msdf.png
+2. ./out/msdfgen msdf -svg ./svg\ sources/gothic_texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/gothic_msdf.png
+3. ./out/msdfgen msdf -svg ./svg\ sources/coptic_texture_simplified.svg -size 512 512 -pxrange 4 -o ./assets/coptic_msdf.png
+4. ./out/msdfgen msdf -svg ./svg\ sources/mathcode_texture.svg -size 512 512 -pxrange 4 -o ./assets/mathcode_msdf.png
+5. ./out/msdfgen msdf -svg ./svg\ sources/alphabet_texture.svg -size 512 512 -pxrange 4 -o ./assets/alphabet_msdf.png
