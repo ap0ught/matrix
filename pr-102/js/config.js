@@ -648,8 +648,8 @@ export const versions = {
 		/*
 		 * Alphabet — The Human Language
 		 * The full Latin alphabet in uppercase (A–Z) and lowercase (a–z) cascading as
-		 * digital rain. Letters randomly flip and rotate as they fall, transforming the
-		 * language of humanity into the code of the simulation.
+		 * digital rain. Letters randomly flip horizontally and vertically as they fall,
+		 * transforming the language of humanity into the code of the simulation.
 		 * "The Matrix is everywhere. It is all around us."
 		 */
 		font: "alphabet",
