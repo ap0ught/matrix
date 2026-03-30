@@ -54,8 +54,8 @@ This project uses the following dependencies:
 
 | Dependency | Purpose | Location | GitHub | Activity |
 |---|---|---|---|---|
-| **REGL** | WebGL wrapper for rendering | Bundled locally in `/lib/` | [regl-project/regl](https://github.com/regl-project/regl) | Stable with ~5,500 ⭐ and over 1M npm downloads/month. Core feature development has slowed but the library is mature and production-ready. Receives occasional maintenance updates. |
-| **gl-matrix** | High-performance matrix and vector math | Bundled locally in `/lib/` | [toji/gl-matrix](https://github.com/toji/gl-matrix) | Actively maintained with ~5,700 ⭐. Nearly 200,000 GitHub projects depend on it. Regular releases through 2024–2025 (latest: v3.4.4). The bundled version is v3.4.0. |
-| **@playwright/test** | End-to-end browser testing (dev only) | npm `devDependency` — **not included in production builds** | [microsoft/playwright](https://github.com/microsoft/playwright) | Very actively maintained by Microsoft with ~85,000 ⭐, 16,500+ commits, and frequent releases. Current pinned version: `^1.58.2`. |
+| **REGL** | WebGL wrapper for rendering | Bundled locally in `/lib/` | [regl-project/regl](https://github.com/regl-project/regl) | Mature, widely used WebGL wrapper. Core feature development has largely stabilized, but it remains production-ready and receives occasional maintenance updates. |
+| **gl-matrix** | High-performance matrix and vector math | Bundled locally in `/lib/` | [toji/gl-matrix](https://github.com/toji/gl-matrix) | Actively maintained and widely adopted for WebGL/WebGPU math. Receives regular releases. The bundled version tracks a stable 3.x release of the library. |
+| **@playwright/test** | End-to-end browser testing (dev only) | npm `devDependency` — **not included in production builds** | [microsoft/playwright](https://github.com/microsoft/playwright) | Very actively maintained by Microsoft with frequent releases and an extensive user base. This project pins a recent stable major version in its devDependencies. |
 
 Dependencies are automatically monitored by [Dependabot](.github/dependabot.yml) for security updates.
