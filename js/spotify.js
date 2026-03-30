@@ -61,7 +61,13 @@ export default class SpotifyIntegration {
 		}
 
 		// Generate and store a random state value to prevent CSRF attacks
-		const state = this.generateState();
+		let state;
+		try {
+			state = this.generateState();
+		} catch (e) {
+			this.emit("error", e.message);
+			return;
+		}
 		sessionStorage.setItem("spotify_oauth_state", state);
 
 		const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -114,6 +120,11 @@ export default class SpotifyIntegration {
 			} else {
 				console.log("Spotify authentication successful");
 			}
+		} else if (code) {
+			// Code present but state is missing — reject and clean up to avoid auth code leaking in URL
+			window.history.replaceState({}, document.title, window.location.pathname);
+			sessionStorage.removeItem("spotify_oauth_state");
+			this.emit("error", "Spotify OAuth state parameter missing - possible CSRF attack");
 		}
 	}
 	/**
