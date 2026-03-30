@@ -40,6 +40,18 @@ export default class SpotifyIntegration {
 		await this.handleOAuthCallback();
 	}
 	/**
+	 * Generate a cryptographically random state value for OAuth CSRF protection
+	 */
+	generateState() {
+		if (!window.crypto || !window.crypto.getRandomValues) {
+			throw new Error("Secure random generation not available - HTTPS is required for Spotify authentication");
+		}
+		const array = new Uint8Array(16);
+		crypto.getRandomValues(array);
+		return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+	}
+
+	/**
 	 * Start the OAuth authentication flow
 	 */
 	authenticate() {
@@ -48,12 +60,16 @@ export default class SpotifyIntegration {
 			return;
 		}
 
+		// Generate and store a random state value to prevent CSRF attacks
+		const state = this.generateState();
+		sessionStorage.setItem("spotify_oauth_state", state);
+
 		const authUrl = new URL("https://accounts.spotify.com/authorize");
 		authUrl.searchParams.set("client_id", this.clientId);
 		authUrl.searchParams.set("response_type", "code");
 		authUrl.searchParams.set("redirect_uri", this.redirectUri);
 		authUrl.searchParams.set("scope", this.scopes);
-		authUrl.searchParams.set("state", "matrix-spotify-auth");
+		authUrl.searchParams.set("state", state);
 
 		// Use direct redirect instead of popup for better compatibility
 		window.location.href = authUrl.toString();
@@ -76,12 +92,21 @@ export default class SpotifyIntegration {
 			return;
 		}
 
-		if (code && state === "matrix-spotify-auth") {
+		if (code && state) {
+			// Clean up URL immediately to remove auth parameters from browser history
+			window.history.replaceState({}, document.title, window.location.pathname);
+
+			// Verify state parameter to prevent CSRF attacks
+			const expectedState = sessionStorage.getItem("spotify_oauth_state");
+			sessionStorage.removeItem("spotify_oauth_state");
+
+			if (!expectedState || state !== expectedState) {
+				this.emit("error", "Spotify OAuth state mismatch - possible CSRF attack");
+				return;
+			}
+
 			console.log("Processing Spotify OAuth callback with code:", code.substring(0, 20) + "...");
 			const result = await this.exchangeCodeForTokens(code);
-
-			// Clean up URL
-			window.history.replaceState({}, document.title, window.location.pathname);
 
 			if (result.error) {
 				console.error("Token exchange error:", result.error);
