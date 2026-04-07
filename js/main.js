@@ -400,7 +400,7 @@ function setupModeManagementEvents(config) {
 	});
 
 	// Mode manager events
-	modeManager.on("modeChange", (modeChangeData) => {
+	modeManager.on("modeChange", async (modeChangeData) => {
 		// Update the URL parameters and reload the configuration
 		const urlParams = new URLSearchParams(window.location.search);
 		urlParams.set("version", modeChangeData.version);
@@ -416,7 +416,7 @@ function setupModeManagementEvents(config) {
 
 			// Update the configuration and restart the renderer
 			const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
-			restartMatrixWithNewConfig(newConfig);
+			await restartMatrixWithNewConfig(newConfig);
 
 			// Update page title and favicon
 			updatePageTitle(newConfig);
