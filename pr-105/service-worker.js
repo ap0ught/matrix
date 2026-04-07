@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-pr-105-161-39b1d76";
+const VER = "matrix-pwa-pr-105-162-781b1db";
 
 // Cache version will be loaded from VERSION file during installation
 let CACHE_NAME = `matrix-v1-${VER}`; // Default fallback
