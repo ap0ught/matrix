@@ -17,6 +17,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy-main-site:
     name: Deploy Main Site to gh-pages
@@ -106,7 +109,7 @@ jobs:
     # Browsers only install a new SW when service-worker.js bytes change; VERSION alone is not enough.
     - name: Stamp PWA deploy build (new cache + SW update each deploy)
       run: |
-        VER="menace-pwa-${GITHUB_RUN_NUMBER}-$(echo "$GITHUB_SHA" | cut -c1-7)"
+        VER="matrix-pwa-${GITHUB_RUN_NUMBER}-$(echo "$GITHUB_SHA" | cut -c1-7)"
         sed -i "s|const VER = \"local\"|const VER = \"${VER}\"|" gh-pages/service-worker.js
         echo "VER=${VER}"
     

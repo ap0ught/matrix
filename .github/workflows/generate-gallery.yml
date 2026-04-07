@@ -9,6 +9,9 @@ on:
         default: 'true'
         type: boolean
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   generate-screenshots:
     runs-on: ubuntu-latest
