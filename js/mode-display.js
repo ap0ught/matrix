@@ -6,6 +6,7 @@
  */
 
 import { getAvailableModes, getAvailableEffects } from "./config.js";
+import { loadFavoriteVersions, toggleFavoriteVersion } from "./mode-favorites.js";
 import { formatModeName } from "./utils.js";
 
 export default class ModeDisplay {
@@ -17,6 +18,9 @@ export default class ModeDisplay {
 			showControls: true,
 			...config,
 		};
+
+		/** @type {string[]} */
+		this.favoriteVersions = [...(this.config.favoriteVersions ?? loadFavoriteVersions(getAvailableModes()))];
 
 		this.element = null;
 		this.isVisible = false;
@@ -57,6 +61,7 @@ export default class ModeDisplay {
 	 */
 	setModeManager(modeManager) {
 		this.modeManager = modeManager;
+		this.modeManager.updateConfig({ favoriteVersions: [...this.favoriteVersions] });
 		this.updateModeInfo();
 
 		// Listen for mode changes
@@ -73,14 +78,14 @@ export default class ModeDisplay {
 	 * Create the UI element
 	 */
 	createElement() {
+		this.injectModeDisplayStyles();
 		this.element = document.createElement("div");
 		this.element.className = "mode-display";
 		this.element.style.cssText = this.getBaseStyles();
 
-		const availableVersions = getAvailableModes();
 		const availableEffects = getAvailableEffects();
 
-		const versionOptions = availableVersions.map((v) => `<option value="${v}">${formatModeName(v)}</option>`).join("");
+		const versionOptions = this.buildVersionSelectInnerHtml();
 		const effectOptions = availableEffects.map((e) => `<option value="${e}">${formatModeName(e)}</option>`).join("");
 
 		this.element.innerHTML = `
@@ -91,14 +96,17 @@ export default class ModeDisplay {
 			<div class="mode-content" style="display: none;">
 				<div class="current-mode" style="margin-bottom: 10px; padding: 5px 0;">
 					<div class="mode-version" style="font-weight: bold; margin-bottom: 5px;">
-						<label style="display: block; font-size: 10px; margin-bottom: 2px;">Version:</label>
-						<select class="version-select" style="width: 100%; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 10px; padding: 3px; border-radius: 3px;">
+						<div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
+							<label style="display: block; font-size: 10px; margin: 0; flex: 1;">Version:</label>
+							<button type="button" class="version-favorite-btn" title="Add to favorites" aria-label="Toggle favorite for selected version" aria-pressed="false">☆</button>
+						</div>
+						<select class="version-select matrix-select" style="width: 100%; font-size: 10px; padding: 3px;">
 							${versionOptions}
 						</select>
 					</div>
 					<div class="mode-effect" style="margin-bottom: 5px;">
 						<label style="display: block; font-size: 10px; margin-bottom: 2px;">Effect:</label>
-						<select class="effect-select" style="width: 100%; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 10px; padding: 3px; border-radius: 3px;">
+						<select class="effect-select matrix-select" style="width: 100%; font-size: 10px; padding: 3px;">
 							${effectOptions}
 						</select>
 					</div>
@@ -112,7 +120,7 @@ export default class ModeDisplay {
 					<div class="auto-switch-interval" style="margin-left: 20px; margin-bottom: 5px; font-size: 10px;">
 						<label style="display: block;">
 							Interval:
-							<select class="interval-select" style="margin-left: 5px; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #00ff00; font-family: monospace; font-size: 9px; padding: 2px;">
+							<select class="interval-select matrix-select" style="margin-left: 5px; font-size: 9px; padding: 2px;">
 								<option value="600000">10 min</option>
 								<option value="1200000">20 min</option>
 								<option value="1800000">30 min</option>
@@ -149,6 +157,97 @@ export default class ModeDisplay {
 		`;
 
 		document.body.appendChild(this.element);
+		this.updateFavoriteButton();
+	}
+
+	/**
+	 * Dark dropdown styling so native option lists are readable (esp. Windows/Chrome).
+	 */
+	injectModeDisplayStyles() {
+		if (document.getElementById("mode-display-styles")) return;
+		const style = document.createElement("style");
+		style.id = "mode-display-styles";
+		style.textContent = `
+			.mode-display select.matrix-select {
+				color-scheme: dark;
+				background-color: #0a140a;
+				color: #b6f7b6;
+				border: 1px solid rgba(0, 255, 0, 0.45);
+				font-family: monospace;
+				border-radius: 3px;
+			}
+			.mode-display select.matrix-select option {
+				background-color: #050805;
+				color: #d4ffd4;
+			}
+			.mode-display select.matrix-select option:checked,
+			.mode-display select.matrix-select option:hover {
+				background-color: #145a20;
+				color: #ffffff;
+			}
+			.mode-display .version-favorite-btn {
+				flex-shrink: 0;
+				min-width: 28px;
+				padding: 2px 6px;
+				font-size: 14px;
+				line-height: 1;
+				cursor: pointer;
+				background: rgba(0, 255, 0, 0.12);
+				border: 1px solid rgba(0, 255, 0, 0.35);
+				border-radius: 3px;
+				color: #9ff59f;
+			}
+			.mode-display .version-favorite-btn:hover {
+				background: rgba(0, 255, 0, 0.22);
+			}
+		`;
+		document.head.appendChild(style);
+	}
+
+	/**
+	 * Build version <select> HTML: favorites group first, then remaining modes.
+	 */
+	buildVersionSelectInnerHtml() {
+		const availableVersions = getAvailableModes();
+		const favSet = new Set(this.favoriteVersions);
+		const favList = this.favoriteVersions.filter((f) => availableVersions.includes(f));
+		const rest = availableVersions.filter((v) => !favSet.has(v));
+		let html = "";
+		if (favList.length > 0) {
+			html += `<optgroup label="★ Favorites">`;
+			for (const v of favList) {
+				html += `<option value="${v}">${formatModeName(v)}</option>`;
+			}
+			html += `</optgroup>`;
+		}
+		html += `<optgroup label="All modes">`;
+		for (const v of rest) {
+			html += `<option value="${v}">${formatModeName(v)}</option>`;
+		}
+		html += `</optgroup>`;
+		return html;
+	}
+
+	rebuildVersionSelect() {
+		const versionSelect = this.element.querySelector(".version-select");
+		if (!versionSelect) return;
+		const current = versionSelect.value;
+		versionSelect.innerHTML = this.buildVersionSelectInnerHtml();
+		versionSelect.value = current;
+		if (versionSelect.value !== current && versionSelect.options.length) {
+			versionSelect.selectedIndex = 0;
+		}
+	}
+
+	updateFavoriteButton() {
+		const btn = this.element?.querySelector(".version-favorite-btn");
+		const versionSelect = this.element?.querySelector(".version-select");
+		if (!btn || !versionSelect) return;
+		const v = versionSelect.value;
+		const isFav = this.favoriteVersions.includes(v);
+		btn.textContent = isFav ? "★" : "☆";
+		btn.setAttribute("aria-pressed", isFav ? "true" : "false");
+		btn.title = isFav ? "Remove from favorites" : "Add to favorites";
 	}
 
 	/**
@@ -227,7 +326,21 @@ export default class ModeDisplay {
 		// Version dropdown change
 		const versionSelect = this.element.querySelector(".version-select");
 		versionSelect.addEventListener("change", (e) => {
+			this.updateFavoriteButton();
 			this.emit("versionChange", e.target.value);
+		});
+
+		const favoriteBtn = this.element.querySelector(".version-favorite-btn");
+		favoriteBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			const v = versionSelect.value;
+			this.favoriteVersions = toggleFavoriteVersion(v, getAvailableModes());
+			if (this.modeManager) {
+				this.modeManager.updateConfig({ favoriteVersions: [...this.favoriteVersions] });
+			}
+			this.rebuildVersionSelect();
+			this.updateFavoriteButton();
 		});
 
 		// Effect dropdown change
@@ -416,6 +529,7 @@ export default class ModeDisplay {
 			effectSelect.value = modeInfo.effect;
 		}
 
+		this.updateFavoriteButton();
 		this.updateNextSwitchTime();
 	}
 

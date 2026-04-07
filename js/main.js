@@ -1,4 +1,5 @@
-import makeConfig from "./config.js";
+import makeConfig, { getAvailableModes } from "./config.js";
+import { loadFavoriteVersions } from "./mode-favorites.js";
 import SpotifyIntegration from "./spotify.js";
 import SpotifyUI from "./spotify-ui.js";
 import ModeManager from "./mode-manager.js";
@@ -299,8 +300,10 @@ document.body.onload = async () => {
  * Initialize mode management and display components
  */
 function initializeModeManagement(config) {
+	const favoriteVersions = loadFavoriteVersions(getAvailableModes());
+
 	// Create mode manager
-	modeManager = new ModeManager(config);
+	modeManager = new ModeManager({ ...config, favoriteVersions });
 
 	// Create mode display
 	modeDisplay = new ModeDisplay({
@@ -308,6 +311,7 @@ function initializeModeManagement(config) {
 		autoHide: true,
 		autoHideDelay: 5000,
 		showControls: true,
+		favoriteVersions,
 	});
 
 	// Connect mode display to mode manager
