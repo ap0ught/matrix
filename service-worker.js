@@ -5,15 +5,27 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.0 - Now with dynamic cache versioning from VERSION file
+ * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
-// Cache version will be loaded from VERSION file during installation
-let CACHE_NAME = "matrix-v1"; // Default fallback
+// Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
+// Remains "local" for development; workflows replace this string before publishing.
+const VER = "local";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
 const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, "");
+
+// Derive a scope key from BASE_PATH so caches are scoped to this SW's deployment path.
+// This prevents the activate cleanup from deleting caches belonging to other scopes
+// (e.g., /vX.Y.Z/ releases or /pr-N/ previews) on the same origin.
+// Step 1: strip leading/trailing slashes. Step 2: replace remaining slashes with hyphens.
+const SCOPE_KEY = BASE_PATH.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "root";
+const CACHE_PREFIX = `matrix-sw-${SCOPE_KEY}-`;
+
+// Cache version will be loaded from VERSION file during installation.
+// After a SW restart globals reset; use getActiveCacheName() for runtime cache writes.
+let CACHE_NAME = `${CACHE_PREFIX}v1-${VER}`; // Default fallback, overwritten during install
 
 // Files to cache for offline functionality (relative to BASE_PATH)
 const STATIC_ASSETS = [
@@ -126,7 +138,7 @@ self.addEventListener("install", (event) => {
 			.then((versionText) => {
 				// Update cache name with version from VERSION file
 				const version = versionText.trim();
-				CACHE_NAME = `matrix-v${version}`;
+				CACHE_NAME = `${CACHE_PREFIX}v${version}-${VER}`;
 				console.log(`[Matrix Service Worker] 🔋 Version: ${version}`);
 				console.log(`[Matrix Service Worker] 💾 Cache Name: ${CACHE_NAME}`);
 				console.log(`[Matrix Service Worker] 📦 Assets to cache: ${STATIC_ASSETS.length} files`);
@@ -167,16 +179,14 @@ self.addEventListener("activate", (event) => {
 			.keys()
 			.then((cacheNames) => {
 				console.log(`[Matrix Service Worker] Found ${cacheNames.length} cache(s):`, cacheNames);
-				const oldCaches = cacheNames.filter((cacheName) => cacheName !== CACHE_NAME);
+				const oldCaches = cacheNames.filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME);
 				if (oldCaches.length > 0) {
 					console.log(`[Matrix Service Worker] 🗑️  Cleaning up ${oldCaches.length} old cache(s)...`);
 				}
 				return Promise.all(
-					cacheNames.map((cacheName) => {
-						if (cacheName !== CACHE_NAME) {
-							console.log(`[Matrix Service Worker] 🗑️  Deleting old cache: ${cacheName}`);
-							return caches.delete(cacheName);
-						}
+					oldCaches.map((cacheName) => {
+						console.log(`[Matrix Service Worker] 🗑️  Deleting old cache: ${cacheName}`);
+						return caches.delete(cacheName);
 					}),
 				);
 			})
@@ -187,6 +197,20 @@ self.addEventListener("activate", (event) => {
 			}),
 	);
 });
+
+/*
+ * Returns the currently active cache name for this SW scope.
+ * Because service workers can be terminated and restarted (resetting globals),
+ * CACHE_NAME may hold the default fallback value after a restart. This helper
+ * looks up the existing scoped cache by prefix instead, falling back to CACHE_NAME
+ * only if none is found (e.g., on first install before activation completes).
+ */
+function getActiveCacheName() {
+	// After activation, cleanup leaves at most one cache per prefix, so the first match is correct.
+	// Returning any matching cache is still safe: caches.match() searches all caches for reads,
+	// and the active cache will be cleaned up on the next SW activation if it is stale.
+	return caches.keys().then((keys) => keys.find((k) => k.startsWith(CACHE_PREFIX)) || CACHE_NAME);
+}
 
 /*
  * Fetch Event Handler - Cache First Strategy
@@ -224,9 +248,12 @@ self.addEventListener("fetch", (event) => {
 					// Clone the response before caching (response can only be consumed once)
 					const responseToCache = networkResponse.clone();
 
-					caches.open(CACHE_NAME).then((cache) => {
-						cache.put(event.request, responseToCache);
-					});
+					// Use getActiveCacheName() so writes go to the correct cache even after a SW restart
+					getActiveCacheName()
+						.then((name) => caches.open(name))
+						.then((cache) => {
+							cache.put(event.request, responseToCache);
+						});
 
 					return networkResponse;
 				})

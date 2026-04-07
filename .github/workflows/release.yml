@@ -210,6 +210,10 @@ jobs:
           mkdir -p "${VERSION_DIR}/gallery"
         fi
         
+        VER="matrix-pwa-v${VERSION}-${GITHUB_RUN_NUMBER}-$(echo "$GITHUB_SHA" | cut -c1-7)"
+        sed -i "s|const VER = \"local\"|const VER = \"${VER}\"|" "${VERSION_DIR}/service-worker.js"
+        echo "VER=${VER}"
+        
         echo "✅ Release v${VERSION} copied to gh-pages/v${VERSION}"
         
         # Create version-specific README
