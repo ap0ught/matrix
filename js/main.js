@@ -401,26 +401,30 @@ function setupModeManagementEvents(config) {
 
 	// Mode manager events
 	modeManager.on("modeChange", async (modeChangeData) => {
-		// Update the URL parameters and reload the configuration
-		const urlParams = new URLSearchParams(window.location.search);
-		urlParams.set("version", modeChangeData.version);
-		urlParams.set("effect", modeChangeData.effect);
+		try {
+			// Update the URL parameters and reload the configuration
+			const urlParams = new URLSearchParams(window.location.search);
+			urlParams.set("version", modeChangeData.version);
+			urlParams.set("effect", modeChangeData.effect);
 
-		if (modeChangeData.isManual) {
-			// For manual mode switches (via "Switch Mode Now" button), reload the page
-			// to ensure the new configuration is fully applied
-			window.location.search = urlParams.toString();
-		} else {
-			// For automatic mode switches (screensaver), update URL and try in-place update
-			history.replaceState({}, "", "?" + urlParams.toString());
+			if (modeChangeData.isManual) {
+				// For manual mode switches (via "Switch Mode Now" button), reload the page
+				// to ensure the new configuration is fully applied
+				window.location.search = urlParams.toString();
+			} else {
+				// For automatic mode switches (screensaver), update URL and try in-place update
+				history.replaceState({}, "", "?" + urlParams.toString());
 
-			// Update the configuration and restart the renderer
-			const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
-			await restartMatrixWithNewConfig(newConfig);
+				// Update the configuration and restart the renderer
+				const newConfig = makeConfig(Object.fromEntries(urlParams.entries()));
+				await restartMatrixWithNewConfig(newConfig);
 
-			// Update page title and favicon
-			updatePageTitle(newConfig);
-			updateFavicon(newConfig);
+				// Update page title and favicon
+				updatePageTitle(newConfig);
+				updateFavicon(newConfig);
+			}
+		} catch (err) {
+			console.error("[Matrix] Error during automatic mode change:", err);
 		}
 	});
 }
