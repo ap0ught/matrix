@@ -5,11 +5,15 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.0 - Now with dynamic cache versioning from VERSION file
+ * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
+// Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
+// Remains "local" for development; workflows replace this string before publishing.
+const VER = "local";
+
 // Cache version will be loaded from VERSION file during installation
-let CACHE_NAME = "matrix-v1"; // Default fallback
+let CACHE_NAME = `matrix-v1-${VER}`; // Default fallback
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -126,7 +130,7 @@ self.addEventListener("install", (event) => {
 			.then((versionText) => {
 				// Update cache name with version from VERSION file
 				const version = versionText.trim();
-				CACHE_NAME = `matrix-v${version}`;
+				CACHE_NAME = `matrix-v${version}-${VER}`;
 				console.log(`[Matrix Service Worker] 🔋 Version: ${version}`);
 				console.log(`[Matrix Service Worker] 💾 Cache Name: ${CACHE_NAME}`);
 				console.log(`[Matrix Service Worker] 📦 Assets to cache: ${STATIC_ASSETS.length} files`);

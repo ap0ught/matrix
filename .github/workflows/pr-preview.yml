@@ -111,6 +111,7 @@ jobs:
         cp manifest.webmanifest "gh-pages/${PREVIEW_PATH}/"
         cp icon-192.png "gh-pages/${PREVIEW_PATH}/"
         cp icon-512.png "gh-pages/${PREVIEW_PATH}/"
+        cp VERSION "gh-pages/${PREVIEW_PATH}/"
         
         # Optional files (don't fail if missing)
         cp README.md "gh-pages/${PREVIEW_PATH}/" 2>/dev/null || true
@@ -118,6 +119,13 @@ jobs:
         
         echo "✅ Preview files copied to gh-pages/${PREVIEW_PATH}"
         ls -la "gh-pages/${PREVIEW_PATH}"
+    
+    - name: Stamp PWA deploy build for preview
+      run: |
+        PREVIEW_PATH="${{ steps.preview.outputs.path }}"
+        VER="matrix-pwa-${PREVIEW_PATH}-${GITHUB_RUN_NUMBER}-$(echo "$GITHUB_SHA" | cut -c1-7)"
+        sed -i "s|const VER = \"local\"|const VER = \"${VER}\"|" "gh-pages/${PREVIEW_PATH}/service-worker.js"
+        echo "VER=${VER}"
     
     - name: Update gh-pages previews index
       run: |
