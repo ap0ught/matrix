@@ -23,6 +23,8 @@ export default class ModeDisplay {
 		this.isMouseOverPanel = false;
 		this.hideTimer = null;
 		this.mouseMoveHandler = null;
+		/** @type {{ passive: boolean }} */
+		this.touchRevealOptions = { passive: true };
 		this.modeManager = null;
 		this.callbacks = {
 			toggleScreensaver: [],
@@ -313,7 +315,8 @@ export default class ModeDisplay {
 				}
 			}, 100);
 		};
-		document.addEventListener("mousemove", this.mouseMoveHandler);
+		document.addEventListener("pointermove", this.mouseMoveHandler);
+		document.addEventListener("touchstart", this.mouseMoveHandler, this.touchRevealOptions);
 
 		// Button hover effects
 		this.element.addEventListener("mouseover", (e) => {
@@ -497,7 +500,8 @@ export default class ModeDisplay {
 	destroy() {
 		this.cancelAutoHide();
 		if (this.mouseMoveHandler) {
-			document.removeEventListener("mousemove", this.mouseMoveHandler);
+			document.removeEventListener("pointermove", this.mouseMoveHandler);
+			document.removeEventListener("touchstart", this.mouseMoveHandler, this.touchRevealOptions);
 			this.mouseMoveHandler = null;
 		}
 		if (this.element && this.element.parentNode) {
