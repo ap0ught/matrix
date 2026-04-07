@@ -44,9 +44,7 @@ export default class SpotifyIntegration {
 	 */
 	generateState() {
 		if (!window.crypto || !window.crypto.getRandomValues) {
-			throw new Error(
-				"Secure random generation not available - Spotify authentication requires a secure context (HTTPS or http://localhost)",
-			);
+			throw new Error("Secure random generation not available - Spotify authentication requires a secure context (HTTPS or http://localhost)");
 		}
 		const array = new Uint8Array(16);
 		crypto.getRandomValues(array);
