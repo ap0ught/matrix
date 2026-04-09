@@ -8,7 +8,12 @@
 #ifdef GL_OES_standard_derivatives
 #extension GL_OES_standard_derivatives: enable
 #endif
-precision lowp float;
+// Fragment precision: we store per-cell glyph indices as floats in half-float FBOs, then
+// read them back and use them as atlas indices. `lowp` floats are not guaranteed to
+// distinguish every integer in 0..glyphSequenceLength-1 on all GPUs, which can make
+// many cells map to the same glyph. `mediump` matches the usual precision for varyings
+// and texture samples and keeps indices stable.
+precision mediump float;
 
 // Cell state textures - contain brightness, symbol, and effect data
 uniform sampler2D raindropState, symbolState, effectState;
@@ -225,14 +230,40 @@ vec2 getSymbol(vec2 uv, float index, float flipFlags) {
 
 void main() {
 
-	// Transform UV coordinates based on display mode (slant, polar, etc.)
+	// --- Two coordinate spaces: "screen grid" (vUV) vs "rendered" (uv) ---
+	//
+	// vUV: 0..1 across the fullscreen quad, one row/column per glyph cell (no slant).
+	// uv:  after getUV() — slant, polar warp, and glyph aspect ratio. Used for *drawing*
+	//      the MSDF (local position inside the cell) and for palette/base textures that
+	//      should follow the same warp as the rain.
+	//
+	// Raindrop/symbol/effect state is written in compute passes using normalized grid
+	// coordinates (see rainPass.*.frag.glsl: screenPos = gl_FragCoord / grid size). Those
+	// texels are aligned with vUV, not with the skewed uv.
+	//
+	// If we sampled symbolState using `uv`, linear filtering would blend *different*
+	// cells' symbol indices when slant or polar is active (and in edge cases with aspect
+	// ratio), producing a few averaged indices — so only a handful of glyphs appear
+	// (e.g. mathcode with many atlas slots). Always sample state textures at the cell
+	// center derived from vUV (see tests/rain-pass-state-sampling.test.mjs).
+
 	vec2 uv = getUV(vUV);
+
+	vec2 cellId = floor(vUV * vec2(numColumns, numRows));
+	// Clamp so vUV == 1.0 does not land on a non-existent row/column (texel edge).
+	cellId = min(cellId, vec2(numColumns, numRows) - 1.);
+	vec2 stateUV = (cellId + 0.5) / vec2(numColumns, numRows);
 
 	// Unpack the values from the data textures
 	// In volumetric mode, data comes from vertex shader; otherwise sample textures
-	vec4 raindropData = volumetric ? vRaindrop : texture2D(raindropState, uv);
-	vec4   symbolData = volumetric ?   vSymbol : texture2D(  symbolState, uv);
-	vec4   effectData = volumetric ?   vEffect : texture2D(  effectState, uv);
+	vec4 raindropData = volumetric ? vRaindrop : texture2D(raindropState, stateUV);
+	vec4   symbolData = volumetric ?   vSymbol : texture2D(  symbolState, stateUV);
+	vec4   effectData = volumetric ?   vEffect : texture2D(  effectState, stateUV);
+
+	// Snap to nearest integer glyph index: half-float storage + linear interpolation can
+	// leave values like 8.47 between frames; clamp to valid atlas range so getSymbolUV
+	// never receives an out-of-range index.
+	float symbolIndex = clamp(floor(symbolData.r + 0.5), 0., glyphSequenceLength - 1.);
 
 	// Calculate brightness for base, cursor, and glint channels
 	vec3 brightness = getBrightness(
@@ -243,7 +274,7 @@ void main() {
 	);
 	
 	// Render the glyph using MSDF for crisp edges at any scale
-	vec2 symbol = getSymbol(uv, symbolData.r, symbolData.b);
+	vec2 symbol = getSymbol(uv, symbolIndex, symbolData.b);
 
 	// Debug view shows the raw computational state (useful for development)
 	if (showDebugView) {
