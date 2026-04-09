@@ -27,14 +27,14 @@ jobs:
     
     steps:
     - name: Checkout master branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: master
         fetch-depth: 1
         submodules: false
     
     - name: Checkout gh-pages branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: gh-pages
         path: gh-pages

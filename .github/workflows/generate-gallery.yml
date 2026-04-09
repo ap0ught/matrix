@@ -18,10 +18,10 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '18'
           
@@ -42,7 +42,7 @@ jobs:
           node .github/scripts/generate-gallery-screenshots.js
           
       - name: Upload screenshots as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gallery-screenshots
           path: gallery/*.png

@@ -104,10 +104,7 @@ export default class ModeManager {
 	getRandomVersionName() {
 		const availableModes = this.config.availableModes || this.availableModes;
 		const favs = this.config.favoriteVersions;
-		const pool =
-			Array.isArray(favs) && favs.length > 0
-				? favs.filter((v) => availableModes.includes(v))
-				: null;
+		const pool = Array.isArray(favs) && favs.length > 0 ? favs.filter((v) => availableModes.includes(v)) : null;
 		const pickFrom = pool?.length ? pool : availableModes;
 		return pickFrom[Math.floor(Math.random() * pickFrom.length)];
 	}
