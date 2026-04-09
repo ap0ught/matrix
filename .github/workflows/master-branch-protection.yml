@@ -34,12 +34,18 @@ jobs:
     - name: Validate code formatting with Prettier
       run: |
         echo "Checking code formatting..."
-        npx prettier --check --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" || {
+        npx prettier --check --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js" || {
           echo "❌ Code formatting check failed!"
-          echo "Run: npx prettier --write --use-tabs --print-width 160 \"index.html\" \"./js/**/*.js\" \"./lib/gpu-buffer.js\""
+          echo "Run: npx prettier --write --use-tabs --print-width 160 \"index.html\" \"./js/**/*.js\" \"./lib/gpu-buffer.js\" \"./scripts/**/*.mjs\" \"./tests/**/*.js\""
           exit 1
         }
         echo "✅ Code formatting is correct"
+
+    - name: Install dependencies and run automated tests
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+        npm test
     
     - name: Start Matrix application server
       run: |
@@ -111,14 +117,11 @@ jobs:
           exit 1
         fi
         
-        # Validate ES6 module syntax by creating a temporary package.json
-        echo '{"type": "module"}' > package.json
         node --check js/main.js
         node --check js/config.js
         node --check js/effects.js
-        node --check js/regl/stripePass.js
+        node --check js/webgl/stripePass.js
         node --check js/webgpu/stripePass.js
-        rm package.json
         
         echo "✅ JavaScript modules are valid"
     

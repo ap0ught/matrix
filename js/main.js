@@ -18,6 +18,16 @@ import { updateFavicon } from "./favicon.js";
  * detects software rendering fallbacks, and presents Matrix-themed warnings.
  */
 
+/**
+ * Looking Glass Holoplay quilt rendering exists only on the WebGL path (`js/webgl`).
+ */
+function enforceHoloplayRenderer(config) {
+	if (config.useHoloplay && config.renderer?.toLowerCase?.() === "webgpu") {
+		console.warn("[Matrix] Looking Glass (Holoplay) requires WebGL; ignoring renderer=webgpu for this session.");
+		config.renderer = "webgl";
+	}
+}
+
 /*
  * Application Version Management
  *
@@ -217,6 +227,7 @@ document.body.onload = async () => {
 	 */
 	const urlParams = new URLSearchParams(window.location.search);
 	matrixConfig = makeConfig(Object.fromEntries(urlParams.entries()));
+	enforceHoloplayRenderer(matrixConfig);
 
 	/*
 	 * Gallery Mode Detection
@@ -234,8 +245,8 @@ document.body.onload = async () => {
 	 * WebGPU provides better performance and more advanced features,
 	 * but WebGL ensures broader browser compatibility
 	 */
-	const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(matrixConfig.renderer?.toLowerCase());
-	const solution = import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
+	const useWebGPU = (await supportsWebGPU()) && matrixConfig.renderer?.toLowerCase() === "webgpu";
+	const solution = import(`./${useWebGPU ? "webgpu" : "webgl"}/main.js`);
 
 	/*
 	 * The Matrix Choice: Blue Pill vs Red Pill
@@ -590,7 +601,7 @@ function setupSpotifyEventListeners() {
 function startMatrix(matrixRenderer, canvas, config) {
 	// Start the Matrix renderer
 	// Note: setupFullscreenToggle is called within the renderer implementations
-	// (regl/main.js and webgpu/main.js) to avoid duplicate event listeners
+	// (webgl/main.js and webgpu/main.js) to avoid duplicate event listeners
 	matrixRenderer.default(canvas, config);
 }
 
@@ -614,11 +625,12 @@ async function initializeGalleryMode() {
 
 		// Update configuration and restart renderer
 		const newConfig = makeConfig(Object.fromEntries(params.entries()));
+		enforceHoloplayRenderer(newConfig);
 
 		// Initialize renderer if not yet started
 		if (!currentMatrixRenderer) {
-			const useWebGPU = (await supportsWebGPU()) && ["webgpu"].includes(newConfig.renderer?.toLowerCase());
-			const solution = await import(`./${useWebGPU ? "webgpu" : "regl"}/main.js`);
+			const useWebGPU = (await supportsWebGPU()) && newConfig.renderer?.toLowerCase() === "webgpu";
+			const solution = await import(`./${useWebGPU ? "webgpu" : "webgl"}/main.js`);
 			currentMatrixRenderer = solution;
 			startMatrix(currentMatrixRenderer, canvas, newConfig);
 		} else {

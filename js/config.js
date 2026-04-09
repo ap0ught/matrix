@@ -32,6 +32,26 @@
 const EXCLUDED_VERSIONS = ["excludeME"];
 
 /**
+ * Normalize `renderer` URL parameter.
+ * `regl` is a legacy alias for the WebGL implementation in `js/webgl/` (npm `regl` runtime).
+ * @param {string} s raw query value
+ * @returns {string|null}
+ */
+function parseRenderer(s) {
+	if (s == null || s === "") {
+		return null;
+	}
+	const x = String(s).toLowerCase();
+	if (x === "webgpu") {
+		return "webgpu";
+	}
+	if (x === "regl" || x === "webgl") {
+		return "webgl";
+	}
+	return String(s);
+}
+
+/**
  * Get Random Version
  *
  * Selects a random Matrix version from available options, excluding aliases
@@ -328,7 +348,7 @@ const defaults = {
 	slant: 0, // The angle at which rain falls; the orientation of the glyph grid
 	resolution: 0.75, // An overall scale multiplier
 	useHalfFloat: false,
-	renderer: "regl", // The preferred web graphics API
+	renderer: "webgl", // webgpu | webgl (URL may still use legacy alias regl)
 	suppressWarnings: false, // Whether to show warnings to visitors on a load
 	isometric: false,
 	useHoloplay: false,
@@ -596,7 +616,7 @@ export const versions = {
 		],
 		raindropLength: 0.3,
 
-		renderer: "regl",
+		renderer: "webgl",
 		numColumns: 20,
 		ditherMagnitude: 0,
 		volumetric: true,
@@ -789,7 +809,7 @@ const paramMapping = {
 	loops: { key: "loops", parser: isTrue },
 	fps: { key: "fps", parser: (s) => nullNaN(range(parseFloat(s), 0, 60)) },
 	skipIntro: { key: "skipIntro", parser: isTrue },
-	renderer: { key: "renderer", parser: (s) => s },
+	renderer: { key: "renderer", parser: parseRenderer },
 	suppressWarnings: { key: "suppressWarnings", parser: isTrue },
 	once: { key: "once", parser: isTrue },
 	isometric: { key: "isometric", parser: isTrue },

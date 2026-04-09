@@ -11,7 +11,7 @@
 
 /**
  * Creates a dynamic effects mapping for the given renderer type
- * @param {string} renderer - Either 'webgpu' or 'regl'
+ * @param {string} renderer - Either 'webgpu' or 'webgl'
  * @param {Object} passModules - Object containing imported pass modules
  * @returns {Object} Effects mapping object
  */

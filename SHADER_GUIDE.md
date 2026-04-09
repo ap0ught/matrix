@@ -103,7 +103,7 @@ void main() {
 }
 ```
 
-Then update the corresponding JavaScript file (`js/regl/bloomPass.js`):
+Then update the corresponding JavaScript file (`js/webgl/bloomPass.js`):
 
 ```javascript
 uniforms: {

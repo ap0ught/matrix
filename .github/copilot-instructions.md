@@ -96,15 +96,15 @@ cp msdfgen/build/msdfgen out/
 - `js/config.js` - URL parameter parsing and configuration management
 - `js/utils.js` - Shared utility functions (formatModeName, etc.)
 - `js/music-integration.js` - Spotify music synchronization
-- `js/regl/` - WebGL implementation using REGL library
+- `js/webgl/` - WebGL implementation (regl npm runtime, vendored to `lib/regl.min.js`)
 - `js/webgpu/` - WebGPU implementation (next-generation graphics)
 - `shaders/` - GLSL and WGSL shader source files
 
 ### Key Renderer Files
-- `js/regl/main.js` - REGL WebGL renderer entry point
+- `js/webgl/main.js` - WebGL renderer entry point
 - `js/webgpu/main.js` - WebGPU renderer entry point  
-- `js/regl/rainPass.js` & `js/webgpu/rainPass.js` - Core Matrix rain computation
-- `js/regl/bloomPass.js` & `js/webgpu/bloomPass.js` - Glow/bloom effects
+- `js/webgl/rainPass.js` & `js/webgpu/rainPass.js` - Core Matrix rain computation
+- `js/webgl/bloomPass.js` & `js/webgpu/bloomPass.js` - Glow/bloom effects
 
 ### Asset Files
 - `assets/` - Matrix fonts (TrueType) and MSDF texture atlases
@@ -168,7 +168,7 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 
 ### Making Visual Changes
 1. **Modify shader code** in `/shaders` directory for rendering effects
-2. **Update pass configurations** in `js/regl/` or `js/webgpu/` directories
+2. **Update pass configurations** in `js/webgl/` or `js/webgpu/` directories
 3. **Test immediately** by refreshing browser - no build step needed
 4. **Always validate** with multiple Matrix versions and effects
 
@@ -236,7 +236,7 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 
 ### Changes Requiring Full Validation
 - **Shader files** (`/shaders`): Test all Matrix versions and effects
-- **Renderer files** (`js/regl/`, `js/webgpu/`): Test WebGL and WebGPU modes
+- **Renderer files** (`js/webgl/`, `js/webgpu/`): Test WebGL and WebGPU modes
 - **Config changes** (`js/config.js`): Test URL parameter parsing
 - **Main entry points** (`index.html`, `js/main.js`): Full application test
 - **Service worker** (`service-worker.js`): Test offline functionality and cache updates
@@ -261,7 +261,7 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 
 ## Browser Compatibility
 
-- **WebGL 2.0**: Widely supported, battle-tested (js/regl/)
+- **WebGL 2.0**: Widely supported, battle-tested (`js/webgl/`)
 - **WebGPU**: Cutting-edge, modern browsers only (js/webgpu/)
 - **Software Fallback**: Works with SwiftShader when hardware acceleration disabled
 - **Mobile Support**: Responsive design, touch interactions for effects

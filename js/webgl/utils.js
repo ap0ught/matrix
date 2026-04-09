@@ -1,12 +1,9 @@
 /*
- * REGL Utilities - WebGL Rendering Helpers
+ * WebGL utilities — helpers for the WebGL renderer (`js/webgl/`)
  *
- * This module provides utility functions for the REGL-based WebGL renderer.
+ * Drawing is driven by the regl library (see `lib/regl.min.js`, npm `regl` package).
  * Like the utilities that keep Zion's machines running, these functions handle
  * the fundamental operations needed for Matrix rain rendering.
- *
- * REGL is a functional WebGL wrapper that treats graphics operations as
- * pure functions - very fitting for the Matrix's deterministic nature.
  */
 
 /*

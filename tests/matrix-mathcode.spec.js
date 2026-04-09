@@ -1,5 +1,5 @@
 /**
- * Browser smoke tests: app boots in mathcode mode with WebGL (regl) and no JS errors.
+ * Browser smoke tests: app boots in mathcode mode with WebGL and no JS errors.
  *
  * Shader regression coverage lives in rain-pass-state-sampling.test.mjs (text invariants).
  * We do not assert pixel colors here: the default canvas is not created with
@@ -9,11 +9,11 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Matrix mathcode mode", () => {
-	test("loads WebGL regl, applies mathcode version, and keeps canvas sized", async ({ page }) => {
+	test("loads WebGL stack, applies mathcode version, and keeps canvas sized", async ({ page }) => {
 		const pageErrors = [];
 		page.on("pageerror", (err) => pageErrors.push(String(err)));
 
-		await page.goto("/?version=mathcode&suppressWarnings=true&skipIntro=true&renderer=regl", {
+		await page.goto("/?version=mathcode&suppressWarnings=true&skipIntro=true&renderer=webgl", {
 			waitUntil: "networkidle",
 		});
 
@@ -30,7 +30,7 @@ test.describe("Matrix mathcode mode", () => {
 		expect(pageErrors, `page errors: ${pageErrors.join("; ")}`).toHaveLength(0);
 		expect(width, "canvas should have width").toBeGreaterThan(0);
 		expect(height, "canvas should have height").toBeGreaterThan(0);
-		expect(webgl, "WebGL context should exist (regl renderer)").toBe(true);
+		expect(webgl, "WebGL context should exist (webgl renderer)").toBe(true);
 
 		await expect(page.locator("select.version-select")).toHaveValue("mathcode", { timeout: 15_000 });
 	});

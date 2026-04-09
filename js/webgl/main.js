@@ -71,7 +71,7 @@ export default async (canvas, config) => {
 		makeImagePass,
 		makeMirrorPass,
 	};
-	const effects = createEffectsMapping("regl", passModules);
+	const effects = createEffectsMapping("webgl", passModules);
 	const effectPass = getEffectPass(config.effect, effects, "palette");
 	const context = { regl, canvas, config, lkg, cameraTex, cameraAspectRatio };
 	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effectPass, makeQuiltPass]);
