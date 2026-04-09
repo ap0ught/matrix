@@ -7,8 +7,6 @@
  *
  * These tests lock in shader invariants as plain-text checks (no GPU). See also
  * tests/matrix-mathcode.spec.js for a browser smoke test.
- *
- * Introduced in PR #107 (rain pass state sampling fix).
  */
 
 import assert from "node:assert/strict";
