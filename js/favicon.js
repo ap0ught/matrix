@@ -132,8 +132,7 @@ function generateFaviconDataURL(chars) {
 	const effectiveChars = Array.isArray(chars) && chars.length > 0 ? chars : DEFAULT_CHARS;
 
 	// Pick a random glyph (fallback if index yields undefined, e.g. sparse arrays)
-	const char =
-		effectiveChars[Math.floor(Math.random() * effectiveChars.length)] ?? DEFAULT_CHARS[0];
+	const char = effectiveChars[Math.floor(Math.random() * effectiveChars.length)] ?? DEFAULT_CHARS[0];
 
 	// Draw the glyph with a black stroke and fill — matches the Matrix "black strokes on green" aesthetic
 	ctx.font = `bold ${Math.floor(size * GLYPH_SIZE_RATIO)}px sans-serif`;
