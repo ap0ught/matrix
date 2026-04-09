@@ -29,6 +29,11 @@ playdate/matrix_c/build-device/
 playdate/ThePlaytrix.pdx/
 playdate/ThePlaytrixLua.pdx/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
 # OS-specific
 .DS_Store
 Thumbs.db

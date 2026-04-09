@@ -1,0 +1,45 @@
+---
+description: Before pushing a PR, sync with master and request Copilot review
+alwaysApply: true
+---
+
+# Pull requests: master sync and Copilot review
+
+When preparing or pushing a PR (or when the user mentions opening a PR), do this **before** the final push:
+
+## 1. Merge conflicts with `master`
+
+- Fetch and integrate the default branch so the branch is up to date and conflicts are visible early.
+- Use the repo’s default branch name; this project uses **`master`**.
+
+**Commands (run from the feature branch):**
+
+```bash
+git fetch origin master
+git merge origin/master
+# or: git rebase origin/master
+```
+
+- If merge/rebase reports conflicts, resolve them, run tests if applicable, then continue.
+- Optionally compare without merging: `git fetch origin master` then `git log --oneline HEAD..origin/master` to see what would come in.
+
+**Never** push a PR branch that has not been checked against current `master` when the PR targets `master`.
+
+## 2. GitHub Copilot review
+
+After the PR exists (or right after push):
+
+- Ask the user to **request a Copilot review** on the PR on GitHub (PR page → **Reviewers** → **Copilot** / **Request review from Copilot**, or the **Copilot** / **Request review** control in the PR UI, depending on org settings).
+- If automation is available (e.g. `@copilot` in a comment), mention that as an alternative.
+
+**Reminder text you can give the user:**  
+“Open the PR on GitHub and request a review from **GitHub Copilot** so it can comment on the diff before merge.”
+
+## 3. Short checklist
+
+1. `git fetch origin master` and merge or rebase onto `origin/master`.
+2. Resolve conflicts; build/test if the project has a standard check.
+3. Push the branch; open or update the PR.
+4. Request **Copilot** review on the PR.
+
+If `master` is not the default branch for this repo, use `origin/HEAD` or the branch shown in GitHub’s branch dropdown instead.
