@@ -5,7 +5,7 @@
  * to create a screensaver-like experience with rotating visual modes.
  */
 
-import { getRandomVersion, getAvailableModes, getAvailableEffects, versions } from "./config.js";
+import { getAvailableModes, getAvailableEffects, versions } from "./config.js";
 import { formatModeName } from "./utils.js";
 
 export default class ModeManager {
@@ -103,7 +103,13 @@ export default class ModeManager {
 	 */
 	getRandomVersionName() {
 		const availableModes = this.config.availableModes || this.availableModes;
-		return availableModes[Math.floor(Math.random() * availableModes.length)];
+		const favs = this.config.favoriteVersions;
+		const pool =
+			Array.isArray(favs) && favs.length > 0
+				? favs.filter((v) => availableModes.includes(v))
+				: null;
+		const pickFrom = pool?.length ? pool : availableModes;
+		return pickFrom[Math.floor(Math.random() * pickFrom.length)];
 	}
 
 	/**

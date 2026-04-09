@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-18-19ef879";
+const VER = "matrix-pwa-19-30eb5b1";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -40,6 +40,7 @@ const STATIC_ASSETS = [
 	"js/spotify.js",
 	"js/spotify-ui.js",
 	"js/mode-manager.js",
+	"js/mode-favorites.js",
 	"js/effects.js",
 	"js/mode-display.js",
 	"js/gallery.js",
