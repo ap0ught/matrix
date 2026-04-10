@@ -77,11 +77,10 @@ Your expertise is informed by the `.codemachine` directory's agent specification
 
 This is a **static ES-module web application** - key architectural points:
 
-- **No build system**: Files are served directly, no webpack/vite/rollup
+- **No bundler**: Files are served directly; **`npm ci`** installs Playwright and npm `regl`/`twgl`, and **`postinstall`** vendors them into `lib/` (see `scripts/vendor-webgl-deps.mjs`).
 - **ES6 modules**: Uses modern `import`/`export` throughout
-- **No npm install needed**: Dependencies in `/lib` directory, uses `npx` for tools
-- **Dual renderer**: WebGL (via REGL) and WebGPU implementations
-- **Service worker**: PWA with dynamic cache versioning from `VERSION` file
+- **Dual renderer**: WebGL (`js/webgl/`, regl) and WebGPU (`js/webgpu/`)
+- **Service worker**: PWA; cache bucket `matrix-sw-{scope}-v{VERSION}-{VER}` (see `service-worker.js` and `js/main.js`)
 
 ### Core Technologies
 
@@ -154,6 +153,9 @@ cd ../..
 **CRITICAL**: Never cancel builds - set timeouts to at least 60 seconds.
 
 #### Testing and Validation
+
+- **`npm test`**: Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`). Regression matrix: `npm run test:regression`.
+- Console hooks in `tests/matrix-playwright-helpers.js` fail CI on `[Matrix][WebGL]` and invalid program errors.
 
 **Essential test URLs** (always append `&suppressWarnings=true`):
 ```

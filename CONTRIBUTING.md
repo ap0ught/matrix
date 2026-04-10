@@ -39,6 +39,10 @@ cd matrix
 # Initialize submodules (if not using --recursive)
 git submodule update --init --recursive
 
+# Install dev dependencies and vendored libs (regl/twgl → lib/)
+npm ci
+npx playwright install chromium
+
 # Start a local development server
 python3 -m http.server 8000
 # or
@@ -46,6 +50,9 @@ npx http-server -p 8000
 
 # Open in browser
 # http://localhost:8000/?suppressWarnings=true
+
+# Run automated tests (same as CI smoke suite)
+npm test
 ```
 
 ### Making Changes
@@ -54,8 +61,9 @@ npx http-server -p 8000
 2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
 3. **Make your changes** with clear, focused commits
 4. **Test thoroughly** across different Matrix versions and browsers
-5. **Format your code**: `npx prettier --write --use-tabs --print-width 160 "js/**/*.js"`
-6. **Submit a pull request** with a clear description
+5. **Format your code** (match CI): `npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"`
+6. **Run tests**: `npm test` (and `npm run test:regression` if you change shaders or renderers)
+7. **Submit a pull request** with a clear description
 
 ## 📋 Code Style Guidelines
 

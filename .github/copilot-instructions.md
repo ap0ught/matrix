@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-Matrix Digital Rain is a web-based implementation of the iconic falling green code from The Matrix films. It's built with WebGL/WebGPU for high-performance graphics rendering and uses ES6 modules with no build system - it runs as static files served by any HTTP server.
+Matrix Digital Rain is a web-based implementation of the iconic falling green code from The Matrix films. It uses **WebGL** (`js/webgl/`, regl) and **WebGPU** (`js/webgpu/`), ES modules with **no bundler** — static files over HTTP. **`npm ci`** installs minimal tooling (Playwright, regl/twgl vendoring); see [RENDERING.md](../RENDERING.md).
 
 This project celebrates *The Matrix* franchise created by the Wachowski sisters. When making changes:
 - **Maintain the Matrix aesthetic** - green digital rain, cyberpunk themes
@@ -49,11 +49,8 @@ php -S localhost:8000
 
 ### Code Formatting
 ```bash
-# Format all JavaScript files (takes ~3 seconds)
-npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
-
-# Complete format command including HTML and libraries
-npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js"
+# Match CI (`.github/workflows/master-branch-protection.yml`): HTML, JS, gpu-buffer, scripts, tests
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
 ```
 
 **TIMING**: Takes ~2-5 seconds to complete, including npm package install. **NEVER CANCEL**: Always let Prettier finish completely.
@@ -109,7 +106,7 @@ cp msdfgen/build/msdfgen out/
 ### Asset Files
 - `assets/` - Matrix fonts (TrueType) and MSDF texture atlases
 - `assets/*_msdf.png` - Multi-channel distance field font textures
-- `lib/` - Third-party JavaScript libraries (REGL, gl-matrix, etc.)
+- `lib/` - Vendored runtime bits (`regl.min.js`, `twgl-full.module.js` from npm via `postinstall`; `gl-matrix.js`, etc.)
 
 ### Documentation
 - `README.md` - User-facing documentation with all URL parameters
@@ -124,9 +121,16 @@ cp msdfgen/build/msdfgen out/
 
 ## Testing and Validation
 
-**CRITICAL**: After making any changes, you MUST manually validate the application functionality.
+### Automated (CI and local)
 
-### Essential Test Scenarios
+- **Install**: `npm ci` (runs `postinstall` → `scripts/vendor-webgl-deps.mjs` to refresh `lib/regl.min.js` and `lib/twgl-full.module.js`).
+- **Default suite**: `npm test` → Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`, **not** `tests/regression/**`).
+- **Helpers**: `tests/matrix-playwright-helpers.js` attaches console/page listeners so **`[Matrix][WebGL]`** lines and invalid-program errors fail CI.
+- **Full matrix** (optional, slow): `npm run test:regression` uses `playwright.regression.config.js` and `tests/regression/` — every `getAvailableModes()` × `getAvailableEffects()` on WebGL.
+
+**CRITICAL**: After shader or renderer changes, run at least `npm test` before merging.
+
+### Manual / Essential Test Scenarios
 
 1. **Default Matrix Effect**: Navigate to `http://localhost:8000/?suppressWarnings=true`
    - Verify green Matrix rain animation loads and runs smoothly
@@ -157,8 +161,8 @@ cp msdfgen/build/msdfgen out/
 
 ### Code Quality Validation
 ```bash
-# ALWAYS run formatting before committing
-npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
+# ALWAYS run formatting before committing (same globs as CI)
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
 
 # Verify no JavaScript errors in browser console
 # Check for WebGL/WebGPU warnings (expected in sandbox environments)
@@ -208,25 +212,23 @@ The project uses shared utility functions to avoid code duplication:
 ### Service Worker and Cache Versioning
 The service worker (`service-worker.js`) implements offline PWA functionality:
 
-- **Dynamic Cache Versioning**: Cache name is generated from `VERSION` file at install time
-  - Cache format: `matrix-v{version}` (e.g., `matrix-v1.0.0`)
-  - When `VERSION` file changes, service worker creates new cache automatically
-  - Old caches are cleaned up during activation phase
-  
-- **VERSION File Management**:
-  - Update `VERSION` file when creating new releases
-  - Service worker fetches `VERSION` during installation
-  - Falls back to `matrix-v1` if VERSION fetch fails
-  
-- **Cache Asset List**: Keep `STATIC_ASSETS` array updated when adding new files
-  - Include all JavaScript modules, shaders, assets, and PWA files
-  - Service worker caches all listed assets for offline use
+- **Cache bucket name** (install path): `matrix-sw-{scope}-v{VERSION}-{VER}`
+  - `{scope}` derives from the service worker URL path (e.g. site root → `root`; GitHub Pages project subpaths get a scoped key so previews/releases do not delete each other’s caches).
+  - `{VERSION}` is read from the `VERSION` file at SW install time (fallback segment `v1` if fetch fails).
+  - `{VER}` is `local` in-repo; GitHub Actions **rewrite** `const VER = "local"` in published `service-worker.js` so each deploy gets a unique stamp and browsers pick up a new SW.
+- **`js/main.js`** logs the same bucket string in the console (parses `VER` from the deployed `service-worker.js` and mirrors scope logic) for debugging — do not confuse with older docs that said `matrix-v{version}` only.
 
-**When releasing new versions:**
-1. Update the `VERSION` file with new version number (e.g., "1.0.1")
-2. Use `create-release.sh` script which automatically includes VERSION in release
-3. Service worker will detect version change and create new cache
-4. Old cached versions are automatically cleaned up
+- **VERSION file**: Bump for releases/cache busts; pair with a small edit to `service-worker.js` header comment if you need byte changes so browsers refetch the SW (see `.github/workflows/gh-pages-deploy.yml`).
+
+- **`STATIC_ASSETS`**: Keep updated when adding first-party JS, shaders, or assets the PWA must offline-cache.
+
+### GitHub Pages and concurrent deploys
+- **`gh-pages-deploy.yml`** syncs the checkout to **`origin/gh-pages`** before rewriting the site root, then pushes without blindly `--force` overwriting sibling **`pr-*`** / **`v*`** directories (see `.github/GITHUB_PAGES.md`).
+- **`pr-preview.yml`** also resets to **`origin/gh-pages`** before copying a PR preview.
+
+### GLSL (WebGL) linking
+- Rain passes load shader sources as **static strings** after fetch (avoid `regl` dynamic `frag`/`vert` being `undefined`).
+- **Shared uniforms** that appear in both vertex and fragment shaders must use the **same precision** on strict drivers (e.g. explicit `uniform mediump float glyphHeightToWidth` in `rainPass.vert.glsl` / `rainPass.frag.glsl` / `rainPass.effect.frag.glsl`). See `SHADER_GUIDE.md`.
 
 ## File Change Impact Analysis
 
@@ -249,19 +251,15 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 
 ## Build System and Dependencies
 
-**NO TRADITIONAL BUILD REQUIRED** - This is a static web application:
-- No package.json, no npm install, no webpack, no bundling
-- Uses ES6 modules loaded directly by browser
-- Prettier for code formatting only (not part of build pipeline)
-- All dependencies are self-contained in `/lib` directory
-- **No Build System**: Static files, no webpack/rollup/vite needed
-- **ES6 Modules**: Modern import/export syntax throughout
-- **No package.json**: Uses npx for tools like prettier and http-server
-- **Git Submodules**: msdfgen for font processing (requires manual initialization)
+**No bundler** — the app is static ES modules over HTTP:
+- **`package.json`**: `npm ci` for CI and local dev; installs `regl` / `twgl` and runs **`postinstall`** → `scripts/vendor-webgl-deps.mjs` (copies minified runtimes into `lib/`). Commit updated `lib/*.min.js` when dependencies change.
+- **Playwright** is a devDependency; `npx playwright install` is required for `npm test`.
+- **Prettier** via `npx` for formatting (also enforced in CI).
+- **Git submodule**: `msdfgen` — only needed to regenerate MSDF textures; prebuilt assets ship in `assets/`.
 
 ## Browser Compatibility
 
-- **WebGL 2.0**: Widely supported, battle-tested (`js/webgl/`)
+- **WebGL 1** (GLSL ES 1.00): Primary compatibility path via **regl** in `js/webgl/` (not “WebGL 2 only”; the stack targets WebGL1 + extensions)
 - **WebGPU**: Cutting-edge, modern browsers only (js/webgpu/)
 - **Software Fallback**: Works with SwiftShader when hardware acceleration disabled
 - **Mobile Support**: Responsive design, touch interactions for effects
@@ -367,8 +365,8 @@ python3 -m http.server 8000
 npx http-server -p 8000  
 php -S localhost:8000
 
-# Format code (ALWAYS before committing)
-npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/**.js" "./lib/gpu-buffer.js"
+# Format code (ALWAYS before committing; match CI)
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
 
 # Essential validation URLs
 http://localhost:8000/?suppressWarnings=true                              # Default Matrix

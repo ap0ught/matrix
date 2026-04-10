@@ -137,8 +137,18 @@ python3 -m http.server 8000    # Python approach
 npx http-server -p 8000        # Node.js approach
 php -S localhost:8000          # PHP approach
 
-# Code formatting with Prettier
-prettier --write --use-tabs --print-width 160 "js/**/*.js"
+# Install tooling and vendored WebGL runtimes (regl/twgl → lib/)
+npm ci
+
+# Code formatting with Prettier (match CI globs)
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
+
+# Automated tests (Node unit tests + Playwright smoke tests)
+npx playwright install   # once per machine
+npm test
+
+# Optional: full WebGL mode × effect regression (slow)
+npm run test:regression
 
 # Performance testing with URL parameters
 localhost:8000/?fps=30&resolution=0.5&effect=none

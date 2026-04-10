@@ -23,6 +23,8 @@ const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, "");
 const SCOPE_KEY = BASE_PATH.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "root";
 const CACHE_PREFIX = `matrix-sw-${SCOPE_KEY}-`;
 
+// Offline bucket: `matrix-sw-{scope}-v{VERSION}-{VER}`. Install fetches VERSION; VER is rewritten in CI.
+// `js/main.js` mirrors this in the console for debugging — keep behavior aligned when changing either file.
 // Cache version will be loaded from VERSION file during installation.
 // After a SW restart globals reset; use getActiveCacheName() for runtime cache writes.
 let CACHE_NAME = `${CACHE_PREFIX}v1-${VER}`; // Default fallback, overwritten during install

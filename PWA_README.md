@@ -71,43 +71,33 @@ Defines the app's metadata:
 
 Implements the caching strategy:
 
-- **Dynamic Version Management**: Cache name is automatically generated from `VERSION` file (e.g., `matrix-v1.0.0`)
-- Caches all static assets during installation
-- Serves from cache first, falls back to network
-- Cleans up old caches on activation
-- Provides detailed console logging for debugging
+- **Cache bucket name** (after install): `matrix-sw-{scope}-v{VERSION}-{VER}`
+  - **`{scope}`** — from the service worker’s URL path (`/matrix/service-worker.js` → scope key so GitHub Pages project sites don’t collide).
+  - **`{VERSION}`** — trimmed contents of the `VERSION` file (fallback segment `1` if the fetch fails).
+  - **`{VER}`** — `local` in development; **GitHub Actions rewrite** this string in published `service-worker.js` so each deploy gets a unique stamp and browsers fetch a new SW.
+- Caches listed assets during installation (`STATIC_ASSETS`), serves cache-first where appropriate, cleans older buckets on activation.
 
-### Version Output
+### Version output (console)
 
-The application outputs version information to the browser console on startup:
+`js/main.js` prints the **same bucket name** the SW will use (reads `VERSION`, derives scope like the SW, and parses `VER` from `service-worker.js`). Example shape:
 
 ```
 ⎡ MATRIX DIGITAL RAIN ⎦
-Version: 1.0.0
-Cache: matrix-v1.0.0
-"Wake up, Neo... The Matrix has you."
-
-PWA Cache Debug Commands:
-  caches.open("matrix-v1.0.0").then(c => c.keys()).then(k => console.log(k.map(r => r.url)))
-  caches.keys().then(names => names.forEach(name => caches.delete(name)))
+Version: 1.0.1
+PWA offline cache: matrix-sw-root-v1.0.1-local
+...
 ```
 
-This information helps with:
-- **Debugging cache issues** - Know which version is running
-- **Verifying updates** - Confirm new versions are deployed
-- **Cache management** - Easy access to debug commands
+Use the printed name with `caches.open(...)` in DevTools. Older docs referred only to `matrix-v{version}`; the **sw-scoped** name above is authoritative.
 
 ### Updating the Cache
 
 When updating the application:
 
-1. Update version number in `VERSION` file (e.g., `1.0.0` → `1.0.1`)
-2. Update `STATIC_ASSETS` array in `service-worker.js` if adding/removing files
-3. The service worker automatically reads `VERSION` file during installation
-4. Cache name is generated as `matrix-v{version}` (e.g., `matrix-v1.0.1`)
-5. On activation, old caches are automatically deleted
-
-**Note**: You no longer need to manually update `CACHE_NAME` in the service worker - it's dynamically generated from the `VERSION` file!
+1. Bump **`VERSION`** for semver/cache identity.
+2. Update **`STATIC_ASSETS`** in `service-worker.js` if you add/remove first-party files the PWA should offline.
+3. Ensure **`service-worker.js` bytes change** when you need every client to pick up a new SW (CI often rewrites `VER`; a comment bump works for source).
+4. On activation, older caches with the same `matrix-sw-{scope}-` prefix are removed when they no longer match the active name.
 
 ## Using as a Screensaver
 
@@ -135,8 +125,8 @@ python3 -m http.server 8000
 ### Viewing Cache Contents
 
 ```javascript
-// In browser console:
-caches.open("matrix-v1").then((cache) => {
+// In browser console (use the name printed at startup, e.g. matrix-sw-root-v1.0.1-local):
+caches.open("matrix-sw-root-v1.0.1-local").then((cache) => {
 	cache.keys().then((keys) => {
 		console.log(
 			"Cached URLs:",

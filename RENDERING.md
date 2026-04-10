@@ -16,3 +16,8 @@ This project uses two browser graphics paths:
 ## Dependencies
 
 - `regl` and `twgl` are **npm dependencies**; `npm install` / `npm ci` runs [`scripts/vendor-webgl-deps.mjs`](scripts/vendor-webgl-deps.mjs) to refresh files under `lib/`. Commit updated `lib/regl.min.js` when the lockfile changes so static hosts without `node_modules` stay consistent.
+
+## GLSL (WebGL) notes
+
+- Targets **WebGL 1** + **GLSL ES 1.00** (with extensions such as `OES_standard_derivatives`). Programs are built with **static** `vert`/`frag` strings after `fetch()` so regl never calls `shaderSource` with `undefined`.
+- **Uniform precision**: If a `float` uniform appears in **both** vertex and fragment shaders, some drivers require the **same precision qualifier** (e.g. `uniform mediump float glyphHeightToWidth`) in both stages — not only a matching global `precision mediump float` directive.
