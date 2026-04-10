@@ -34,15 +34,21 @@ test.describe("Matrix WebGL effects smoke", () => {
 	});
 });
 
+/**
+ * Mirrors the supportsWebGPU() predicate in js/main.js so tests skip precisely
+ * when the app itself would fall back to WebGL (not just when navigator.gpu is absent).
+ */
+const browserSupportsWebGPU = () => window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
+
 test.describe("Matrix WebGPU smoke", () => {
 	test("effect=palette when WebGPU available", async ({ page }) => {
-		const hasGpu = await page.evaluate(() => !!navigator.gpu);
+		const hasGpu = await page.evaluate(browserSupportsWebGPU);
 		test.skip(!hasGpu, "WebGPU not available in this browser");
 		await assertMatrixBootsClean(page, `${baseQuery}&renderer=webgpu&effect=palette`);
 	});
 
 	test("effect=mirror when WebGPU available", async ({ page }) => {
-		const hasGpu = await page.evaluate(() => !!navigator.gpu);
+		const hasGpu = await page.evaluate(browserSupportsWebGPU);
 		test.skip(!hasGpu, "WebGPU not available in this browser");
 		await assertMatrixBootsClean(page, `${baseQuery}&renderer=webgpu&effect=mirror`);
 	});
