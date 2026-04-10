@@ -4,7 +4,7 @@ _"You have to let it all go, Neo. Fear, doubt, and disbelief. Free your mind."_ 
 
 Thank you for your interest in contributing to the Matrix Digital Rain project! This document provides guidelines for contributing code, documentation, and CLI workflows.
 
-**Third-party and npm policy:** read **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** before adding or upgrading dependencies.
+**Third-party and npm policy:** read **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** before adding or upgrading dependencies. Looking Glass / Holoplay: **[HOLOPLAY.md](HOLOPLAY.md)**.
 
 ## 🎯 Ways to Contribute
 

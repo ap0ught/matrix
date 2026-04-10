@@ -111,7 +111,7 @@ Assigned after the object literal:
 
 ### 5.3 Special cases inside versions
 
-- **`holoplay`**: Forces **WebGL** (Looking Glass quilt path in `makeQuiltPass` + `lkgHelper`). Highest integration risk; test hardware or LKG stubs last.
+- **`holoplay`**: Forces **WebGL** (Looking Glass quilt path in `makeQuiltPass` + `lkgHelper`). Highest integration risk; test hardware or LKG stubs last. Product and vendor context: **[HOLOPLAY.md](HOLOPLAY.md)**.
 - **`trinity` / `morpheus` / `bugs` / `holoplay` / `3d`**: **`volumetric: true`** — extra load on rain vertex shader and camera uniforms; regression-test carefully.
 - **`nightmare` / `paradise` / `operator`**: Ripples / polar / box effects — stresses `rainPass.effect.frag.glsl` and uniforms.
 
@@ -190,8 +190,8 @@ Each pass: preserve **inputs/outputs** (texture handles) so `main.js` pipeline s
 
 ### Phase 4 — **quiltPass + Holoplay**
 
-1. Port `quiltPass.js` last; validate against `useHoloplay` / `config` from `holoplay` version.
-2. If no hardware: use mock framebuffer sizes and assert shader compile only.
+1. Port `quiltPass.js` last; validate against `useHoloplay` / `config` from `holoplay` version. Read **[HOLOPLAY.md](HOLOPLAY.md)** for how `lkgHelper` and the vendored `holoplay-core` client fit in (regl migration does **not** replace that file unless you deliberately change LKG integration).
+2. If no hardware: use mock framebuffer sizes and assert shader compile only (`lkgHelper` recorded device path).
 
 ### Phase 5 — **main.js loop**
 

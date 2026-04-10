@@ -35,7 +35,7 @@ _Variants_
 - [Custom palette (`palette=R,G,B,%,R,G,B,%,R,G,B,%, etc`)](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
 - [Custom image (`url=www.website.com/picture.jpg`)](https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
 - [Debug view (`effect=none`)](https://ap0ught.github.io/matrix/?effect=none) (_epilepsy warning_: this once had lots of flickering)
-- [Holographic version](https://ap0ught.github.io/matrix?version=holoplay) (requires a Looking Glass display; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing))
+- [Holographic version](https://ap0ught.github.io/matrix?version=holoplay) (requires a Looking Glass display and HoloPlay Service; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing); integration notes: [HOLOPLAY.md](HOLOPLAY.md))
 
 _Typography_
 

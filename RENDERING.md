@@ -10,7 +10,7 @@ This project uses two browser graphics paths:
 ## Strategy
 
 1. **WebGPU-first** for new GPU work and performance-sensitive changes where supported.
-2. **WebGL** remains the compatibility path for Safari and older browsers, and for **Looking Glass / Holoplay** output (quilt pass lives only under `js/webgl/`). If `useHoloplay` is enabled, `renderer=webgpu` is ignored and the WebGL stack is used.
+2. **WebGL** remains the compatibility path for Safari and older browsers, and for **Looking Glass / Holoplay** output (quilt pass lives only under `js/webgl/`). If `useHoloplay` is enabled, `renderer=webgpu` is ignored and the WebGL stack is used. See **[HOLOPLAY.md](HOLOPLAY.md)** for the Holoplay service client, vendored `holoplay-core` module, and preset behavior.
 3. **regl must be removed** from the dependency tree (first-party WebGL or a policy-approved library). Follow [migration_repl.md](migration_repl.md).
 
 ## Dependencies

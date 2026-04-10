@@ -29,7 +29,7 @@ shaders/
 │   ├── stripePass.frag.glsl       # Stripe effect rendering
 │   ├── mirrorPass.frag.glsl       # Mirror/camera effect
 │   ├── imagePass.frag.glsl        # Custom image overlay
-│   └── quiltPass.frag.glsl        # Looking Glass holographic display
+│   └── quiltPass.frag.glsl        # Looking Glass holographic display (see HOLOPLAY.md)
 │
 └── wgsl/                           # WebGPU shaders
     ├── rainPass.wgsl              # Main rain rendering (compute + render)
