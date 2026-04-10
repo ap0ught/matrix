@@ -11,7 +11,6 @@
 		"@playwright/test": "^1.58.2"
 	},
 	"dependencies": {
-		"regl": "^2.1.1",
-		"twgl": "^7.0.3"
+		"regl": "^2.1.1"
 	}
 }

@@ -58,13 +58,11 @@ Your expertise is informed by the `.codemachine` directory's agent specification
   - Use tabs (not spaces)
   - Print width: 160 characters
   - Format command: `npx prettier --write --use-tabs --print-width 160 "js/**/*.js"`
-  
 - **Performance Baselines**:
   - Target: 60 FPS minimum
   - Memory limit: 512 MB
   - Mobile optimization required
   - Resolution scaling: support 0.5x to 1.0x
-  
 - **Testing Standards**:
   - Visual regression testing expected
   - Performance benchmarking required
@@ -77,7 +75,7 @@ Your expertise is informed by the `.codemachine` directory's agent specification
 
 This is a **static ES-module web application** - key architectural points:
 
-- **No bundler**: Files are served directly; **`npm ci`** installs Playwright and npm `regl`/`twgl`, and **`postinstall`** vendors them into `lib/` (see `scripts/vendor-webgl-deps.mjs`).
+- **No bundler**: Files are served directly; **`npm ci`** installs Playwright and **regl** (temporary), and **`postinstall`** vendors `lib/regl.min.js` (see `scripts/vendor-webgl-deps.mjs`, **DEPENDENCY_POLICY.md**).
 - **ES6 modules**: Uses modern `import`/`export` throughout
 - **Dual renderer**: WebGL (`js/webgl/`, regl) and WebGPU (`js/webgpu/`)
 - **Service worker**: PWA; cache bucket `matrix-sw-{scope}-v{VERSION}-{VER}` (see `service-worker.js` and `js/main.js`)
@@ -88,12 +86,10 @@ This is a **static ES-module web application** - key architectural points:
    - Uses REGL functional wrapper
    - Shaders in `/shaders` directory (GLSL)
    - Main passes: rain computation, bloom effects, final composite
-   
 2. **WebGPU Rendering** (`js/webgpu/`):
    - Next-generation graphics API
    - WGSL shaders
    - Compute shader support for particle systems
-   
 3. **MSDF Fonts** (`assets/`):
    - Multi-channel signed distance field textures
    - Requires msdfgen tool (git submodule)
@@ -158,6 +154,7 @@ cd ../..
 - Console hooks in `tests/matrix-playwright-helpers.js` fail CI on `[Matrix][WebGL]` and invalid program errors.
 
 **Essential test URLs** (always append `&suppressWarnings=true`):
+
 ```
 http://localhost:8000/?suppressWarnings=true                    # Default Matrix
 http://localhost:8000/?version=classic&suppressWarnings=true    # Classic mode
@@ -167,6 +164,7 @@ http://localhost:8000/?effect=rainbow&suppressWarnings=true     # Rainbow colors
 ```
 
 **Manual validation required** after changes:
+
 - Verify Matrix rain animation runs smoothly
 - Test multiple versions and effects
 - Check browser console for errors (WebGL warnings expected in sandbox)
@@ -215,23 +213,27 @@ matrix/
 ### Common Development Tasks
 
 **Adding New Matrix Versions**:
+
 1. Add version config in `js/config.js` versions object
 2. Create font/texture assets if needed
 3. Test via URL: `?version=yourversion&suppressWarnings=true`
 
 **Shader Modifications**:
+
 1. Edit shader files in `/shaders` directory
 2. Refresh browser (no build step needed)
 3. Test with multiple versions and effects
 4. Verify WebGL and WebGPU compatibility
 
 **Performance Optimization**:
+
 1. Use debug view: `?effect=none&suppressWarnings=true`
 2. Profile with browser DevTools
 3. Test with lower resolution: `?resolution=0.5&suppressWarnings=true`
 4. Monitor GPU usage and frame timing
 
 **Shared Utilities**:
+
 - Place shared functions in `js/utils.js` (DRY principle)
 - Export with ES6 syntax
 - Import where needed
@@ -250,6 +252,7 @@ matrix/
 ### Matrix Aesthetic and Terminology
 
 **When appropriate**, use Matrix-themed language:
+
 - "Wake up, Neo..." for initialization messages
 - "Follow the white rabbit" for optimization paths
 - "There is no spoon" for explaining abstraction tricks
@@ -271,6 +274,7 @@ matrix/
 ### Development Best Practices
 
 1. **Always Format Before Committing**:
+
    ```bash
    npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
    ```
@@ -295,17 +299,20 @@ matrix/
 
 ### Troubleshooting Common Issues
 
-**"Software rendering" warning**: 
+**"Software rendering" warning**:
+
 - Expected in sandboxed environments
 - Application functions correctly
 - Performance impact acceptable for development
 
 **Font rendering issues**:
+
 - Verify MSDF textures exist in `assets/`
 - Check browser console for texture loading errors
 - Rebuild msdfgen if fonts appear blurry
 
 **Performance problems**:
+
 - Lower resolution: `?resolution=0.5&suppressWarnings=true`
 - Reduce bloom: `?bloomSize=0.1&bloomStrength=0.3&suppressWarnings=true`
 - Use debug view: `?effect=none&suppressWarnings=true`
@@ -333,7 +340,7 @@ npx prettier --write --use-tabs --print-width 160 "js/**/*.js"
 
 # Essential validation URLs
 http://localhost:8000/?suppressWarnings=true                              # Default
-http://localhost:8000/?version=3d&suppressWarnings=true                   # 3D Mode  
+http://localhost:8000/?version=3d&suppressWarnings=true                   # 3D Mode
 http://localhost:8000/?effect=none&suppressWarnings=true                  # Debug
 http://localhost:8000/?effect=rainbow&suppressWarnings=true               # Rainbow
 ```

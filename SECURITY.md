@@ -50,13 +50,12 @@ The optional Spotify integration uses the OAuth 2.0 Authorization Code flow:
 
 ## Dependencies
 
-This project uses the following dependencies:
+See **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** for what may be added or vendored. Supply-chain table:
 
-| Dependency | Purpose | Location | GitHub | Activity |
-|---|---|---|---|---|
-| **regl** (npm) | WebGL command wrapper used by `js/webgl/` | Version pinned in `package.json`; `npm install` copies `dist/regl.min.js` to `/lib/` via `scripts/vendor-webgl-deps.mjs` | [regl-project/regl](https://github.com/regl-project/regl) | Same upstream project as “REGL”; tracked with semver and Dependabot instead of an opaque copy in git. |
-| **twgl** (npm) | Utilities for raw WebGL; optional path for future refactors | Copied to `/lib/twgl-full.module.js` on install | [greggman/twgl.js](https://github.com/greggman/twgl.js) | Actively maintained; used alongside WebGPU-first work (see [RENDERING.md](RENDERING.md)). |
-| **gl-matrix** | High-performance matrix and vector math | Bundled locally in `/lib/` | [toji/gl-matrix](https://github.com/toji/gl-matrix) | Actively maintained and widely adopted for WebGL/WebGPU math. Receives regular releases. The bundled version tracks a stable 3.x release of the library. |
-| **@playwright/test** | End-to-end browser testing (dev only) | npm `devDependency` — **not included in production builds** | [microsoft/playwright](https://github.com/microsoft/playwright) | Very actively maintained by Microsoft with frequent releases and an extensive user base. This project pins a recent stable major version in its devDependencies. |
+| Dependency           | Purpose                                   | Location                                                                                                        | GitHub                                                          | Activity / notes                                                                                                                                                                          |
+| -------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **regl** (npm)       | WebGL command wrapper used by `js/webgl/` | Pinned in `package.json`; `postinstall` copies `dist/regl.min.js` to `lib/` via `scripts/vendor-webgl-deps.mjs` | [regl-project/regl](https://github.com/regl-project/regl)       | **Exception:** upstream is effectively unmaintained. **Removal is required** per [migration_repl.md](migration_repl.md); tracked explicitly so it is not mistaken for a long-term choice. |
+| **gl-matrix**        | High-performance matrix and vector math   | Bundled locally in `/lib/`                                                                                      | [toji/gl-matrix](https://github.com/toji/gl-matrix)             | Actively maintained and widely adopted for WebGL/WebGPU math. Receives regular releases. The bundled version tracks a stable 3.x release of the library.                                  |
+| **@playwright/test** | End-to-end browser testing (dev only)     | npm `devDependency` — **not included in production builds**                                                     | [microsoft/playwright](https://github.com/microsoft/playwright) | Very actively maintained by Microsoft with frequent releases and an extensive user base. This project pins a recent stable major version in its devDependencies.                          |
 
 Dependencies are automatically monitored by [Dependabot](.github/dependabot.yml) for security updates.

@@ -1,0 +1,31 @@
+# Dependency and third-party code policy
+
+This repository ships as **static files** (no app bundler). Anything we add must stay **maintainable** and **auditable**.
+
+## Rules
+
+1. **npm `dependencies` / `devDependencies`**
+   - Prefer packages with **recent releases**, **responsive maintainers**, and **public security disclosure** practice.
+   - **Do not add** libraries whose upstream is **archived**, **explicitly unmaintained**, or has had **no meaningful release or security fix** for an extended period without a written exception and an owner.
+   - **Do not vendor** unmaintained npm tarballs into `lib/` except as a **time-boxed** migration bridge (see exceptions below).
+
+2. **Vendored scripts under `lib/`**
+   - Every file must have a **documented upstream** (URL + license) in `SECURITY.md` or next to the file.
+   - Prefer **reproducible copies** from `npm pack` / `scripts/*.mjs` over hand-edited minified blobs.
+
+3. **Browser APIs**
+   - First-party code may use WebGL / WebGPU directly. That code is **ours to maintain**; it is not an npm dependency.
+
+## Current exceptions (must shrink over time)
+
+| Item                       | Status                                                                                                                       | Required action                                                                                   |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **`regl`** (WebGL wrapper) | Upstream maintenance is effectively stalled. Still required for `js/webgl/` until the port in **`migration_repl.md`** lands. | **Remove** regl and replace with **first-party WebGL** (or a dependency that passes this policy). |
+
+## Removed (policy-compliant cleanup)
+
+- **`twgl`**: Was listed as a dependency and copied to `lib/twgl-full.module.js` but **was not imported** by any application module. It has been **removed** entirely to avoid shipping unused third-party code.
+
+## Reviews
+
+When upgrading or adding dependencies, update **`SECURITY.md`** supply-chain table and run **`npm test`** (and **`npm run test:regression`** for renderer/shader changes).

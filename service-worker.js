@@ -49,7 +49,7 @@ const STATIC_ASSETS = [
 	"js/colorToRGB.js",
 	"js/fullscreen.js",
 	"js/camera.js",
-	// WebGL modules (regl runtime from npm, vendored to lib/regl.min.js)
+	// WebGL modules (regl runtime — temporary; see DEPENDENCY_POLICY.md + migration_repl.md)
 	"js/webgl/main.js",
 	"js/webgl/rainPass.js",
 	"js/webgl/bloomPass.js",
@@ -72,7 +72,6 @@ const STATIC_ASSETS = [
 	"js/webgpu/utils.js",
 	// Libraries
 	"lib/regl.min.js",
-	"lib/twgl-full.module.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",

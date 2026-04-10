@@ -4,19 +4,21 @@
 
 ## Project Overview
 
-Matrix Digital Rain is a web-based implementation of the iconic falling green code from The Matrix films. It uses **WebGL** (`js/webgl/`, regl) and **WebGPU** (`js/webgpu/`), ES modules with **no bundler** — static files over HTTP. **`npm ci`** installs minimal tooling (Playwright, regl/twgl vendoring); see [RENDERING.md](../RENDERING.md).
+Matrix Digital Rain is a web-based implementation of the iconic falling green code from The Matrix films. It uses **WebGL** (`js/webgl/`, regl **temporarily**) and **WebGPU** (`js/webgpu/`), ES modules with **no bundler** — static files over HTTP. **`npm ci`** installs Playwright and vendors **regl** only; see [DEPENDENCY_POLICY.md](../DEPENDENCY_POLICY.md) and [RENDERING.md](../RENDERING.md).
 
-This project celebrates *The Matrix* franchise created by the Wachowski sisters. When making changes:
+This project celebrates _The Matrix_ franchise created by the Wachowski sisters. When making changes:
+
 - **Maintain the Matrix aesthetic** - green digital rain, cyberpunk themes
 - **Use Matrix terminology** in comments and documentation when appropriate
 - **Remember**: "There is no spoon" - the effect is an illusion created by mathematical precision
 - **The red pill reveals truth** - debug mode (`?effect=none`) shows the reality behind the illusion
 
-*"Welcome to the real world, Neo."* - Morpheus
+_"Welcome to the real world, Neo."_ - Morpheus
 
 ## Development Setup
 
 ### Bootstrap and Initial Setup
+
 ```bash
 # Clone repository with submodules
 git clone --recursive https://github.com/ap0ught/matrix.git
@@ -32,6 +34,7 @@ sudo apt-get update && sudo apt-get install -y libfreetype6-dev cmake build-esse
 **Note**: The msdfgen submodule is required only for generating new font textures. Pre-built MSDF textures are included in the `assets/` directory, so most development work doesn't require building msdfgen.
 
 ### Local Development Server
+
 Choose any HTTP server - all work identically for this static web application:
 
 ```bash
@@ -48,6 +51,7 @@ php -S localhost:8000
 **Access the application**: Open `http://localhost:8000` in any web browser.
 
 ### Code Formatting
+
 ```bash
 # Match CI (`.github/workflows/master-branch-protection.yml`): HTML, JS, gpu-buffer, scripts, tests
 npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
@@ -56,6 +60,7 @@ npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" ".
 **TIMING**: Takes ~2-5 seconds to complete, including npm package install. **NEVER CANCEL**: Always let Prettier finish completely.
 
 ### MSDF Font Generation (Advanced)
+
 **NEVER CANCEL**: Building msdfgen takes 8-20 seconds. Font generation depends on this tool.
 
 ```bash
@@ -78,7 +83,9 @@ cp msdfgen/build/msdfgen out/
 ```
 
 ### Playdate Game Development (Optional)
+
 **ONLY attempt if PLAYDATE_SDK_PATH environment variable is set:**
+
 - Simulator build: `cd playdate/matrix_c/build && rm -R ../ThePlaytrix.pdx ./* && cmake .. && make`
 - Device build: `cd playdate/matrix_c/build-device && cmake -DCMAKE_TOOLCHAIN_FILE=${PLAYDATE_SDK_PATH}/C_API/buildsupport/arm.cmake -DCMAKE_BUILD_TYPE=Release .. && make`
 - **TIMING**: Each build takes 30-60 seconds. NEVER CANCEL builds.
@@ -86,6 +93,7 @@ cp msdfgen/build/msdfgen out/
 ## Repository Structure
 
 ### Core Web Application Files
+
 - `index.html` - Main HTML entry point with inline CSS
 - `service-worker.js` - PWA service worker with dynamic cache versioning
 - `VERSION` - Version file used for cache busting (e.g., "1.0.0")
@@ -98,23 +106,27 @@ cp msdfgen/build/msdfgen out/
 - `shaders/` - GLSL and WGSL shader source files
 
 ### Key Renderer Files
+
 - `js/webgl/main.js` - WebGL renderer entry point
-- `js/webgpu/main.js` - WebGPU renderer entry point  
+- `js/webgpu/main.js` - WebGPU renderer entry point
 - `js/webgl/rainPass.js` & `js/webgpu/rainPass.js` - Core Matrix rain computation
 - `js/webgl/bloomPass.js` & `js/webgpu/bloomPass.js` - Glow/bloom effects
 
 ### Asset Files
+
 - `assets/` - Matrix fonts (TrueType) and MSDF texture atlases
 - `assets/*_msdf.png` - Multi-channel distance field font textures
-- `lib/` - Vendored runtime bits (`regl.min.js`, `twgl-full.module.js` from npm via `postinstall`; `gl-matrix.js`, etc.)
+- `lib/` - Vendored runtime bits (`regl.min.js` from npm via `postinstall`; `gl-matrix.js`, etc.)
 
 ### Documentation
+
 - `README.md` - User-facing documentation with all URL parameters
 - `DEV_README.md` - Developer guide with Matrix movie theming
 - `.copilot/instructions.md` - Copilot instructions for code enhancement
 - `SPOTIFY_INTEGRATION.md` - Spotify music integration guide
 
 ### Configuration
+
 - URL parameters control all visual aspects (see README.md for full list)
 - No configuration files - everything via URL query strings
 - Music integration requires Spotify API setup (see SPOTIFY_INTEGRATION.md)
@@ -123,7 +135,7 @@ cp msdfgen/build/msdfgen out/
 
 ### Automated (CI and local)
 
-- **Install**: `npm ci` (runs `postinstall` → `scripts/vendor-webgl-deps.mjs` to refresh `lib/regl.min.js` and `lib/twgl-full.module.js`).
+- **Install**: `npm ci` (runs `postinstall` → `scripts/vendor-webgl-deps.mjs` to refresh `lib/regl.min.js`).
 - **Default suite**: `npm test` → Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`, **not** `tests/regression/**`).
 - **Helpers**: `tests/matrix-playwright-helpers.js` attaches console/page listeners so **`[Matrix][WebGL]`** lines and invalid-program errors fail CI.
 - **Full matrix** (optional, slow): `npm run test:regression` uses `playwright.regression.config.js` and `tests/regression/` — every `getAvailableModes()` × `getAvailableEffects()` on WebGL.
@@ -153,6 +165,7 @@ cp msdfgen/build/msdfgen out/
    - Performance testing: `http://localhost:8000/?fps=30&resolution=0.5&suppressWarnings=true`
 
 ### Performance Testing
+
 - Use URL parameters for performance validation: `?fps=30&resolution=0.5&effect=none&suppressWarnings=true`
 - **WebGL Inspector** - Use browser DevTools for frame analysis
 - **Chrome DevTools** - Monitor CPU and memory usage during animation
@@ -160,6 +173,7 @@ cp msdfgen/build/msdfgen out/
 - Monitor browser console for WebGL warnings (expected in sandboxed environments)
 
 ### Code Quality Validation
+
 ```bash
 # ALWAYS run formatting before committing (same globs as CI)
 npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
@@ -171,23 +185,27 @@ npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" ".
 ## Common Development Tasks
 
 ### Making Visual Changes
+
 1. **Modify shader code** in `/shaders` directory for rendering effects
 2. **Update pass configurations** in `js/webgl/` or `js/webgpu/` directories
 3. **Test immediately** by refreshing browser - no build step needed
 4. **Always validate** with multiple Matrix versions and effects
 
 ### Adding New Matrix Versions
+
 1. Add version configuration in `js/config.js` versions object
 2. Create corresponding font/texture assets if needed
 3. Test via URL parameter: `?version=yourversion&suppressWarnings=true`
 
 ### Adding New URL Parameters
+
 1. Update parameter definitions in `js/config.js`
 2. Add validation and default values in config parsing
 3. Test parameter in URL: `?yourNewParam=value&suppressWarnings=true`
 4. **Always test** with existing parameters to ensure no conflicts
 
 ### Performance Optimization
+
 1. **Profile with browser DevTools** - built-in GPU performance counters
 2. **Test with different resolutions**: `?resolution=0.5&suppressWarnings=true` for performance testing
 3. **Use debug view**: `?effect=none&suppressWarnings=true` to see raw computational output
@@ -197,19 +215,22 @@ npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" ".
 7. Test on both WebGL and WebGPU renderers
 
 ### Shared Utilities and DRY Principles
+
 The project uses shared utility functions to avoid code duplication:
 
 - **`js/utils.js`** - Central location for shared utility functions
   - `formatModeName(name)` - Converts camelCase/snake_case/kebab-case to Title Case
   - Used across `main.js`, `mode-manager.js`, and `mode-display.js`
-  
+
 **When adding new utilities:**
+
 1. Place shared functions in `js/utils.js` with clear JSDoc comments
 2. Export functions using ES6 export syntax
 3. Import where needed using `import { functionName } from "./utils.js"`
 4. Avoid duplicating utility functions across multiple files
 
 ### Service Worker and Cache Versioning
+
 The service worker (`service-worker.js`) implements offline PWA functionality:
 
 - **Cache bucket name** (install path): `matrix-sw-{scope}-v{VERSION}-{VER}`
@@ -223,20 +244,24 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 - **`STATIC_ASSETS`**: Keep updated when adding first-party JS, shaders, or assets the PWA must offline-cache.
 
 ### GitHub Pages and concurrent deploys
+
 - **`gh-pages-deploy.yml`** syncs the checkout to **`origin/gh-pages`** before rewriting the site root, then pushes without blindly `--force` overwriting sibling **`pr-*`** / **`v*`** directories (see `.github/GITHUB_PAGES.md`).
 - **`pr-preview.yml`** also resets to **`origin/gh-pages`** before copying a PR preview.
 
 ### GLSL (WebGL) linking
+
 - Rain passes load shader sources as **static strings** after fetch (avoid `regl` dynamic `frag`/`vert` being `undefined`).
 - **Shared uniforms** that appear in both vertex and fragment shaders must use the **same precision** on strict drivers (e.g. explicit `uniform mediump float glyphHeightToWidth` in `rainPass.vert.glsl` / `rainPass.frag.glsl` / `rainPass.effect.frag.glsl`). See `SHADER_GUIDE.md`.
 
 ## File Change Impact Analysis
 
 ### Changes Requiring Format Check
+
 - **ANY JavaScript file change**: Run Prettier command before committing
 - **HTML file changes**: Include in Prettier run
 
 ### Changes Requiring Full Validation
+
 - **Shader files** (`/shaders`): Test all Matrix versions and effects
 - **Renderer files** (`js/webgl/`, `js/webgpu/`): Test WebGL and WebGPU modes
 - **Config changes** (`js/config.js`): Test URL parameter parsing
@@ -246,13 +271,15 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 - **VERSION file**: Update release documentation and test cache invalidation
 
 ### Safe Changes (Minimal Testing)
+
 - **Documentation files** (`*.md`): No validation required
 - **Asset files** (`/assets`): Test affected visual features only
 
 ## Build System and Dependencies
 
 **No bundler** — the app is static ES modules over HTTP:
-- **`package.json`**: `npm ci` for CI and local dev; installs `regl` / `twgl` and runs **`postinstall`** → `scripts/vendor-webgl-deps.mjs` (copies minified runtimes into `lib/`). Commit updated `lib/*.min.js` when dependencies change.
+
+- **`package.json`**: `npm ci` for CI and local dev; installs **regl** (temporary) and runs **`postinstall`** → `scripts/vendor-webgl-deps.mjs` (copies `lib/regl.min.js`). Commit updated `lib/regl.min.js` when the lockfile changes. See **DEPENDENCY_POLICY.md**.
 - **Playwright** is a devDependency; `npx playwright install` is required for `npm test`.
 - **Prettier** via `npx` for formatting (also enforced in CI).
 - **Git submodule**: `msdfgen` — only needed to regenerate MSDF textures; prebuilt assets ship in `assets/`.
@@ -269,12 +296,14 @@ The service worker (`service-worker.js`) implements offline PWA functionality:
 The gallery mode (`?effect=gallery`) follows the same architectural patterns as other core modules:
 
 ### Design Patterns
+
 - **Class-based with event system**: Like `ModeManager`, uses `on()` and `emit()` for event handling
 - **Lifecycle methods**: `start()`, `stop()`, `on()`, `emit()` matching other managers
 - **Configuration-driven**: Accepts config object in constructor
 - **Self-contained UI**: Creates and manages its own DOM elements and styles
 
 ### Key Features
+
 1. **Fortune Cookie Title Screens** - Random Matrix quotes shown before playlist starts (3 seconds)
 2. **Smart Screenshot Generation** - Automatically captures missing screenshots (12 seconds)
 3. **Random Playlist System** - Shuffles gallery items, generates new playlist when complete
@@ -282,6 +311,7 @@ The gallery mode (`?effect=gallery`) follows the same architectural patterns as 
 5. **42-Second Intervals** - Time between shader transitions (homage to "42")
 
 ### File Structure
+
 ```
 js/gallery.js           # Gallery manager class (follows ModeManager pattern)
 gallery/                # Screenshot storage directory
@@ -290,21 +320,23 @@ gallery/                # Screenshot storage directory
 ```
 
 ### Event System
+
 ```javascript
 galleryManager.on("itemChange", ({ item, index }) => {
-    // Fired when switching to new shader
+	// Fired when switching to new shader
 });
 
 galleryManager.on("screenshotCapture", ({ item, duration }) => {
-    // Fired when capturing screenshot for missing image
+	// Fired when capturing screenshot for missing image
 });
 
 galleryManager.on("playlistComplete", () => {
-    // Fired when playlist finishes, triggers new playlist generation
+	// Fired when playlist finishes, triggers new playlist generation
 });
 ```
 
 ### Integration Points
+
 - **main.js**: Detects `effect=gallery` and calls `initializeGalleryMode()`
 - **config.js**: Includes "gallery" in available effects list
 - **effects.js**: Maps "gallery" effect (handled before renderer initialization)
@@ -312,27 +344,32 @@ galleryManager.on("playlistComplete", () => {
 ## Troubleshooting
 
 ### "Software rendering" warning
+
 - Expected in sandboxed environments
 - Application still functions correctly
 - Performance impact is acceptable for development
 
 ### Font rendering issues
+
 - Verify MSDF textures exist in `assets/` directory
 - Check browser console for texture loading errors
 - Rebuild msdfgen if fonts appear blurry
 
 ### Performance problems
+
 - Lower resolution: `?resolution=0.5&suppressWarnings=true`
 - Reduce bloom: `?bloomSize=0.1&bloomStrength=0.3&suppressWarnings=true`
 - Debug view for analysis: `?effect=none&suppressWarnings=true` (reveals character grid structure)
 
 ### Common Issues
+
 - **Performance warnings**: Expected in headless/sandboxed environments
 - **WebGL fallback warnings**: Normal when hardware acceleration unavailable
 - **Blank screen**: Check browser console for JavaScript errors
 - **Slow performance**: Test with `?resolution=0.5&suppressWarnings=true` parameter
 
 ### Development Environment
+
 - **Any modern browser** with JavaScript enabled
 - **Local HTTP server** (Python/Node.js/PHP) required for ES6 modules
 - **No build tools** or development dependencies required
@@ -342,7 +379,7 @@ galleryManager.on("playlistComplete", () => {
 
 **NEVER CANCEL THESE OPERATIONS**:
 
-- **msdfgen compilation**: 8-20 seconds - Do NOT interrupt the build process  
+- **msdfgen compilation**: 8-20 seconds - Do NOT interrupt the build process
 - **Font generation**: 5-15 seconds per font - Large texture processing takes time
 - **Server startup**: 3-8 seconds - Initial HTTP server setup
 - **Prettier formatting**: 2-5 seconds - Processing all JavaScript files
@@ -362,7 +399,7 @@ galleryManager.on("playlistComplete", () => {
 ```bash
 # Serve application (choose one)
 python3 -m http.server 8000
-npx http-server -p 8000  
+npx http-server -p 8000
 php -S localhost:8000
 
 # Format code (ALWAYS before committing; match CI)
@@ -370,7 +407,7 @@ npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" ".
 
 # Essential validation URLs
 http://localhost:8000/?suppressWarnings=true                              # Default Matrix
-http://localhost:8000/?version=3d&suppressWarnings=true                   # 3D Mode  
+http://localhost:8000/?version=3d&suppressWarnings=true                   # 3D Mode
 http://localhost:8000/?effect=none&suppressWarnings=true                  # Debug view
 http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0&suppressWarnings=true  # Custom colors
 ```
@@ -379,19 +416,20 @@ http://localhost:8000/?effect=stripes&stripeColors=1,0,0,1,1,0&suppressWarnings=
 
 **Remember**: This is a digital art project first, a technical demo second. Changes should preserve the mystique and visual impact of the original Matrix digital rain effect while improving performance and accessibility.
 
-*The Matrix has you. Follow the white rabbit.* 🐰
+_The Matrix has you. Follow the white rabbit._ 🐰
 
 ## UI Components Architecture
 
 ### Mode Display Panel (`js/mode-display.js`)
+
 The Matrix Mode panel in the top-right corner provides user controls for customizing the experience:
 
 **Key Features**:
+
 - **Version Dropdown**: Interactive select element populated from `getAvailableModes()` in config.js
   - Lists all available Matrix versions (classic, resurrections, trinity, etc.)
   - Changing version triggers page reload with new URL parameter
   - Current selection is synchronized with URL params
-  
 - **Effect Dropdown**: Interactive select element populated from `getAvailableEffects()` in config.js
   - Lists all available effects (palette, rainbow, mirror, etc.)
   - Changing effect triggers page reload with new URL parameter
@@ -400,29 +438,40 @@ The Matrix Mode panel in the top-right corner provides user controls for customi
 - **Auto Mode Switching**: Checkbox to enable/disable screensaver-like mode rotation
   - When enabled, automatically cycles through different version/effect combinations
   - Interval configurable via dropdown (10-60 minutes)
-  
 - **Switch Mode Now**: Button to manually trigger a random mode change
   - Calls `modeManager.switchToRandomMode(true)` with manual flag
   - For manual switches, page reloads to ensure clean state
   - For auto switches, attempts in-place config update
 
 **Event System**:
+
 ```javascript
-modeDisplay.on("versionChange", (version) => { /* handle version change */ });
-modeDisplay.on("effectChange", (effect) => { /* handle effect change */ });
-modeDisplay.on("toggleScreensaver", (enabled) => { /* handle screensaver toggle */ });
-modeDisplay.on("changeSwitchInterval", (interval) => { /* handle interval change */ });
+modeDisplay.on("versionChange", (version) => {
+	/* handle version change */
+});
+modeDisplay.on("effectChange", (effect) => {
+	/* handle effect change */
+});
+modeDisplay.on("toggleScreensaver", (enabled) => {
+	/* handle screensaver toggle */
+});
+modeDisplay.on("changeSwitchInterval", (interval) => {
+	/* handle interval change */
+});
 ```
 
 **Integration Points**:
+
 - Imports `getAvailableModes()` and `getAvailableEffects()` from config.js
 - Communicates with `ModeManager` for mode switching logic
 - Events handled in `main.js` `setupModeManagementEvents()` function
 
 ### Page Title Updates
+
 The page title dynamically updates to reflect the current version and effect:
+
 - Format: `"Matrix - {Version Name} / {Effect Name}"`
-- Examples: 
+- Examples:
   - `"Matrix - Classic / Palette"`
   - `"Matrix - Resurrections / Rainbow"`
   - `"Matrix - Trinity / Mirror"`
@@ -435,7 +484,9 @@ The page title dynamically updates to reflect the current version and effect:
 - Name formatting uses camelCase-to-Title-Case conversion for readability
 
 ### Spotify UI Component
+
 The Spotify integration UI (`js/spotify-ui.js`) is hidden by default:
+
 - Located in top-left corner when visible
 - Controlled via `spotifyControlsVisible` config parameter
 - **Note**: "Show Spotify Controls" checkbox removed from Mode Display as of QOL improvements
@@ -443,7 +494,9 @@ The Spotify integration UI (`js/spotify-ui.js`) is hidden by default:
 - Component still functional for users who explicitly enable it via URL
 
 ### Configuration System
+
 All UI options are controlled via URL parameters:
+
 - `version`: Matrix version (classic, resurrections, etc.)
 - `effect`: Visual effect (palette, rainbow, mirror, etc.)
   - **Note**: The "trans" effect was removed in a prior PR and is no longer available
@@ -454,5 +507,5 @@ All UI options are controlled via URL parameters:
 See `js/config.js` `paramMapping` object for complete list of supported parameters.
 
 Available effects are defined in `getAvailableEffects()` function in config.js:
-- none, plain, palette, customStripes, stripes, rainbow, spectrum, image, mirror, gallery
 
+- none, plain, palette, customStripes, stripes, rainbow, spectrum, image, mirror, gallery

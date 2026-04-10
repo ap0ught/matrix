@@ -1,7 +1,7 @@
 /*
  * WebGL utilities — helpers for the WebGL renderer (`js/webgl/`)
  *
- * Drawing is driven by the regl library (see `lib/regl.min.js`, npm `regl` package).
+ * Drawing is driven by regl today (see `lib/regl.min.js`); regl is slated for removal — DEPENDENCY_POLICY.md + migration_repl.md.
  * Like the utilities that keep Zion's machines running, these functions handle
  * the fundamental operations needed for Matrix rain rendering.
  */

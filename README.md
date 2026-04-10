@@ -62,7 +62,7 @@ _Concept_
 
 ## About
 
-This project is a web implementation of the raining green code seen in the _Matrix_ franchise. The WebGL path ([`js/webgl/`](js/webgl/)) uses the [regl](https://www.npmjs.com/package/regl) package (vendored to `lib/regl.min.js` after install); there is also a [WebGPU](https://github.com/gpuweb/gpuweb) implementation under [`js/webgpu/`](js/webgpu/). See [RENDERING.md](RENDERING.md) for how the two stacks relate. Its previous Three.js version is maintained in a separate branch.
+This project is a web implementation of the raining green code seen in the _Matrix_ franchise. The WebGL path ([`js/webgl/`](js/webgl/)) currently uses [regl](https://www.npmjs.com/package/regl) (vendored to `lib/regl.min.js` after install) as a **temporary** runtime; **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** requires migrating off unmaintained third-party GL wrappers per [migration_repl.md](migration_repl.md). There is also a [WebGPU](https://github.com/gpuweb/gpuweb) implementation under [`js/webgpu/`](js/webgpu/). See [RENDERING.md](RENDERING.md) for how the two stacks relate. Its previous Three.js version is maintained in a separate branch.
 
 This project runs right in the web browser; you can serve it with any HTTP/HTTPS server, with no additional setup. For example, on a Mac you can point a Terminal shell at a local copy of the project and run a simple HTTP server with Python: `cd /path/to/the/project ; python3 -m http.server`
 
@@ -119,29 +119,27 @@ The number of implementations out there of this effect is a testament to the siz
 
 Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matrix.c), [roughest](https://github.com/Zygo/xscreensaver/blob/d1f484cfa47f4a0862140421480bb536ad66ede9/hacks/xmatrix.c) versions were made after the film hit theaters in March, but before it was released on home media in October— people were recreating the effect purely from memory. Others probably used the official screensaver as a reference, which was made by the time-strappped developers of [the (excellent, defunct) official site](https://web.archive.org/web/*/http://whatisthematrix.com) from the images and multimedia tools they had available.
 
-
-
 ## 🎨 Gallery
 
 _Explore the full range of Matrix shader variations:_
 
 **[View Live Gallery Slideshow](https://ap0ught.github.io/matrix/?effect=gallery)**
 
-| ![Classic Matrix](gallery/classic-matrix.png) | ![Matrix Resurrections](gallery/resurrections.png) | ![3D Volumetric Mode](gallery/3d-volumetric.png) | 
-| :---: | :---: | :---: | 
-| **Classic Matrix** | **Matrix Resurrections** | **3D Volumetric Mode** | 
+| ![Classic Matrix](gallery/classic-matrix.png) | ![Matrix Resurrections](gallery/resurrections.png) | ![3D Volumetric Mode](gallery/3d-volumetric.png) |
+| :-------------------------------------------: | :------------------------------------------------: | :----------------------------------------------: |
+|              **Classic Matrix**               |              **Matrix Resurrections**              |              **3D Volumetric Mode**              |
 
-| ![Operator Console](gallery/operator.png) | ![Nightmare Matrix](gallery/nightmare.png) | ![Paradise Matrix](gallery/paradise.png) | 
-| **Operator Console** | **Nightmare Matrix** | **Paradise Matrix** | 
+| ![Operator Console](gallery/operator.png) | ![Nightmare Matrix](gallery/nightmare.png) | ![Paradise Matrix](gallery/paradise.png) |
+| **Operator Console** | **Nightmare Matrix** | **Paradise Matrix** |
 
-| ![Rainbow Spectrum](gallery/rainbow.png) | ![Light Spectrum](gallery/spectrum.png) | ![Custom Stripes (RGB)](gallery/stripes-rgb.png) | 
-| **Rainbow Spectrum** | **Light Spectrum** | **Custom Stripes (RGB)** | 
+| ![Rainbow Spectrum](gallery/rainbow.png) | ![Light Spectrum](gallery/spectrum.png) | ![Custom Stripes (RGB)](gallery/stripes-rgb.png) |
+| **Rainbow Spectrum** | **Light Spectrum** | **Custom Stripes (RGB)** |
 
-| ![Trinity Mode](gallery/trinity.png) | ![Morpheus Mode](gallery/morpheus.png) | ![Megacity](gallery/megacity.png) | 
-| **Trinity Mode** | **Morpheus Mode** | **Megacity** | 
+| ![Trinity Mode](gallery/trinity.png) | ![Morpheus Mode](gallery/morpheus.png) | ![Megacity](gallery/megacity.png) |
+| **Trinity Mode** | **Morpheus Mode** | **Megacity** |
 
-| ![Palimpsest](gallery/palimpsest.png) | ![Twilight](gallery/twilight.png) | ![Debug View](gallery/debug.png) | 
-| **Palimpsest** | **Twilight** | **Debug View** | 
+| ![Palimpsest](gallery/palimpsest.png) | ![Twilight](gallery/twilight.png) | ![Debug View](gallery/debug.png) |
+| **Palimpsest** | **Twilight** | **Debug View** |
 
 ## Customization
 

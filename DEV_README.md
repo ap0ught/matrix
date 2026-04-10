@@ -74,8 +74,8 @@ float alpha = smoothstep(0.5 - fwidth(distance), 0.5 + fwidth(distance), distanc
 
 ### WebGL path (`js/webgl/`) and regl
 
-- 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — the WebGL renderer loads the package output from `lib/regl.min.js` (refreshed by `npm install`).
-- 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL, Holoplay constraints, and twgl for future glue code.
+- 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — **temporary** WebGL runtime (`lib/regl.min.js`); see [DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md) and [migration_repl.md](migration_repl.md).
+- 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL and Holoplay constraints.
 - 💡 **Philosophy**: Treat graphics as pure functions — given the same inputs, always produce the same output. Very Matrix-like in its deterministic perfection.
 
 ### Signed Distance Fields in Graphics
@@ -137,7 +137,7 @@ python3 -m http.server 8000    # Python approach
 npx http-server -p 8000        # Node.js approach
 php -S localhost:8000          # PHP approach
 
-# Install tooling and vendored WebGL runtimes (regl/twgl → lib/)
+# Install tooling and vendored regl (→ lib/regl.min.js)
 npm ci
 
 # Code formatting with Prettier (match CI globs)
