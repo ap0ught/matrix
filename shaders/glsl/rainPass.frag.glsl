@@ -30,8 +30,8 @@ uniform float msdfPxRange;
 uniform vec2 glyphMSDFSize, glintMSDFSize;
 uniform bool hasBaseTexture, hasGlintTexture;
 
-// Glyph appearance parameters
-uniform float glyphHeightToWidth, glyphSequenceLength, glyphEdgeCrop;
+// Glyph appearance parameters (mediump explicit — must match rainPass.vert.glsl)
+uniform mediump float glyphHeightToWidth, glyphSequenceLength, glyphEdgeCrop;
 uniform float baseContrast, baseBrightness, glintContrast, glintBrightness;
 uniform float brightnessOverride, brightnessThreshold;
 uniform vec2 glyphTextureGridSize;

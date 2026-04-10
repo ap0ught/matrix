@@ -27,7 +27,8 @@ uniform float animationSpeed;
 
 // Effect control flags and parameters
 uniform bool hasThunder, loops;
-uniform float glyphHeightToWidth;
+// Must match fullscreen quad vert (`precision mediump float` in js/webgl/utils.js).
+uniform mediump float glyphHeightToWidth;
 uniform int rippleType;  // -1=none, 0=square, 1=circular
 uniform float rippleScale, rippleSpeed, rippleThickness;
 
