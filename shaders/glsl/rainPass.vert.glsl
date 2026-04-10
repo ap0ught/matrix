@@ -18,7 +18,10 @@ uniform sampler2D raindropState, symbolState, effectState;
 // Layout parameters - control glyph spacing and density
 uniform float density;
 uniform vec2 quadSize;
-uniform float glyphHeightToWidth, glyphVerticalSpacing;
+// Explicit precision: some GL stacks still report a VERTEX/FRAGMENT mismatch for shared
+// uniforms when only the default `precision mediump float` applies (e.g. version=2003 path).
+uniform mediump float glyphHeightToWidth;
+uniform mediump float glyphVerticalSpacing;
 
 // 3D transformation matrices for volumetric mode
 uniform mat4 camera, transform;
