@@ -1,5 +1,5 @@
 import colorToRGB from "../colorToRGB.js";
-import { loadText, make1DTexture, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadText, make1DTexture, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 // Multiplies the rendered rain and bloom by a 1D gradient texture
 // generated from the passed-in color sequence
@@ -41,32 +41,36 @@ export default ({ regl, config }, inputs) => {
 
 	const stripePassFrag = loadText("shaders/glsl/stripePass.frag.glsl");
 
-	const render = regl({
-		frag: regl.prop("frag"),
-
-		uniforms: {
-			backgroundColor: colorToRGB(backgroundColor),
-			cursorColor: colorToRGB(cursorColor),
-			glintColor: colorToRGB(glintColor),
-			cursorIntensity,
-			glintIntensity,
-			ditherMagnitude,
-			tex: inputs.primary,
-			bloomTex: inputs.bloom,
-			stripeTex,
-		},
-		framebuffer: output,
+	let render;
+	const programsReady = stripePassFrag.loaded.then(() => {
+		render = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("stripePass.frag", () => stripePassFrag.text()),
+			uniforms: {
+				backgroundColor: colorToRGB(backgroundColor),
+				cursorColor: colorToRGB(cursorColor),
+				glintColor: colorToRGB(glintColor),
+				cursorIntensity,
+				glintIntensity,
+				ditherMagnitude,
+				time: regl.context("time"),
+				tex: inputs.primary,
+				bloomTex: inputs.bloom,
+				stripeTex,
+			},
+			framebuffer: output,
+		});
 	});
 
 	return makePass(
 		{
 			primary: output,
 		},
-		stripePassFrag.loaded,
+		programsReady,
 		(w, h) => output.resize(w, h),
 		(shouldRender) => {
 			if (shouldRender) {
-				render({ frag: stripePassFrag.text() });
+				render({});
 			}
 		},
 	);

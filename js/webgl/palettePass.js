@@ -1,5 +1,5 @@
 import colorToRGB from "../colorToRGB.js";
-import { loadText, make1DTexture, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadText, make1DTexture, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 // Maps the brightness of the rendered rain and bloom to colors
 // in a 1D gradient palette texture generated from the passed-in color sequence
@@ -61,32 +61,36 @@ export default ({ regl, config }, inputs) => {
 
 	const palettePassFrag = loadText("shaders/glsl/palettePass.frag.glsl");
 
-	const render = regl({
-		frag: regl.prop("frag"),
-
-		uniforms: {
-			backgroundColor: colorToRGB(backgroundColor),
-			cursorColor: colorToRGB(cursorColor),
-			glintColor: colorToRGB(glintColor),
-			cursorIntensity,
-			glintIntensity,
-			ditherMagnitude,
-			tex: inputs.primary,
-			bloomTex: inputs.bloom,
-			paletteTex,
-		},
-		framebuffer: output,
+	let render;
+	const programsReady = palettePassFrag.loaded.then(() => {
+		render = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("palettePass.frag", () => palettePassFrag.text()),
+			uniforms: {
+				backgroundColor: colorToRGB(backgroundColor),
+				cursorColor: colorToRGB(cursorColor),
+				glintColor: colorToRGB(glintColor),
+				cursorIntensity,
+				glintIntensity,
+				ditherMagnitude,
+				time: regl.context("time"),
+				tex: inputs.primary,
+				bloomTex: inputs.bloom,
+				paletteTex,
+			},
+			framebuffer: output,
+		});
 	});
 
 	return makePass(
 		{
 			primary: output,
 		},
-		palettePassFrag.loaded,
+		programsReady,
 		(w, h) => output.resize(w, h),
 		(shouldRender) => {
 			if (shouldRender) {
-				render({ frag: palettePassFrag.text() });
+				render({});
 			}
 		},
 	);

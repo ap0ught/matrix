@@ -5,7 +5,7 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
+ * Version: 2.2 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.

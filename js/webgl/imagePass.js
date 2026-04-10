@@ -1,4 +1,4 @@
-import { loadImage, loadText, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadImage, loadText, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 // Multiplies the rendered rain and bloom by a loaded in image
 
@@ -9,24 +9,28 @@ export default ({ regl, config }, inputs) => {
 	const bgURL = "bgURL" in config ? config.bgURL : defaultBGURL;
 	const background = loadImage(regl, bgURL);
 	const imagePassFrag = loadText("shaders/glsl/imagePass.frag.glsl");
-	const render = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			backgroundTex: background.texture,
-			tex: inputs.primary,
-			bloomTex: inputs.bloom,
-		},
-		framebuffer: output,
+	let render;
+	const programsReady = Promise.all([background.loaded, imagePassFrag.loaded]).then(() => {
+		render = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("imagePass.frag", () => imagePassFrag.text()),
+			uniforms: {
+				backgroundTex: background.texture,
+				tex: inputs.primary,
+				bloomTex: inputs.bloom,
+			},
+			framebuffer: output,
+		});
 	});
 	return makePass(
 		{
 			primary: output,
 		},
-		Promise.all([background.loaded, imagePassFrag.loaded]),
+		programsReady,
 		(w, h) => output.resize(w, h),
 		(shouldRender) => {
 			if (shouldRender) {
-				render({ frag: imagePassFrag.text() });
+				render({});
 			}
 		},
 	);

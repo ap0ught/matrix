@@ -177,21 +177,26 @@ const loadText = (url) => {
 		text: () => {
 			if (!loaded) {
 				console.warn(`text still loading: ${url}`);
+				return "";
 			}
 			return text;
 		},
 		loaded: (async () => {
 			if (url != null) {
-				text = await (await fetch(url)).text();
+				const res = await fetch(url);
+				if (!res.ok) {
+					throw new Error(`[Matrix] Failed to load shader ${url}: ${res.status} ${res.statusText}`);
+				}
+				const body = await res.text();
+				text = typeof body === "string" ? body : String(body ?? "");
 				loaded = true;
 			}
 		})(),
 	};
 };
 
-const makeFullScreenQuad = (regl, uniforms = {}, context = {}) =>
-	regl({
-		vert: `
+// Shared fullscreen triangle (must match attribute name `aPosition` + buffer layout).
+const fullscreenPassVertGLSL = `
 		precision mediump float;
 		attribute vec2 aPosition;
 		varying vec2 vUV;
@@ -199,7 +204,37 @@ const makeFullScreenQuad = (regl, uniforms = {}, context = {}) =>
 			vUV = 0.5 * (aPosition + 1.0);
 			gl_Position = vec4(aPosition, 0, 1);
 		}
-	`,
+	`;
+
+const fullscreenPassAttributes = {
+	aPosition: [-4, -4, 4, -4, 0, 4],
+};
+
+const fullscreenPassVertexCount = 3;
+
+/** Spread into `regl({ ... })` for full-screen fragment passes that use a static `frag` string. */
+const fullscreenQuadReglBase = {
+	vert: fullscreenPassVertGLSL,
+	attributes: fullscreenPassAttributes,
+	count: fullscreenPassVertexCount,
+	depth: { enable: false },
+};
+
+/**
+ * @param {string} label
+ * @param {() => string} getText e.g. `() => handle.text()`
+ */
+const requireShaderString = (label, getText) => {
+	const s = getText();
+	if (typeof s !== "string" || !s.trim()) {
+		throw new Error(`[Matrix] ${label} shader missing after load (${s?.length ?? "n/a"} chars).`);
+	}
+	return s;
+};
+
+const makeFullScreenQuad = (regl, uniforms = {}, context = {}) =>
+	regl({
+		vert: fullscreenPassVertGLSL,
 
 		frag: `
 		precision mediump float;
@@ -210,10 +245,8 @@ const makeFullScreenQuad = (regl, uniforms = {}, context = {}) =>
 		}
 	`,
 
-		attributes: {
-			aPosition: [-4, -4, 4, -4, 0, 4],
-		},
-		count: 3,
+		attributes: fullscreenPassAttributes,
+		count: fullscreenPassVertexCount,
 
 		uniforms: {
 			...uniforms,
@@ -248,4 +281,19 @@ const makePass = (outputs, ready, setSize, execute) => ({
 const makePipeline = (context, steps) =>
 	steps.filter((f) => f != null).reduce((pipeline, f, i) => [...pipeline, f(context, i == 0 ? null : pipeline[i - 1].outputs)], []);
 
-export { makePassTexture, makePassFBO, makeDoubleBuffer, loadImage, loadText, makeFullScreenQuad, make1DTexture, makePass, makePipeline };
+export {
+	makePassTexture,
+	makePassFBO,
+	makeDoubleBuffer,
+	loadImage,
+	loadText,
+	fullscreenPassVertGLSL,
+	fullscreenPassAttributes,
+	fullscreenPassVertexCount,
+	fullscreenQuadReglBase,
+	requireShaderString,
+	makeFullScreenQuad,
+	make1DTexture,
+	makePass,
+	makePipeline,
+};

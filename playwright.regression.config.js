@@ -2,20 +2,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright runs browser smoke tests against a static copy of the site.
- * `webServer` starts a local static file server so ES modules and assets resolve.
+ * Full matrix: every `getAvailableModes()` × every `getAvailableEffects()` on WebGL.
+ * Run with: `npm run test:regression`
+ * Not part of default `npm test` (see testIgnore in playwright.config.js).
  */
 export default defineConfig({
-	testDir: "./tests",
-	// Node's `node --test` uses `*.test.mjs`; Playwright only runs `*.spec.js`.
+	testDir: "./tests/regression",
 	testMatch: "**/*.spec.js",
-	// Full version×effect matrix: `npm run test:regression` (see tests/regression/).
-	testIgnore: ["tests/regression/**"],
-	timeout: 60_000,
-	expect: { timeout: 10_000 },
+	timeout: 120_000,
+	expect: { timeout: 15_000 },
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
-	retries: process.env.CI ? 2 : 0,
+	retries: process.env.CI ? 1 : 0,
 	use: {
 		baseURL: "http://127.0.0.1:4173",
 		trace: "on-first-retry",
