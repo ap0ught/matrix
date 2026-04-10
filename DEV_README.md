@@ -72,10 +72,11 @@ float alpha = smoothstep(0.5 - fwidth(distance), 0.5 + fwidth(distance), distanc
 - 🔗 [GPU Buffer Management](https://github.com/brendan-duncan/wgsl_reflect) - WGSL shader reflection
 - 💡 **Why it matters**: WebGPU provides compute shaders and better performance - essential for real-time particle systems like our rain
 
-### REGL: Functional WebGL
+### WebGL path (`js/webgl/`) and regl
 
-- 🔗 [REGL Documentation](https://regl.party/) - WebGL made functional
-- 💡 **Philosophy**: Treat graphics as pure functions - given the same inputs, always produce the same output. Very Matrix-like in its deterministic perfection.
+- 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — the WebGL renderer loads the package output from `lib/regl.min.js` (refreshed by `npm install`).
+- 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL, Holoplay constraints, and twgl for future glue code.
+- 💡 **Philosophy**: Treat graphics as pure functions — given the same inputs, always produce the same output. Very Matrix-like in its deterministic perfection.
 
 ### Signed Distance Fields in Graphics
 

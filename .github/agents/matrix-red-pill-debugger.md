@@ -366,7 +366,7 @@ function refactorAllEffects() { ... }
 // shaders/rain-pass.glsl
 uniform int effectMode; // Added missing uniform
 
-// js/regl/rainPass.js
+// js/webgl/rainPass.js
 effectMode: config.effect === 'rainbow' ? 1 : 0, // Pass to shader
 ```
 

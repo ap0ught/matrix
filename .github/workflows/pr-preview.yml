@@ -87,6 +87,23 @@ jobs:
           cd ..
         fi
     
+    # Match main-site deploy: always start from remote tip so we do not drop sibling pr-* / v* dirs.
+    - name: Sync gh-pages to origin tip
+      run: |
+        if [ ! -d "gh-pages/.git" ]; then
+          echo "No gh-pages repo; skip sync"
+          exit 0
+        fi
+        cd gh-pages
+        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" 2>/dev/null || \
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        if git fetch origin gh-pages 2>/dev/null; then
+          git reset --hard origin/gh-pages
+          echo "✅ gh-pages synced to origin/gh-pages before preview copy"
+        else
+          echo "⚠️ Could not fetch origin/gh-pages; continuing with checkout state"
+        fi
+    
     - name: Prepare preview directory
       run: |
         PREVIEW_PATH="${{ steps.preview.outputs.path }}"

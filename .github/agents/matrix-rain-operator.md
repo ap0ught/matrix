@@ -85,7 +85,7 @@ This is a **static ES-module web application** - key architectural points:
 
 ### Core Technologies
 
-1. **WebGL Rendering** (`js/regl/`):
+1. **WebGL Rendering** (`js/webgl/`):
    - Uses REGL functional wrapper
    - Shaders in `/shaders` directory (GLSL)
    - Main passes: rain computation, bloom effects, final composite
@@ -194,7 +194,7 @@ matrix/
 │   ├── main.js            # Application bootstrap
 │   ├── config.js          # URL parameter parsing
 │   ├── utils.js           # Shared utilities (formatModeName, etc.)
-│   ├── regl/              # WebGL implementation
+│   ├── webgl/             # WebGL implementation
 │   │   ├── main.js        # REGL renderer entry
 │   │   ├── rainPass.js    # Core rain computation
 │   │   └── bloomPass.js   # Bloom effects

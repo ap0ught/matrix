@@ -1,10 +1,17 @@
 {
-  "scripts": {
-    "test": "node --test tests/*.test.mjs && playwright test",
-    "test:unit": "node --test tests/*.test.mjs",
-    "test:e2e": "playwright test"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2"
-  }
+	"type": "module",
+	"scripts": {
+		"postinstall": "node scripts/vendor-webgl-deps.mjs",
+		"test": "node --test tests/*.test.mjs && playwright test",
+		"test:unit": "node --test tests/*.test.mjs",
+		"test:e2e": "playwright test",
+		"test:regression": "playwright test --config=playwright.regression.config.js"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.58.2"
+	},
+	"dependencies": {
+		"regl": "^2.1.1",
+		"twgl": "^7.0.3"
+	}
 }

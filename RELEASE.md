@@ -114,7 +114,7 @@ matrix-{version}.zip
 ├── js/                  # JavaScript modules
 │   ├── main.js
 │   ├── config.js
-│   ├── regl/           # WebGL renderer
+│   ├── webgl/          # WebGL renderer
 │   └── webgpu/         # WebGPU renderer
 ├── lib/                 # Third-party libraries
 │   ├── regl.min.js
