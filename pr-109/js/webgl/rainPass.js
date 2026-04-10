@@ -1,4 +1,13 @@
-import { loadImage, loadText, makePassFBO, makeDoubleBuffer, makePass } from "./utils.js";
+import {
+	loadImage,
+	loadText,
+	makePassFBO,
+	makeDoubleBuffer,
+	makePass,
+	fullscreenPassVertGLSL,
+	fullscreenPassAttributes,
+	fullscreenPassVertexCount,
+} from "./utils.js";
 
 const extractEntries = (src, keys) => Object.fromEntries(Array.from(Object.entries(src)).filter(([key]) => keys.includes(key)));
 
@@ -67,15 +76,6 @@ export default ({ regl, config, lkg }) => {
 		...commonUniforms,
 		...extractEntries(config, ["fallSpeed", "skipIntro"]),
 	};
-	const intro = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			...introUniforms,
-			previousIntroState: introDoubleBuffer.back,
-		},
-
-		framebuffer: introDoubleBuffer.front,
-	});
 
 	const raindropDoubleBuffer = makeComputeDoubleBuffer(regl, numRows, numColumns);
 	const rainPassRaindrop = loadText("shaders/glsl/rainPass.raindrop.frag.glsl");
@@ -83,16 +83,6 @@ export default ({ regl, config, lkg }) => {
 		...commonUniforms,
 		...extractEntries(config, ["brightnessDecay", "fallSpeed", "raindropLength", "loops", "skipIntro"]),
 	};
-	const raindrop = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			...raindropUniforms,
-			introState: introDoubleBuffer.front,
-			previousRaindropState: raindropDoubleBuffer.back,
-		},
-
-		framebuffer: raindropDoubleBuffer.front,
-	});
 
 	const symbolDoubleBuffer = makeComputeDoubleBuffer(regl, numRows, numColumns);
 	const rainPassSymbol = loadText("shaders/glsl/rainPass.symbol.frag.glsl");
@@ -100,16 +90,6 @@ export default ({ regl, config, lkg }) => {
 		...commonUniforms,
 		...extractEntries(config, ["cycleSpeed", "cycleFrameSkip", "loops", "glyphRandomFlip"]),
 	};
-	const symbol = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			...symbolUniforms,
-			raindropState: raindropDoubleBuffer.front,
-			previousSymbolState: symbolDoubleBuffer.back,
-		},
-
-		framebuffer: symbolDoubleBuffer.front,
-	});
 
 	const effectDoubleBuffer = makeComputeDoubleBuffer(regl, numRows, numColumns);
 	const rainPassEffect = loadText("shaders/glsl/rainPass.effect.frag.glsl");
@@ -118,16 +98,6 @@ export default ({ regl, config, lkg }) => {
 		...extractEntries(config, ["hasThunder", "rippleScale", "rippleSpeed", "rippleThickness", "loops"]),
 		rippleType,
 	};
-	const effect = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			...effectUniforms,
-			raindropState: raindropDoubleBuffer.front,
-			previousEffectState: effectDoubleBuffer.back,
-		},
-
-		framebuffer: effectDoubleBuffer.front,
-	});
 
 	const quadPositions = Array(numQuadRows)
 		.fill()
@@ -175,46 +145,135 @@ export default ({ regl, config, lkg }) => {
 		slantVec,
 		volumetric,
 	};
-	const render = regl({
-		blend: {
-			enable: true,
-			func: {
-				src: "one",
-				dst: "one",
+	let intro;
+	let raindrop;
+	let symbol;
+	let effect;
+	let render;
+	// Bind all rain GLSL as static strings after fetch. `regl.prop("frag")` with a
+	// missing/undefined source becomes shaderSource(undefined) → GLSL `undefined` at line 0.
+	const rainProgramsReady = Promise.all([
+		rainPassIntro.loaded,
+		rainPassRaindrop.loaded,
+		rainPassSymbol.loaded,
+		rainPassEffect.loaded,
+		rainPassVert.loaded,
+		rainPassFrag.loaded,
+	]).then(() => {
+		const need = (label, s) => {
+			if (typeof s !== "string" || !s.trim()) {
+				throw new Error(`[Matrix] ${label} shader missing after load (${s?.length ?? "n/a"} chars).`);
+			}
+			return s;
+		};
+		const introFrag = need("rainPass.intro.frag", rainPassIntro.text());
+		const raindropFrag = need("rainPass.raindrop.frag", rainPassRaindrop.text());
+		const symbolFrag = need("rainPass.symbol.frag", rainPassSymbol.text());
+		const effectFrag = need("rainPass.effect.frag", rainPassEffect.text());
+		const vertSource = need("rainPass.vert", rainPassVert.text());
+		const fragSource = need("rainPass.frag", rainPassFrag.text());
+
+		intro = regl({
+			vert: fullscreenPassVertGLSL,
+			frag: introFrag,
+			attributes: fullscreenPassAttributes,
+			count: fullscreenPassVertexCount,
+			depth: { enable: false },
+			uniforms: {
+				...introUniforms,
+				time: regl.context("time"),
+				tick: regl.context("tick"),
+				previousIntroState: introDoubleBuffer.back,
 			},
-		},
-		vert: regl.prop("vert"),
-		frag: regl.prop("frag"),
+			framebuffer: introDoubleBuffer.front,
+		});
+		raindrop = regl({
+			vert: fullscreenPassVertGLSL,
+			frag: raindropFrag,
+			attributes: fullscreenPassAttributes,
+			count: fullscreenPassVertexCount,
+			depth: { enable: false },
+			uniforms: {
+				...raindropUniforms,
+				time: regl.context("time"),
+				tick: regl.context("tick"),
+				introState: introDoubleBuffer.front,
+				previousRaindropState: raindropDoubleBuffer.back,
+			},
+			framebuffer: raindropDoubleBuffer.front,
+		});
+		symbol = regl({
+			vert: fullscreenPassVertGLSL,
+			frag: symbolFrag,
+			attributes: fullscreenPassAttributes,
+			count: fullscreenPassVertexCount,
+			depth: { enable: false },
+			uniforms: {
+				...symbolUniforms,
+				time: regl.context("time"),
+				tick: regl.context("tick"),
+				raindropState: raindropDoubleBuffer.front,
+				previousSymbolState: symbolDoubleBuffer.back,
+			},
+			framebuffer: symbolDoubleBuffer.front,
+		});
+		effect = regl({
+			vert: fullscreenPassVertGLSL,
+			frag: effectFrag,
+			attributes: fullscreenPassAttributes,
+			count: fullscreenPassVertexCount,
+			depth: { enable: false },
+			uniforms: {
+				...effectUniforms,
+				time: regl.context("time"),
+				tick: regl.context("tick"),
+				raindropState: raindropDoubleBuffer.front,
+				previousEffectState: effectDoubleBuffer.back,
+			},
+			framebuffer: effectDoubleBuffer.front,
+		});
+		render = regl({
+			blend: {
+				enable: true,
+				func: {
+					src: "one",
+					dst: "one",
+				},
+			},
+			vert: vertSource,
+			frag: fragSource,
 
-		uniforms: {
-			...renderUniforms,
+			uniforms: {
+				...renderUniforms,
+				time: regl.context("time"),
 
-			raindropState: raindropDoubleBuffer.front,
-			symbolState: symbolDoubleBuffer.front,
-			effectState: effectDoubleBuffer.front,
-			glyphMSDF: glyphMSDF.texture,
-			glintMSDF: glintMSDF.texture,
-			baseTexture: baseTexture.texture,
-			glintTexture: glintTexture.texture,
+				raindropState: raindropDoubleBuffer.front,
+				symbolState: symbolDoubleBuffer.front,
+				effectState: effectDoubleBuffer.front,
+				glyphMSDF: glyphMSDF.texture,
+				glintMSDF: glintMSDF.texture,
+				baseTexture: baseTexture.texture,
+				glintTexture: glintTexture.texture,
 
-			msdfPxRange: 4.0,
-			glyphMSDFSize: () => [glyphMSDF.width(), glyphMSDF.height()],
-			glintMSDFSize: () => [glintMSDF.width(), glintMSDF.height()],
+				msdfPxRange: 4.0,
+				glyphMSDFSize: () => [glyphMSDF.width(), glyphMSDF.height()],
+				glintMSDFSize: () => [glintMSDF.width(), glintMSDF.height()],
 
-			camera: regl.prop("camera"),
-			transform: regl.prop("transform"),
-			screenSize: regl.prop("screenSize"),
-		},
+				camera: regl.prop("camera"),
+				transform: regl.prop("transform"),
+				screenSize: regl.prop("screenSize"),
+			},
 
-		viewport: regl.prop("viewport"),
+			viewport: regl.prop("viewport"),
 
-		attributes: {
-			aPosition: quadPositions,
-			aCorner: Array(numQuads).fill(quadVertices),
-		},
-		count: numQuads * numVerticesPerQuad,
+			attributes: {
+				aPosition: quadPositions,
+				aCorner: Array(numQuads).fill(quadVertices),
+			},
+			count: numQuads * numVerticesPerQuad,
 
-		framebuffer: output,
+			framebuffer: output,
+		});
 	});
 
 	// Camera and transform math for the volumetric mode
@@ -240,17 +299,7 @@ export default ({ regl, config, lkg }) => {
 		{
 			primary: output,
 		},
-		Promise.all([
-			glyphMSDF.loaded,
-			glintMSDF.loaded,
-			baseTexture.loaded,
-			glintTexture.loaded,
-			rainPassIntro.loaded,
-			rainPassRaindrop.loaded,
-			rainPassSymbol.loaded,
-			rainPassVert.loaded,
-			rainPassFrag.loaded,
-		]),
+		Promise.all([glyphMSDF.loaded, glintMSDF.loaded, baseTexture.loaded, glintTexture.loaded, rainProgramsReady]),
 		(w, h) => {
 			output.resize(w, h);
 			const aspectRatio = w / h;
@@ -300,10 +349,10 @@ export default ({ regl, config, lkg }) => {
 			[screenSize[0], screenSize[1]] = aspectRatio > 1 ? [1, aspectRatio] : [1 / aspectRatio, 1];
 		},
 		(shouldRender) => {
-			intro({ frag: rainPassIntro.text() });
-			raindrop({ frag: rainPassRaindrop.text() });
-			symbol({ frag: rainPassSymbol.text() });
-			effect({ frag: rainPassEffect.text() });
+			intro({});
+			raindrop({});
+			symbol({});
+			effect({});
 
 			if (shouldRender) {
 				regl.clear({
@@ -313,7 +362,7 @@ export default ({ regl, config, lkg }) => {
 				});
 
 				for (const vantagePoint of vantagePoints) {
-					render({ ...vantagePoint, transform, screenSize, vert: rainPassVert.text(), frag: rainPassFrag.text() });
+					render({ ...vantagePoint, transform, screenSize });
 				}
 			}
 		},

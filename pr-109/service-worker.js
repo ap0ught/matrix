@@ -5,12 +5,12 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
+ * Version: 2.2 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-pr-109-173-c51c128";
+const VER = "matrix-pwa-pr-109-174-f7e1b8d";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)

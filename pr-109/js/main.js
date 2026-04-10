@@ -37,6 +37,33 @@ function enforceHoloplayRenderer(config) {
  */
 let appVersion = "unknown";
 
+/** Matches `const VER` in `service-worker.js` (read at runtime so CI-stamped deploys stay accurate). */
+let serviceWorkerVerStamp = "local";
+
+/**
+ * Same scope key algorithm as `service-worker.js` (BASE_PATH → SCOPE_KEY).
+ * Uses the registered script URL so subpaths (e.g. GitHub Pages project sites) match the SW.
+ * @returns {string}
+ */
+function getPwaCacheScopeKey() {
+	const swPath = new URL("service-worker.js", location.href).pathname;
+	const basePath = swPath.replace(/service-worker\.js$/, "");
+	return basePath.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "root";
+}
+
+/**
+ * Offline cache bucket name the service worker uses after a successful install
+ * (`CACHE_NAME` in `service-worker.js`). If VERSION could not be read, the SW falls back to `v1`.
+ * @param {string} versionTrimmed
+ * @param {string} verStamp
+ * @returns {string}
+ */
+function getExpectedPwaCacheName(versionTrimmed, verStamp) {
+	const prefix = `matrix-sw-${getPwaCacheScopeKey()}-`;
+	const versionSeg = versionTrimmed && versionTrimmed !== "unknown" ? versionTrimmed : "1";
+	return `${prefix}v${versionSeg}-${verStamp}`;
+}
+
 /**
  * Load application version from VERSION file
  * @returns {Promise<string>} The version string (e.g., "1.0.0")
@@ -54,14 +81,32 @@ async function loadVersion() {
 }
 
 /**
+ * Read `VER` from the deployed service worker script (same source CI rewrites on gh-pages).
+ * @returns {Promise<void>}
+ */
+async function loadServiceWorkerVerStamp() {
+	try {
+		const url = new URL("service-worker.js", location.href).href;
+		const response = await fetch(url, { cache: "no-cache" });
+		const text = await response.text();
+		const match = text.match(/const\s+VER\s*=\s*"([^"]*)"/);
+		if (match) {
+			serviceWorkerVerStamp = match[1];
+		}
+	} catch (error) {
+		console.warn("[Matrix] Could not read service worker VER for cache name hint:", error);
+	}
+}
+
+/**
  * Display version information to console
  * Includes Matrix-themed messaging and helpful cache information
  */
 function displayVersionInfo() {
-	const cacheName = `matrix-v${appVersion}`;
+	const cacheName = getExpectedPwaCacheName(appVersion, serviceWorkerVerStamp);
 	console.log("%c⎡ MATRIX DIGITAL RAIN ⎦", "color: #0F0; font-size: 16px; font-weight: bold; text-shadow: 0 0 10px #0F0");
 	console.log(`%cVersion: ${appVersion}`, "color: #0F0; font-size: 12px");
-	console.log(`%cCache: ${cacheName}`, "color: #0F0; font-size: 12px");
+	console.log(`%cPWA offline cache: ${cacheName}`, "color: #0F0; font-size: 12px");
 	console.log(`%c"Wake up, Neo... The Matrix has you."`, "color: #0F0; font-style: italic; font-size: 10px");
 	console.log("");
 	console.log("%cPWA Cache Debug Commands:", "color: #0F0; font-size: 11px; font-weight: bold");
@@ -216,7 +261,7 @@ document.body.onload = async () => {
 	 * Load and Display Version Information
 	 * Shows version and cache debugging info in console for PWA management
 	 */
-	await loadVersion();
+	await Promise.all([loadVersion(), loadServiceWorkerVerStamp()]);
 	displayVersionInfo();
 
 	/*
@@ -292,7 +337,7 @@ document.body.onload = async () => {
 			urlParams.set("suppressWarnings", true);
 			history.replaceState({}, "", "?" + unescape(urlParams.toString()));
 			currentMatrixRenderer = await solution;
-			startMatrix(currentMatrixRenderer, canvas, matrixConfig);
+			await startMatrix(currentMatrixRenderer, canvas, matrixConfig);
 			canvas.style.display = "unset";
 			document.body.removeChild(notice);
 		});
@@ -303,7 +348,7 @@ document.body.onload = async () => {
 		 * Initialize the chosen rendering solution immediately.
 		 */
 		currentMatrixRenderer = await solution;
-		startMatrix(currentMatrixRenderer, canvas, matrixConfig);
+		await startMatrix(currentMatrixRenderer, canvas, matrixConfig);
 	}
 };
 
@@ -598,11 +643,11 @@ function setupSpotifyEventListeners() {
 /**
  * Start the Matrix renderer
  */
-function startMatrix(matrixRenderer, canvas, config) {
+async function startMatrix(matrixRenderer, canvas, config) {
 	// Start the Matrix renderer
 	// Note: setupFullscreenToggle is called within the renderer implementations
 	// (webgl/main.js and webgpu/main.js) to avoid duplicate event listeners
-	matrixRenderer.default(canvas, config);
+	await matrixRenderer.default(canvas, config);
 }
 
 /**
@@ -632,7 +677,7 @@ async function initializeGalleryMode() {
 			const useWebGPU = (await supportsWebGPU()) && newConfig.renderer?.toLowerCase() === "webgpu";
 			const solution = await import(`./${useWebGPU ? "webgpu" : "webgl"}/main.js`);
 			currentMatrixRenderer = solution;
-			startMatrix(currentMatrixRenderer, canvas, newConfig);
+			await startMatrix(currentMatrixRenderer, canvas, newConfig);
 		} else {
 			await restartMatrixWithNewConfig(newConfig);
 		}
