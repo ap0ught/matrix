@@ -5,12 +5,12 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
+ * Version: 2.2 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-20-e5e70c4";
+const VER = "matrix-pwa-21-6a6d6ac";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -47,17 +47,17 @@ const STATIC_ASSETS = [
 	"js/colorToRGB.js",
 	"js/fullscreen.js",
 	"js/camera.js",
-	// WebGL/REGL modules
-	"js/regl/main.js",
-	"js/regl/rainPass.js",
-	"js/regl/bloomPass.js",
-	"js/regl/palettePass.js",
-	"js/regl/stripePass.js",
-	"js/regl/imagePass.js",
-	"js/regl/quiltPass.js",
-	"js/regl/mirrorPass.js",
-	"js/regl/utils.js",
-	"js/regl/lkgHelper.js",
+	// WebGL modules (regl runtime from npm, vendored to lib/regl.min.js)
+	"js/webgl/main.js",
+	"js/webgl/rainPass.js",
+	"js/webgl/bloomPass.js",
+	"js/webgl/palettePass.js",
+	"js/webgl/stripePass.js",
+	"js/webgl/imagePass.js",
+	"js/webgl/quiltPass.js",
+	"js/webgl/mirrorPass.js",
+	"js/webgl/utils.js",
+	"js/webgl/lkgHelper.js",
 	// WebGPU modules
 	"js/webgpu/main.js",
 	"js/webgpu/rainPass.js",
@@ -70,6 +70,7 @@ const STATIC_ASSETS = [
 	"js/webgpu/utils.js",
 	// Libraries
 	"lib/regl.min.js",
+	"lib/twgl-full.module.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",

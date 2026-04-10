@@ -5,7 +5,9 @@
 // Matrix rain effect. It handles both 2D screen-space and 3D volumetric modes.
 
 #define PI 3.14159265359
-precision lowp float;
+// Must match rainPass.frag.glsl (`precision mediump float`): shared uniforms like
+// glyphHeightToWidth must use the same default precision in both stages or link fails.
+precision mediump float;
 
 // Vertex attributes - define the quad corners for each glyph
 attribute vec2 aPosition, aCorner;

@@ -1,4 +1,4 @@
-import { loadText, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadText, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 export default ({ regl, canvas, config, cameraTex, cameraAspectRatio }, inputs) => {
 	let start;
@@ -19,23 +19,27 @@ export default ({ regl, canvas, config, cameraTex, cameraAspectRatio }, inputs) 
 
 	const output = makePassFBO(regl, config.useHalfFloat);
 	const mirrorPassFrag = loadText("shaders/glsl/mirrorPass.frag.glsl");
-	const render = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			time: regl.context("time"),
-			tex: inputs.primary,
-			bloomTex: inputs.bloom,
-			cameraTex,
-			// REGL bug can misinterpret array uniforms
-			["clicks[0]"]: () => clicks[0],
-			["clicks[1]"]: () => clicks[1],
-			["clicks[2]"]: () => clicks[2],
-			["clicks[3]"]: () => clicks[3],
-			["clicks[4]"]: () => clicks[4],
-			aspectRatio: () => aspectRatio,
-			cameraAspectRatio,
-		},
-		framebuffer: output,
+	let render;
+	const programsReady = mirrorPassFrag.loaded.then(() => {
+		render = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("mirrorPass.frag", () => mirrorPassFrag.text()),
+			uniforms: {
+				time: regl.context("time"),
+				tex: inputs.primary,
+				bloomTex: inputs.bloom,
+				cameraTex,
+				// REGL bug can misinterpret array uniforms
+				["clicks[0]"]: () => clicks[0],
+				["clicks[1]"]: () => clicks[1],
+				["clicks[2]"]: () => clicks[2],
+				["clicks[3]"]: () => clicks[3],
+				["clicks[4]"]: () => clicks[4],
+				aspectRatio: () => aspectRatio,
+				cameraAspectRatio,
+			},
+			framebuffer: output,
+		});
 	});
 
 	start = performance.now();
@@ -44,14 +48,14 @@ export default ({ regl, canvas, config, cameraTex, cameraAspectRatio }, inputs) 
 		{
 			primary: output,
 		},
-		Promise.all([mirrorPassFrag.loaded]),
+		programsReady,
 		(w, h) => {
 			output.resize(w, h);
 			aspectRatio = w / h;
 		},
 		(shouldRender) => {
 			if (shouldRender) {
-				render({ frag: mirrorPassFrag.text() });
+				render({});
 			}
 		},
 	);

@@ -1,4 +1,4 @@
-import { loadText, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadText, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 // The bloom pass is basically an added high-pass blur.
 // The blur approximation is the sum of a pyramid of downscaled, blurred textures.
@@ -35,41 +35,42 @@ export default ({ regl, config }, inputs) => {
 
 	// The high pass restricts the blur to bright things in our input texture.
 	const highPassFrag = loadText("shaders/glsl/bloomPass.highPass.frag.glsl");
-	const highPass = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			highPassThreshold,
-			tex: regl.prop("tex"),
-		},
-		framebuffer: regl.prop("fbo"),
-	});
-
-	// A 2D gaussian blur is just a 1D blur done horizontally, then done vertically.
-	// The FBO pyramid's levels represent separate levels of detail;
-	// by blurring them all, this basic blur approximates a more complex gaussian:
-	// https://web.archive.org/web/20191124072602/https://software.intel.com/en-us/articles/compute-shader-hdr-and-bloom
-
 	const blurFrag = loadText("shaders/glsl/bloomPass.blur.frag.glsl");
-	const blur = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			tex: regl.prop("tex"),
-			direction: regl.prop("direction"),
-			height: regl.context("viewportWidth"),
-			width: regl.context("viewportHeight"),
-		},
-		framebuffer: regl.prop("fbo"),
-	});
-
-	// The pyramid of textures gets flattened (summed) into a final blurry "bloom" texture
 	const combineFrag = loadText("shaders/glsl/bloomPass.combine.frag.glsl");
-	const combine = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			bloomStrength,
-			...Object.fromEntries(vBlurPyramid.map((fbo, index) => [`pyr_${index}`, fbo])),
-		},
-		framebuffer: output,
+
+	let highPass;
+	let blur;
+	let combine;
+	const programsReady = Promise.all([highPassFrag.loaded, blurFrag.loaded, combineFrag.loaded]).then(() => {
+		highPass = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("bloomPass.highPass.frag", () => highPassFrag.text()),
+			uniforms: {
+				highPassThreshold,
+				tex: regl.prop("tex"),
+			},
+			framebuffer: regl.prop("fbo"),
+		});
+		blur = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("bloomPass.blur.frag", () => blurFrag.text()),
+			uniforms: {
+				tex: regl.prop("tex"),
+				direction: regl.prop("direction"),
+				height: regl.context("viewportWidth"),
+				width: regl.context("viewportHeight"),
+			},
+			framebuffer: regl.prop("fbo"),
+		});
+		combine = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("bloomPass.combine.frag", () => combineFrag.text()),
+			uniforms: {
+				bloomStrength,
+				...Object.fromEntries(vBlurPyramid.map((fbo, index) => [`pyr_${index}`, fbo])),
+			},
+			framebuffer: output,
+		});
 	});
 
 	return makePass(
@@ -77,7 +78,7 @@ export default ({ regl, config }, inputs) => {
 			primary: inputs.primary,
 			bloom: output,
 		},
-		Promise.all([highPassFrag.loaded, blurFrag.loaded]),
+		programsReady,
 		(w, h) => {
 			// The blur pyramids can be lower resolution than the screen.
 			resizePyramid(highPassPyramid, w, h, bloomSize);
@@ -94,12 +95,12 @@ export default ({ regl, config }, inputs) => {
 				const highPassFBO = highPassPyramid[i];
 				const hBlurFBO = hBlurPyramid[i];
 				const vBlurFBO = vBlurPyramid[i];
-				highPass({ fbo: highPassFBO, frag: highPassFrag.text(), tex: i === 0 ? inputs.primary : highPassPyramid[i - 1] });
-				blur({ fbo: hBlurFBO, frag: blurFrag.text(), tex: highPassFBO, direction: [1, 0] });
-				blur({ fbo: vBlurFBO, frag: blurFrag.text(), tex: hBlurFBO, direction: [0, 1] });
+				highPass({ fbo: highPassFBO, tex: i === 0 ? inputs.primary : highPassPyramid[i - 1] });
+				blur({ fbo: hBlurFBO, tex: highPassFBO, direction: [1, 0] });
+				blur({ fbo: vBlurFBO, tex: hBlurFBO, direction: [0, 1] });
 			}
 
-			combine({ frag: combineFrag.text() });
+			combine({});
 		},
 	);
 };

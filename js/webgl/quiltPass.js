@@ -1,4 +1,4 @@
-import { loadText, makePassFBO, makePass } from "./utils.js";
+import { fullscreenQuadReglBase, loadText, makePassFBO, makePass, requireShaderString } from "./utils.js";
 
 // Multiplies the rendered rain and bloom by a loaded in image
 
@@ -11,23 +11,27 @@ export default ({ regl, config, lkg }, inputs) => {
 
 	const output = makePassFBO(regl, config.useHalfFloat);
 	const quiltPassFrag = loadText("shaders/glsl/quiltPass.frag.glsl");
-	const render = regl({
-		frag: regl.prop("frag"),
-		uniforms: {
-			quiltTexture: inputs.primary,
-			...lkg,
-		},
-		framebuffer: output,
+	let render;
+	const programsReady = quiltPassFrag.loaded.then(() => {
+		render = regl({
+			...fullscreenQuadReglBase,
+			frag: requireShaderString("quiltPass.frag", () => quiltPassFrag.text()),
+			uniforms: {
+				quiltTexture: inputs.primary,
+				...lkg,
+			},
+			framebuffer: output,
+		});
 	});
 	return makePass(
 		{
 			primary: output,
 		},
-		Promise.all([quiltPassFrag.loaded]),
+		programsReady,
 		(w, h) => output.resize(w, h),
 		(shouldRender) => {
 			if (shouldRender) {
-				render({ frag: quiltPassFrag.text() });
+				render({});
 			}
 		},
 	);
