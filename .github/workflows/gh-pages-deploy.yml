@@ -38,7 +38,8 @@ jobs:
       with:
         ref: gh-pages
         path: gh-pages
-        fetch-depth: 1
+        # Need full history for reliable sync; shallow tip alone races with PR preview deploys.
+        fetch-depth: 0
       continue-on-error: true
     
     - name: Initialize gh-pages if needed
@@ -58,6 +59,24 @@ jobs:
           cd gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+        fi
+    
+    # PR previews land on gh-pages in parallel. Without resetting to the remote tip here, this job
+    # can build from a stale checkout and `git push --force` would delete pr-* directories (404 on /matrix/pr-N/).
+    - name: Sync gh-pages to origin tip
+      run: |
+        if [ ! -d "gh-pages/.git" ]; then
+          echo "No gh-pages repo; skip sync"
+          exit 0
+        fi
+        cd gh-pages
+        git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" 2>/dev/null || \
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+        if git fetch origin gh-pages 2>/dev/null; then
+          git reset --hard origin/gh-pages
+          echo "✅ gh-pages working tree = origin/gh-pages (includes pr-* / previews / v*)"
+        else
+          echo "⚠️ Could not fetch origin/gh-pages (first deploy?); continuing with checkout state"
         fi
     
     - name: Clean root directory (preserve PR previews and version directories)
@@ -190,8 +209,15 @@ jobs:
         else
           COMMIT_SHA="${GITHUB_SHA:0:7}"
           git commit -m "Deploy main site from master@${COMMIT_SHA}"
-          git push origin gh-pages --force
-          echo "✅ Successfully deployed main site to gh-pages"
+          if git push origin gh-pages; then
+            echo "✅ Successfully pushed main site to gh-pages"
+          else
+            echo "⚠️ Push rejected (concurrent gh-pages update); rebasing and retrying..."
+            git fetch origin gh-pages
+            git rebase origin/gh-pages
+            git push origin gh-pages
+            echo "✅ Successfully deployed main site to gh-pages after rebase"
+          fi
         fi
     
     - name: Summary
