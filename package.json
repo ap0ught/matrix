@@ -1,7 +1,7 @@
 {
 	"type": "module",
 	"scripts": {
-		"postinstall": "node scripts/vendor-webgl-deps.mjs",
+		"postinstall": "node scripts/vendor-webgl-deps.mjs && node scripts/vendor-three.mjs",
 		"test": "node --test tests/*.test.mjs && playwright test",
 		"test:unit": "node --test tests/*.test.mjs",
 		"test:e2e": "playwright test",
@@ -11,6 +11,7 @@
 		"@playwright/test": "^1.58.2"
 	},
 	"dependencies": {
-		"regl": "^2.1.1"
+		"regl": "^2.1.1",
+		"three": "^0.172.0"
 	}
 }

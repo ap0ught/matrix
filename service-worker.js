@@ -70,8 +70,13 @@ const STATIC_ASSETS = [
 	"js/webgpu/mirrorPass.js",
 	"js/webgpu/endPass.js",
 	"js/webgpu/utils.js",
+	// Three.js experimental rain (mathcode + alphabet demo)
+	"js/three-rain/main.js",
+	"js/three-rain/glyphAtlas.js",
+	"js/three-rain/glyphs.js",
 	// Libraries
 	"lib/regl.min.js",
+	"lib/three.module.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",

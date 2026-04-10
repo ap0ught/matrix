@@ -76,6 +76,7 @@ float alpha = smoothstep(0.5 - fwidth(distance), 0.5 + fwidth(distance), distanc
 
 - 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — **temporary** WebGL runtime (`lib/regl.min.js`); see [DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md) and [migration_repl.md](migration_repl.md).
 - 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL and Holoplay constraints.
+- 🔗 [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md) — pass-based rain vs Three.js demo (`renderer=three`).
 - 🔗 [HOLOPLAY.md](HOLOPLAY.md) — Looking Glass HoloPlay Service client, vendored `holoplay-core`, code map, and upgrade notes.
 - 💡 **Philosophy**: Treat graphics as pure functions — given the same inputs, always produce the same output. Very Matrix-like in its deterministic perfection.
 

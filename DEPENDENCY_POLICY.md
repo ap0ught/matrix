@@ -28,6 +28,10 @@ This repository ships as **static files** (no app bundler). Anything we add must
 | `**regl`** (WebGL wrapper) | Upstream maintenance is effectively stalled. Still required for `js/webgl/` until the port in `**migration_repl.md**` lands. | **Remove** regl and replace with **first-party WebGL** (or a dependency that passes this policy). |
 
 
+## Experimental: `three` (Three.js)
+
+- **npm `three`** + vendored **`lib/three.module.js`** power **`js/three-rain/`** only when **`renderer=three`** or the **`mathcode_alphabet_three`** version preset. This path is **not** a replacement for the MSDF rain pipeline; see **[RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)**.
+
 ## Removed (policy-compliant cleanup)
 
 - `**twgl`**: Was listed as a dependency and copied to `lib/twgl-full.module.js` but **was not imported** by any application module. It has been **removed** entirely to avoid shipping unused third-party code.
