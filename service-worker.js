@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-22-92b714f";
+const VER = "matrix-pwa-23-a813e38";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -23,6 +23,8 @@ const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, "");
 const SCOPE_KEY = BASE_PATH.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "root";
 const CACHE_PREFIX = `matrix-sw-${SCOPE_KEY}-`;
 
+// Offline bucket: `matrix-sw-{scope}-v{VERSION}-{VER}`. Install fetches VERSION; VER is rewritten in CI.
+// `js/main.js` mirrors this in the console for debugging — keep behavior aligned when changing either file.
 // Cache version will be loaded from VERSION file during installation.
 // After a SW restart globals reset; use getActiveCacheName() for runtime cache writes.
 let CACHE_NAME = `${CACHE_PREFIX}v1-${VER}`; // Default fallback, overwritten during install
