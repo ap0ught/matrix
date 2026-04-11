@@ -64,7 +64,7 @@ npm test
 3. **Make your changes** with clear, focused commits
 4. **Test thoroughly** across different Matrix versions and browsers
 5. **Format your code** (match CI): `npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"`
-6. **Run tests**: `npm test` (and `npm run test:regression` if you change shaders or renderers)
+6. **Run tests**: `npm test` (and `npm run test:regression` if you change shaders or renderers). See **[tests/README.md](tests/README.md)** for suite layout; regression includes **`matrix-experimental-renderers.spec.js`** for **`three-rain`** / **`p5-rain`** in addition to the WebGL mode×effect matrix.
 7. **Submit a pull request** with a clear description
 
 ## 📋 Code Style Guidelines

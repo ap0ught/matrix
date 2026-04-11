@@ -150,7 +150,7 @@ cd ../..
 
 #### Testing and Validation
 
-- **`npm test`**: Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`). Regression matrix: `npm run test:regression`.
+- **`npm test`**: Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`). **`npm run test:regression`**: `tests/regression/` — WebGL mode×effect (`matrix-full.spec.js`) + experimental **three** / **p5** renderers (`matrix-experimental-renderers.spec.js`). See `tests/README.md`.
 - Console hooks in `tests/matrix-playwright-helpers.js` fail CI on `[Matrix][WebGL]` and invalid program errors.
 
 **Essential test URLs** (always append `&suppressWarnings=true`):

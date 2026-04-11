@@ -46,8 +46,8 @@ The brilliance? **Sawtooth waves** create natural-looking randomness while ensur
 // Converting human-intuitive colors to machine-readable values
 // Like translating between the Matrix's perception layer and reality
 const f = (n) => {
-	const k = (n + hue * 12) % 12;
-	return lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  const k = (n + hue * 12) % 12;
+  return lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
 };
 ```
 
@@ -149,8 +149,9 @@ npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" ".
 npx playwright install   # once per machine
 npm test
 
-# Optional: full WebGL mode × effect regression (slow)
+# Optional: full regression (slow): WebGL mode×effect matrix + three-rain / p5-rain
 npm run test:regression
+# See tests/README.md for what each suite covers.
 
 # Performance testing with URL parameters
 localhost:8000/?fps=30&resolution=0.5&effect=none

@@ -2,34 +2,33 @@
  * Smoke test: Three.js experimental rain (mathcode + alphabet columns).
  */
 import { expect, test } from "@playwright/test";
-import { attachMatrixRenderingWatchers, settleAfterPaint } from "./matrix-playwright-helpers.js";
+import {
+  assertMatrixBootsClean,
+  rainSurfaceCanvas,
+} from "./matrix-playwright-helpers.js";
 
 test.describe("Matrix Three.js mathcode+alphabet mode", () => {
-	test("loads three-rain stack and keeps canvas sized", async ({ page }) => {
-		const watchers = attachMatrixRenderingWatchers(page);
+  test("loads three-rain stack and keeps canvas sized", async ({ page }) => {
+    const query = new URLSearchParams({
+      version: "mathcode_alphabet_three",
+      suppressWarnings: "true",
+      skipIntro: "true",
+    }).toString();
 
-		await page.goto("/?version=mathcode_alphabet_three&suppressWarnings=true&skipIntro=true", {
-			waitUntil: "networkidle",
-		});
+    await assertMatrixBootsClean(page, query);
 
-		const canvas = page.locator("canvas").first();
-		await expect(canvas).toBeVisible({ timeout: 30_000 });
-		await settleAfterPaint(page);
+    const canvas = rainSurfaceCanvas(page);
+    const { webgl } = await canvas.evaluate((el) => ({
+      webgl: !!(el.getContext("webgl2") || el.getContext("webgl")),
+    }));
 
-		const { width, height, webgl } = await canvas.evaluate((el) => {
-			const w = el.width;
-			const h = el.height;
-			const gl = el.getContext("webgl2") || el.getContext("webgl");
-			return { width: w, height: h, webgl: !!gl };
-		});
+    expect(webgl, "Three.js uses WebGL backing").toBe(true);
 
-		watchers.assertNoIssues("mathcode_alphabet_three three.js");
-		expect(width, "canvas should have width").toBeGreaterThan(0);
-		expect(height, "canvas should have height").toBeGreaterThan(0);
-		expect(webgl, "Three.js uses WebGL backing").toBe(true);
-
-		await expect(page.locator("select.version-select")).toHaveValue("mathcode_alphabet_three", {
-			timeout: 15_000,
-		});
-	});
+    await expect(page.locator("select.version-select")).toHaveValue(
+      "mathcode_alphabet_three",
+      {
+        timeout: 15_000,
+      },
+    );
+  });
 });

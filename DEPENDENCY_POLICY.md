@@ -42,4 +42,4 @@ This repository ships as **static files** (no app bundler). Anything we add must
 
 ## Reviews
 
-When upgrading or adding dependencies, update `**SECURITY.md`** supply-chain table and run `**npm test**` (and `**npm run test:regression**` for renderer/shader changes).
+When upgrading or adding dependencies, update `**SECURITY.md`** supply-chain table and run `**npm test**` (and `**npm run test:regression**` for renderer/shader changes — see `**tests/README.md**`).

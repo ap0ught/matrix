@@ -138,7 +138,7 @@ cp msdfgen/build/msdfgen out/
 - **Install**: `npm ci` (runs `postinstall` → `scripts/vendor-webgl-deps.mjs` to refresh `lib/regl.min.js`).
 - **Default suite**: `npm test` → Node unit tests (`tests/*.test.mjs`) + Playwright smoke tests (`tests/*.spec.js`, **not** `tests/regression/**`).
 - **Helpers**: `tests/matrix-playwright-helpers.js` attaches console/page listeners so **`[Matrix][WebGL]`** lines and invalid-program errors fail CI.
-- **Full matrix** (optional, slow): `npm run test:regression` uses `playwright.regression.config.js` and `tests/regression/` — every `getAvailableModes()` × `getAvailableEffects()` on WebGL.
+- **Full regression** (optional, slow): `npm run test:regression` uses `playwright.regression.config.js` and `tests/regression/` — WebGL **mode×effect** matrix (`matrix-full.spec.js`, experimental renderer presets excluded) plus **three-rain / p5-rain** (`matrix-experimental-renderers.spec.js`). See `tests/README.md`.
 
 **CRITICAL**: After shader or renderer changes, run at least `npm test` before merging.
 
@@ -323,15 +323,15 @@ gallery/                # Screenshot storage directory
 
 ```javascript
 galleryManager.on("itemChange", ({ item, index }) => {
-	// Fired when switching to new shader
+  // Fired when switching to new shader
 });
 
 galleryManager.on("screenshotCapture", ({ item, duration }) => {
-	// Fired when capturing screenshot for missing image
+  // Fired when capturing screenshot for missing image
 });
 
 galleryManager.on("playlistComplete", () => {
-	// Fired when playlist finishes, triggers new playlist generation
+  // Fired when playlist finishes, triggers new playlist generation
 });
 ```
 
@@ -447,16 +447,16 @@ The Matrix Mode panel in the top-right corner provides user controls for customi
 
 ```javascript
 modeDisplay.on("versionChange", (version) => {
-	/* handle version change */
+  /* handle version change */
 });
 modeDisplay.on("effectChange", (effect) => {
-	/* handle effect change */
+  /* handle effect change */
 });
 modeDisplay.on("toggleScreensaver", (enabled) => {
-	/* handle screensaver toggle */
+  /* handle screensaver toggle */
 });
 modeDisplay.on("changeSwitchInterval", (interval) => {
-	/* handle interval change */
+  /* handle interval change */
 });
 ```
 

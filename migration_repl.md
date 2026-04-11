@@ -155,7 +155,8 @@ Every stage that calls `regl({...})` must be rewritten.
 | `package.json`                                                   | Remove `regl` dependency                                                                                                        |
 | `scripts/vendor-webgl-deps.mjs`                                  | Stop copying regl to `lib/`                                                                                                     |
 | `service-worker.js`                                              | Remove `lib/regl.min.js` from `STATIC_ASSETS` when file deleted                                                                 |
-| `tests/regression/matrix-full.spec.js`                           | Still valid; must pass after migration                                                                                          |
+| `tests/regression/matrix-full.spec.js`                           | Still valid; must pass after migration (WebGL-only matrix; skips experimental renderer presets).                                |
+| `tests/regression/matrix-experimental-renderers.spec.js`         | **three-rain** / **p5-rain** URLs; must pass if those paths change.                                                             |
 | `README.md` / `RENDERING.md` / `.github/copilot-instructions.md` | Update wording from “regl” to new stack                                                                                         |
 
 **Optional:** `js/webgl/lkgHelper.js` — may stay JS-only; verify it does not assume regl types.

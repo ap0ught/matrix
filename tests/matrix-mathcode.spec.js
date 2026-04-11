@@ -8,32 +8,43 @@
  * after the compositor runs.
  */
 import { expect, test } from "@playwright/test";
-import { attachMatrixRenderingWatchers, settleAfterPaint } from "./matrix-playwright-helpers.js";
+import {
+  attachMatrixRenderingWatchers,
+  settleAfterPaint,
+} from "./matrix-playwright-helpers.js";
 
 test.describe("Matrix mathcode mode", () => {
-	test("loads WebGL stack, applies mathcode version, and keeps canvas sized", async ({ page }) => {
-		const watchers = attachMatrixRenderingWatchers(page);
+  test("loads WebGL stack, applies mathcode version, and keeps canvas sized", async ({
+    page,
+  }) => {
+    const watchers = attachMatrixRenderingWatchers(page);
 
-		await page.goto("/?version=mathcode&suppressWarnings=true&skipIntro=true&renderer=webgl", {
-			waitUntil: "networkidle",
-		});
+    await page.goto(
+      "/?version=mathcode&suppressWarnings=true&skipIntro=true&renderer=webgl",
+      {
+        waitUntil: "networkidle",
+      },
+    );
 
-		const canvas = page.locator("canvas").first();
-		await expect(canvas).toBeVisible({ timeout: 30_000 });
-		await settleAfterPaint(page);
+    const canvas = page.locator("canvas").first();
+    await expect(canvas).toBeVisible({ timeout: 30_000 });
+    await settleAfterPaint(page);
 
-		const { width, height, webgl } = await canvas.evaluate((el) => {
-			const w = el.width;
-			const h = el.height;
-			const gl = el.getContext("webgl2") || el.getContext("webgl");
-			return { width: w, height: h, webgl: !!gl };
-		});
+    const { width, height, webgl } = await canvas.evaluate((el) => {
+      const w = el.width;
+      const h = el.height;
+      const gl = el.getContext("webgl2") || el.getContext("webgl");
+      return { width: w, height: h, webgl: !!gl };
+    });
 
-		watchers.assertNoIssues("mathcode webgl");
-		expect(width, "canvas should have width").toBeGreaterThan(0);
-		expect(height, "canvas should have height").toBeGreaterThan(0);
-		expect(webgl, "WebGL context should exist (webgl renderer)").toBe(true);
+    watchers.assertNoIssues("mathcode webgl");
+    expect(width, "canvas should have width").toBeGreaterThan(0);
+    expect(height, "canvas should have height").toBeGreaterThan(0);
+    expect(webgl, "WebGL context should exist (webgl renderer)").toBe(true);
 
-		await expect(page.locator("select.version-select")).toHaveValue("mathcode", { timeout: 15_000 });
-	});
+    await expect(page.locator("select.version-select")).toHaveValue(
+      "mathcode",
+      { timeout: 15_000 },
+    );
+  });
 });

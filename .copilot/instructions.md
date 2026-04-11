@@ -342,7 +342,7 @@ When adding features that span multiple windows/displays:
 These complement `.github/copilot-instructions.md` (treat that file as the detailed source of truth).
 
 - **Renderers**: `js/webgl/` (GLSL + regl **temporarily**, vendored `lib/regl.min.js`) and `js/webgpu/` (WGSL). Experimental: `renderer=three` (`js/three-rain/`), `renderer=p5` (`js/p5-rain/`). URL `renderer=regl` is a legacy alias for WebGL. Holoplay / Looking Glass is **WebGL-only** — see [RENDERING.md](../RENDERING.md), [RENDERING_PIPELINE.md](../RENDERING_PIPELINE.md), [HOLOPLAY.md](../HOLOPLAY.md), and [DEPENDENCY_POLICY.md](../DEPENDENCY_POLICY.md).
-- **Tests**: `npm test` runs Node tests + Playwright smoke tests; `npm run test:regression` is the full mode×effect matrix (slow). Failures on `[Matrix][WebGL]` console lines are intentional.
+- **Tests**: `npm test` runs Node tests + Playwright smoke tests (`tests/README.md`). `npm run test:regression` runs `tests/regression/`: **`matrix-full.spec.js`** (WebGL mode×effect; skips `mathcode_alphabet_three` / `mathcode_p5`) and **`matrix-experimental-renderers.spec.js`** (**three-rain**, **p5-rain**). Slow. Failures on `[Matrix][WebGL]` console lines are intentional.
 - **PWA cache names**: Not just `matrix-v{version}` — the service worker uses `matrix-sw-{scope}-v{VERSION}-{VER}`; `js/main.js` prints the matching string for debugging.
 - **GLSL**: Shared uniforms must match precision across vertex/fragment stages on some GPUs (`uniform mediump float` where shared). Shader sources are loaded as static strings after fetch (avoid undefined `shaderSource`).
 - **GitHub Pages**: Main-site deploy must **sync to `origin/gh-pages`** before rewriting root so `pr-*` previews are not wiped; see [GITHUB_PAGES.md](../.github/GITHUB_PAGES.md).

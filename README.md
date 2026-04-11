@@ -222,4 +222,4 @@ The glyphs are formatted as a multi-channel distance field (or MSDF) via Victor 
 
 The raindrops themselves are particles [computed on the GPU and stored in textures](https://threejs.org/examples/webgl_gpgpu_water.html), much smaller than the final render. The data sent from the CPU to the GPU every frame is negligible.
 
-**Contributing / tests:** Install with `npm ci`, run `npm test` (Playwright + unit tests). Full WebGL mode×effect coverage is `npm run test:regression`. See [CONTRIBUTING.md](CONTRIBUTING.md), [DEV_README.md](DEV_README.md), and [RENDERING.md](RENDERING.md).
+**Contributing / tests:** Install with `npm ci`, run `npm test` (Playwright + unit tests). **`npm run test:regression`** runs the WebGL **mode×effect** matrix plus **experimental renderer** checks (**`three-rain`**, **`p5-rain`**). See [tests/README.md](tests/README.md), [CONTRIBUTING.md](CONTRIBUTING.md), [DEV_README.md](DEV_README.md), and [RENDERING.md](RENDERING.md).
