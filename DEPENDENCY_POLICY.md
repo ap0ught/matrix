@@ -32,6 +32,10 @@ This repository ships as **static files** (no app bundler). Anything we add must
 
 - **npm `three`** + vendored **`lib/three.module.js`** power **`js/three-rain/`** only when **`renderer=three`** or the **`mathcode_alphabet_three`** version preset. This path is **not** a replacement for the MSDF rain pipeline; see **[RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)**.
 
+## Experimental: `p5` (p5.js)
+
+- **npm `p5`** + vendored **`lib/p5.min.js`** (browser UMD) power **`js/p5-rain/`** when **`renderer=p5`** or **`version=mathcode_p5`**. **LGPL-2.1** — review `node_modules/p5/license.txt` before redistributing modified bundles. Not MSDF / bloom parity; see **[RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)**.
+
 ## Removed (policy-compliant cleanup)
 
 - `**twgl`**: Was listed as a dependency and copied to `lib/twgl-full.module.js` but **was not imported** by any application module. It has been **removed** entirely to avoid shipping unused third-party code.

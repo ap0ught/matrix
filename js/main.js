@@ -30,8 +30,10 @@ function enforceHoloplayRenderer(config) {
 		console.warn("[Matrix] Looking Glass (Holoplay) requires WebGL; ignoring renderer=webgpu for this session.");
 		config.renderer = "webgl";
 	}
-	if (r === "three") {
-		console.warn("[Matrix] Looking Glass (Holoplay) requires the regl/WebGL rain path; ignoring renderer=three for this session.");
+	if (r === "three" || r === "p5") {
+		console.warn(
+			"[Matrix] Looking Glass (Holoplay) requires the regl/WebGL rain path; ignoring experimental renderer for this session.",
+		);
 		config.renderer = "webgl";
 	}
 }
@@ -302,7 +304,9 @@ document.body.onload = async () => {
 	const solution =
 		rendererName === "three"
 			? import("./three-rain/main.js")
-			: import(`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`);
+			: rendererName === "p5"
+				? import("./p5-rain/main.js")
+				: import(`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`);
 
 	/*
 	 * The Matrix Choice: Blue Pill vs Red Pill
@@ -689,9 +693,11 @@ async function initializeGalleryMode() {
 			const solution =
 				rendererName === "three"
 					? await import("./three-rain/main.js")
-					: await import(
-							`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`,
-						);
+					: rendererName === "p5"
+						? await import("./p5-rain/main.js")
+						: await import(
+								`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`,
+							);
 			currentMatrixRenderer = solution;
 			await startMatrix(currentMatrixRenderer, canvas, newConfig);
 		} else {

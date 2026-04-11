@@ -74,9 +74,11 @@ const STATIC_ASSETS = [
 	"js/three-rain/main.js",
 	"js/three-rain/glyphAtlas.js",
 	"js/three-rain/glyphs.js",
+	"js/p5-rain/main.js",
 	// Libraries
 	"lib/regl.min.js",
 	"lib/three.module.js",
+	"lib/p5.min.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",

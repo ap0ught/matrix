@@ -30,6 +30,7 @@ _Variants_
 - [Bugs mode](https://ap0ught.github.io/matrix?version=bugs)
 - [Mathcode mode — mathematical symbols and arrows (∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ ඞ)](https://ap0ught.github.io/matrix?version=mathcode)
 - [Mathcode + Latin alphabet (experimental Three.js column split)](https://ap0ught.github.io/matrix?version=mathcode_alphabet_three) — see [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)
+- [Mathcode via p5.js (experimental 2D canvas rain)](https://ap0ught.github.io/matrix?version=mathcode_p5) — see [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)
 - [Rainbow colors](https://ap0ught.github.io/matrix/?effect=rainbow)
 - [Light spectrum colors](https://ap0ught.github.io/matrix/?effect=spectrum)
 - [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)

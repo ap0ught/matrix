@@ -1,6 +1,6 @@
 # How rendering works today (and how the Three.js demo relates)
 
-This document explains **what the main Matrix rain does on the GPU**, how **`regl` / WebGL** and **WebGPU** paths differ, and how the experimental **`renderer=three`** mode compares to rewriting the same effect in **Three.js**.
+This document explains **what the main Matrix rain does on the GPU**, how **`regl` / WebGL** and **WebGPU** paths differ, and how the experimental **`renderer=three`** and **`renderer=p5`** demos compare to the full pipeline.
 
 For stack overview and links to policy, see **[RENDERING.md](RENDERING.md)**. Looking Glass is **[HOLOPLAY.md](HOLOPLAY.md)**.
 
@@ -14,7 +14,8 @@ For stack overview and links to policy, see **[RENDERING.md](RENDERING.md)**. Lo
    - **`webgpu`** — dynamic `import("./webgpu/main.js")` when `navigator.gpu` is available **and** the user asked for WebGPU.
    - **`webgl`** (default, or legacy `renderer=regl`) — `import("./webgl/main.js")`.
    - **`three`** — `import("./three-rain/main.js")` (**experimental** demo; see §5).
-4. Holoplay forces **WebGL**; **`renderer=three`** is rejected when **`useHoloplay`** is true (same entry as WebGPU override).
+   - **`p5`** — `import("./p5-rain/main.js")` (**experimental** demo; see §6).
+4. Holoplay forces **WebGL**; **`renderer=three`** and **`renderer=p5`** are ignored when **`useHoloplay`** is true (same override path as WebGPU).
 
 Each renderer’s **`default`** export is an **`async (canvas, config) => { ... }`** that owns the animation loop and resize handling.
 
@@ -71,13 +72,23 @@ So Three is **not a drop-in replacement for regl** here: it replaces **low-level
 
 ---
 
-## 6. Summary
+## 6. Experimental: `renderer=p5` + `version=mathcode_p5`
 
-| Aspect | WebGL (`js/webgl/`) | WebGPU (`js/webgpu/`) | Three demo (`js/three-rain/`) |
-| ------ | --------------------- | ---------------------- | ----------------------------- |
-| API | WebGL1 + regl (temporary) | WebGPU + WGSL | WebGL2 (when available) + Three |
-| Glyphs | MSDF atlases | MSDF / WGSL sampling | CPU raster atlas |
-| Post | Bloom + effects + optional quilt | Bloom + effects | None |
-| Holoplay | Supported | Not used | Not supported |
+**Purpose:** A **p5.js** sketch in **instance mode** that draws **mathcode** Unicode glyphs (same ordered list as **`three-rain/glyphs.js`**) in falling columns using the **2D** renderer (`text()`, `HSL` fills). It is a **CPU / canvas 2D** path: no MSDF, no GPU simulation textures, no bloom or post stack.
 
-Use the Three mode as a **learning / comparison** slice and for dependency experiments; use **WebGL/WebGPU** for the full Matrix experience.
+**Entry:** **`js/p5-rain/main.js`** — loads **`lib/p5.min.js`** (UMD from the **`p5`** npm package via **`scripts/vendor-p5.mjs`**), hides the Matrix WebGL canvas element, injects a fullscreen p5 canvas on `document.body`, and runs `new p5(sketch, document.body)`.
+
+**Try it:** `?version=mathcode_p5` or `?renderer=p5&version=mathcode`.
+
+---
+
+## 7. Summary
+
+| Aspect | WebGL (`js/webgl/`) | WebGPU (`js/webgpu/`) | Three demo (`js/three-rain/`) | p5 demo (`js/p5-rain/`) |
+| ------ | --------------------- | ---------------------- | ------------------------------ | ---------------------- |
+| API | WebGL1 + regl (temporary) | WebGPU + WGSL | WebGL2 (when available) + Three | Canvas 2D + p5 loop |
+| Glyphs | MSDF atlases | MSDF / WGSL sampling | Raster atlas (GPU) | `text()` (CPU) |
+| Post | Bloom + effects + optional quilt | Bloom + effects | None | None |
+| Holoplay | Supported | Not used | Not supported | Not supported |
+
+Use the **Three** and **p5** modes as **learning / comparison** slices; use **WebGL/WebGPU** for the full Matrix experience.

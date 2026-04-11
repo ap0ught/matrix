@@ -1,6 +1,6 @@
 # Rendering stack
 
-This project uses two browser graphics paths:
+This project uses several browser graphics paths:
 
 
 | Path                        | Directory                          | Runtime                                                                                                                                                                 | When it runs                                                     |
@@ -8,6 +8,7 @@ This project uses two browser graphics paths:
 | **WebGPU**                  | `[js/webgpu/](js/webgpu/)`         | WGSL + WebGPU                                                                                                                                                           | `renderer=webgpu` and `navigator.gpu` is available               |
 | **WebGL**                   | `[js/webgl/](js/webgl/)`           | GLSL + WebGL1 (currently via [regl](https://www.npmjs.com/package/regl), copied to `lib/regl.min.js` — **temporary**, see [DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)) | Default, or `renderer=webgl`, or legacy `renderer=regl`          |
 | **Three.js** (experimental) | `[js/three-rain/](js/three-rain/)` | [three](https://www.npmjs.com/package/three) → `lib/three.module.js`; instanced quads + raster atlas                                                                    | `renderer=three` or preset `**version=mathcode_alphabet_three`** |
+| **p5.js** (experimental)    | `[js/p5-rain/](js/p5-rain/)`      | [p5](https://www.npmjs.com/package/p5) → `lib/p5.min.js` (UMD); 2D canvas `text()` columns, mathcode glyph list                                                         | `renderer=p5` or preset **`version=mathcode_p5`**                |
 
 
 ## Strategy
@@ -20,7 +21,8 @@ This project uses two browser graphics paths:
 
 ## Dependencies
 
-- `**regl`** is the only WebGL runtime npm dependency; `npm install` / `npm ci` runs `[scripts/vendor-webgl-deps.mjs](scripts/vendor-webgl-deps.mjs)` to refresh `lib/regl.min.js`. Commit updated `lib/regl.min.js` when the lockfile changes so static hosts without `node_modules` stay consistent.
+- `**regl**` — `postinstall` runs [`scripts/vendor-webgl-deps.mjs`](scripts/vendor-webgl-deps.mjs) → `lib/regl.min.js`. Commit when the lockfile changes for static hosting without `node_modules`.
+- **`three`** / **`p5`** — optional experimental renderers; [`scripts/vendor-three.mjs`](scripts/vendor-three.mjs) and [`scripts/vendor-p5.mjs`](scripts/vendor-p5.mjs) copy their browser builds into `lib/`. Commit updated `lib/three.module.js` / `lib/p5.min.js` when those dependencies change.
 
 ## GLSL (WebGL) notes
 
