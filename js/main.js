@@ -22,8 +22,18 @@ import { updateFavicon } from "./favicon.js";
  * Looking Glass Holoplay quilt rendering exists only on the WebGL path (`js/webgl`).
  */
 function enforceHoloplayRenderer(config) {
-	if (config.useHoloplay && config.renderer?.toLowerCase?.() === "webgpu") {
+	if (!config.useHoloplay) {
+		return;
+	}
+	const r = config.renderer?.toLowerCase?.();
+	if (r === "webgpu") {
 		console.warn("[Matrix] Looking Glass (Holoplay) requires WebGL; ignoring renderer=webgpu for this session.");
+		config.renderer = "webgl";
+	}
+	if (r === "three" || r === "p5") {
+		console.warn(
+			"[Matrix] Looking Glass (Holoplay) requires the regl/WebGL rain path; ignoring experimental renderer for this session.",
+		);
 		config.renderer = "webgl";
 	}
 }
@@ -290,8 +300,13 @@ document.body.onload = async () => {
 	 * WebGPU provides better performance and more advanced features,
 	 * but WebGL ensures broader browser compatibility
 	 */
-	const useWebGPU = (await supportsWebGPU()) && matrixConfig.renderer?.toLowerCase() === "webgpu";
-	const solution = import(`./${useWebGPU ? "webgpu" : "webgl"}/main.js`);
+	const rendererName = matrixConfig.renderer?.toLowerCase() ?? "webgl";
+	const solution =
+		rendererName === "three"
+			? import("./three-rain/main.js")
+			: rendererName === "p5"
+				? import("./p5-rain/main.js")
+				: import(`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`);
 
 	/*
 	 * The Matrix Choice: Blue Pill vs Red Pill
@@ -674,8 +689,15 @@ async function initializeGalleryMode() {
 
 		// Initialize renderer if not yet started
 		if (!currentMatrixRenderer) {
-			const useWebGPU = (await supportsWebGPU()) && newConfig.renderer?.toLowerCase() === "webgpu";
-			const solution = await import(`./${useWebGPU ? "webgpu" : "webgl"}/main.js`);
+			const rendererName = newConfig.renderer?.toLowerCase() ?? "webgl";
+			const solution =
+				rendererName === "three"
+					? await import("./three-rain/main.js")
+					: rendererName === "p5"
+						? await import("./p5-rain/main.js")
+						: await import(
+								`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`,
+							);
 			currentMatrixRenderer = solution;
 			await startMatrix(currentMatrixRenderer, canvas, newConfig);
 		} else {

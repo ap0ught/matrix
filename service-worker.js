@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-23-a813e38";
+const VER = "matrix-pwa-24-e7b10a5";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -49,7 +49,7 @@ const STATIC_ASSETS = [
 	"js/colorToRGB.js",
 	"js/fullscreen.js",
 	"js/camera.js",
-	// WebGL modules (regl runtime from npm, vendored to lib/regl.min.js)
+	// WebGL modules (regl runtime — temporary; see DEPENDENCY_POLICY.md + migration_repl.md)
 	"js/webgl/main.js",
 	"js/webgl/rainPass.js",
 	"js/webgl/bloomPass.js",
@@ -70,9 +70,15 @@ const STATIC_ASSETS = [
 	"js/webgpu/mirrorPass.js",
 	"js/webgpu/endPass.js",
 	"js/webgpu/utils.js",
+	// Three.js experimental rain (mathcode + alphabet demo)
+	"js/three-rain/main.js",
+	"js/three-rain/glyphAtlas.js",
+	"js/three-rain/glyphs.js",
+	"js/p5-rain/main.js",
 	// Libraries
 	"lib/regl.min.js",
-	"lib/twgl-full.module.js",
+	"lib/three.module.js",
+	"lib/p5.min.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",
