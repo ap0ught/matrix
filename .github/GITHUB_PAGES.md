@@ -55,6 +55,7 @@ gh-pages/
 - Deploys the latest master branch to the root of gh-pages
 - Preserves version directories (`v*/`) and PR preview directories (`pr-*/`)
 - Updates only the main site files at the root level
+- **Concurrency**: The job **fetches and resets to `origin/gh-pages`** before modifying files, then pushes (with rebase/retry if needed). A previous revision used a stale checkout plus **`git push --force`**, which could **drop `pr-*` directories** that another workflow had just pushed — fix: always sync to the remote tip first.
 
 **Live URL:** https://ap0ught.github.io/matrix/
 
@@ -83,6 +84,7 @@ gh-pages/
 - Does not modify the main site or version directories
 - Updates the PR previews index page
 - Posts a comment on the PR with preview links
+- **Resets its `gh-pages` checkout to `origin/gh-pages` before copying** so previews stack on the current branch tip (same race avoidance as the main-site workflow).
 
 **Preview URLs:** https://ap0ught.github.io/matrix/pr-XX/
 

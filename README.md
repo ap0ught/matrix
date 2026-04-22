@@ -29,13 +29,15 @@ _Variants_
 - [Morpheus mode](https://ap0ught.github.io/matrix?version=morpheus)
 - [Bugs mode](https://ap0ught.github.io/matrix?version=bugs)
 - [Mathcode mode — mathematical symbols and arrows (∑∆∇∞≠≈∈∉ ←→↑↓↔↕⇒⇔ ඞ)](https://ap0ught.github.io/matrix?version=mathcode)
+- [Mathcode + Latin alphabet (experimental Three.js column split)](https://ap0ught.github.io/matrix?version=mathcode_alphabet_three) — see [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)
+- [Mathcode via p5.js (experimental 2D canvas rain)](https://ap0ught.github.io/matrix?version=mathcode_p5) — see [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md)
 - [Rainbow colors](https://ap0ught.github.io/matrix/?effect=rainbow)
 - [Light spectrum colors](https://ap0ught.github.io/matrix/?effect=spectrum)
 - [Custom stripes (`effect=stripes&stripeColors=R,G,B,R,G,B,R,G,B, etc`)](https://ap0ught.github.io/matrix/?effect=stripes&stripeColors=1,0,0,1,1,0,0,1,0)
 - [Custom palette (`palette=R,G,B,%,R,G,B,%,R,G,B,%, etc`)](https://ap0ught.github.io/matrix/?palette=0.1,0,0.2,0,0.2,0.5,0,0.5,1,0.7,0,1)
 - [Custom image (`url=www.website.com/picture.jpg`)](https://ap0ught.github.io/matrix/?effect=image&url=https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg)
 - [Debug view (`effect=none`)](https://ap0ught.github.io/matrix/?effect=none) (_epilepsy warning_: this once had lots of flickering)
-- [Holographic version](https://ap0ught.github.io/matrix?version=holoplay) (requires a Looking Glass display; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing))
+- [Holographic version](https://ap0ught.github.io/matrix?version=holoplay) (requires a Looking Glass display and HoloPlay Service; see it in action [here](https://www.youtube.com/watch?v=gwA9hfq1Ing); integration notes: [HOLOPLAY.md](HOLOPLAY.md))
 
 _Typography_
 
@@ -62,7 +64,7 @@ _Concept_
 
 ## About
 
-This project is a web implementation of the raining green code seen in the _Matrix_ franchise. The WebGL path ([`js/webgl/`](js/webgl/)) uses the [regl](https://www.npmjs.com/package/regl) package (vendored to `lib/regl.min.js` after install); there is also a [WebGPU](https://github.com/gpuweb/gpuweb) implementation under [`js/webgpu/`](js/webgpu/). See [RENDERING.md](RENDERING.md) for how the two stacks relate. Its previous Three.js version is maintained in a separate branch.
+This project is a web implementation of the raining green code seen in the _Matrix_ franchise. The WebGL path ([`js/webgl/`](js/webgl/)) currently uses [regl](https://www.npmjs.com/package/regl) (vendored to `lib/regl.min.js` after install) as a **temporary** runtime; **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** requires migrating off unmaintained third-party GL wrappers per [migration_repl.md](migration_repl.md). There is also a [WebGPU](https://github.com/gpuweb/gpuweb) implementation under [`js/webgpu/`](js/webgpu/). See [RENDERING.md](RENDERING.md) for how the two stacks relate. Its previous Three.js version is maintained in a separate branch.
 
 This project runs right in the web browser; you can serve it with any HTTP/HTTPS server, with no additional setup. For example, on a Mac you can point a Terminal shell at a local copy of the project and run a simple HTTP server with Python: `cd /path/to/the/project ; python3 -m http.server`
 
@@ -119,29 +121,27 @@ The number of implementations out there of this effect is a testament to the siz
 
 Some of the [earliest](https://github.com/ppetr/xlockmore/blob/master/modes/matrix.c), [roughest](https://github.com/Zygo/xscreensaver/blob/d1f484cfa47f4a0862140421480bb536ad66ede9/hacks/xmatrix.c) versions were made after the film hit theaters in March, but before it was released on home media in October— people were recreating the effect purely from memory. Others probably used the official screensaver as a reference, which was made by the time-strappped developers of [the (excellent, defunct) official site](https://web.archive.org/web/*/http://whatisthematrix.com) from the images and multimedia tools they had available.
 
-
-
 ## 🎨 Gallery
 
 _Explore the full range of Matrix shader variations:_
 
 **[View Live Gallery Slideshow](https://ap0ught.github.io/matrix/?effect=gallery)**
 
-| ![Classic Matrix](gallery/classic-matrix.png) | ![Matrix Resurrections](gallery/resurrections.png) | ![3D Volumetric Mode](gallery/3d-volumetric.png) | 
-| :---: | :---: | :---: | 
-| **Classic Matrix** | **Matrix Resurrections** | **3D Volumetric Mode** | 
+| ![Classic Matrix](gallery/classic-matrix.png) | ![Matrix Resurrections](gallery/resurrections.png) | ![3D Volumetric Mode](gallery/3d-volumetric.png) |
+| :-------------------------------------------: | :------------------------------------------------: | :----------------------------------------------: |
+|              **Classic Matrix**               |              **Matrix Resurrections**              |              **3D Volumetric Mode**              |
 
-| ![Operator Console](gallery/operator.png) | ![Nightmare Matrix](gallery/nightmare.png) | ![Paradise Matrix](gallery/paradise.png) | 
-| **Operator Console** | **Nightmare Matrix** | **Paradise Matrix** | 
+| ![Operator Console](gallery/operator.png) | ![Nightmare Matrix](gallery/nightmare.png) | ![Paradise Matrix](gallery/paradise.png) |
+| **Operator Console** | **Nightmare Matrix** | **Paradise Matrix** |
 
-| ![Rainbow Spectrum](gallery/rainbow.png) | ![Light Spectrum](gallery/spectrum.png) | ![Custom Stripes (RGB)](gallery/stripes-rgb.png) | 
-| **Rainbow Spectrum** | **Light Spectrum** | **Custom Stripes (RGB)** | 
+| ![Rainbow Spectrum](gallery/rainbow.png) | ![Light Spectrum](gallery/spectrum.png) | ![Custom Stripes (RGB)](gallery/stripes-rgb.png) |
+| **Rainbow Spectrum** | **Light Spectrum** | **Custom Stripes (RGB)** |
 
-| ![Trinity Mode](gallery/trinity.png) | ![Morpheus Mode](gallery/morpheus.png) | ![Megacity](gallery/megacity.png) | 
-| **Trinity Mode** | **Morpheus Mode** | **Megacity** | 
+| ![Trinity Mode](gallery/trinity.png) | ![Morpheus Mode](gallery/morpheus.png) | ![Megacity](gallery/megacity.png) |
+| **Trinity Mode** | **Morpheus Mode** | **Megacity** |
 
-| ![Palimpsest](gallery/palimpsest.png) | ![Twilight](gallery/twilight.png) | ![Debug View](gallery/debug.png) | 
-| **Palimpsest** | **Twilight** | **Debug View** | 
+| ![Palimpsest](gallery/palimpsest.png) | ![Twilight](gallery/twilight.png) | ![Debug View](gallery/debug.png) |
+| **Palimpsest** | **Twilight** | **Debug View** |
 
 ## Customization
 
@@ -221,3 +221,5 @@ The glyphs used in the "Palimpsest" and "Twilight" versions are derived from [Te
 The glyphs are formatted as a multi-channel distance field (or MSDF) via Victor Chlumsky's [msdfgen](https://github.com/Chlumsky/msdfgen). This format preserves the crisp edges and corners of vector graphics when rendered as textures. Chlumsky's thesis paper, which is in English and is also easy to read, is [available to download here](https://dspace.cvut.cz/handle/10467/62770).
 
 The raindrops themselves are particles [computed on the GPU and stored in textures](https://threejs.org/examples/webgl_gpgpu_water.html), much smaller than the final render. The data sent from the CPU to the GPU every frame is negligible.
+
+**Contributing / tests:** Install with `npm ci`, run `npm test` (Playwright + unit tests). **`npm run test:regression`** runs the WebGL **mode×effect** matrix plus **experimental renderer** checks (**`three-rain`**, **`p5-rain`**). See [tests/README.md](tests/README.md), [CONTRIBUTING.md](CONTRIBUTING.md), [DEV_README.md](DEV_README.md), and [RENDERING.md](RENDERING.md).

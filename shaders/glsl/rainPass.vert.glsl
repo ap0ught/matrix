@@ -5,7 +5,9 @@
 // Matrix rain effect. It handles both 2D screen-space and 3D volumetric modes.
 
 #define PI 3.14159265359
-precision lowp float;
+// Must match rainPass.frag.glsl (`precision mediump float`): shared uniforms like
+// glyphHeightToWidth must use the same default precision in both stages or link fails.
+precision mediump float;
 
 // Vertex attributes - define the quad corners for each glyph
 attribute vec2 aPosition, aCorner;
@@ -16,7 +18,10 @@ uniform sampler2D raindropState, symbolState, effectState;
 // Layout parameters - control glyph spacing and density
 uniform float density;
 uniform vec2 quadSize;
-uniform float glyphHeightToWidth, glyphVerticalSpacing;
+// Explicit precision: some GL stacks still report a VERTEX/FRAGMENT mismatch for shared
+// uniforms when only the default `precision mediump float` applies (e.g. version=2003 path).
+uniform mediump float glyphHeightToWidth;
+uniform mediump float glyphVerticalSpacing;
 
 // 3D transformation matrices for volumetric mode
 uniform mat4 camera, transform;

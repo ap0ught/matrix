@@ -5,9 +5,10 @@
 // (Multi-channel Signed Distance Fields) for crisp rendering at any scale.
 
 #define PI 3.14159265359
-#ifdef GL_OES_standard_derivatives
-#extension GL_OES_standard_derivatives: enable
-#endif
+// Required at context level (see js/webgl/main.js). Do not wrap in #ifdef GL_OES_standard_derivatives:
+// some implementations do not predefine that macro, so the extension would never enable and fwidth()
+// would fail to compile — INVALID_OPERATION: useProgram: program not valid with no clear GLSL log.
+#extension GL_OES_standard_derivatives : enable
 // Fragment precision: we store per-cell glyph indices as floats in half-float FBOs, then
 // read them back and use them as atlas indices. `lowp` floats are not guaranteed to
 // distinguish every integer in 0..glyphSequenceLength-1 on all GPUs, which can make
@@ -29,8 +30,8 @@ uniform float msdfPxRange;
 uniform vec2 glyphMSDFSize, glintMSDFSize;
 uniform bool hasBaseTexture, hasGlintTexture;
 
-// Glyph appearance parameters
-uniform float glyphHeightToWidth, glyphSequenceLength, glyphEdgeCrop;
+// Glyph appearance parameters (mediump explicit — must match rainPass.vert.glsl)
+uniform mediump float glyphHeightToWidth, glyphSequenceLength, glyphEdgeCrop;
 uniform float baseContrast, baseBrightness, glintContrast, glintBrightness;
 uniform float brightnessOverride, brightnessThreshold;
 uniform vec2 glyphTextureGridSize;

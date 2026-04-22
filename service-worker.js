@@ -5,7 +5,7 @@
  * Like the Matrix itself, once downloaded, the code persists in memory.
  * "There is no cloud, it's just someone else's computer" - Cache everything locally.
  *
- * Version: 2.1 - Cache name uses VERSION file + VER (stamped in CI)
+ * Version: 2.2 - Cache name uses VERSION file + VER (stamped in CI)
  */
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
@@ -23,6 +23,8 @@ const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, "");
 const SCOPE_KEY = BASE_PATH.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "root";
 const CACHE_PREFIX = `matrix-sw-${SCOPE_KEY}-`;
 
+// Offline bucket: `matrix-sw-{scope}-v{VERSION}-{VER}`. Install fetches VERSION; VER is rewritten in CI.
+// `js/main.js` mirrors this in the console for debugging — keep behavior aligned when changing either file.
 // Cache version will be loaded from VERSION file during installation.
 // After a SW restart globals reset; use getActiveCacheName() for runtime cache writes.
 let CACHE_NAME = `${CACHE_PREFIX}v1-${VER}`; // Default fallback, overwritten during install
@@ -47,7 +49,7 @@ const STATIC_ASSETS = [
 	"js/colorToRGB.js",
 	"js/fullscreen.js",
 	"js/camera.js",
-	// WebGL modules (regl runtime from npm, vendored to lib/regl.min.js)
+	// WebGL modules (regl runtime — temporary; see DEPENDENCY_POLICY.md + migration_repl.md)
 	"js/webgl/main.js",
 	"js/webgl/rainPass.js",
 	"js/webgl/bloomPass.js",
@@ -68,9 +70,15 @@ const STATIC_ASSETS = [
 	"js/webgpu/mirrorPass.js",
 	"js/webgpu/endPass.js",
 	"js/webgpu/utils.js",
+	// Three.js experimental rain (mathcode + alphabet demo)
+	"js/three-rain/main.js",
+	"js/three-rain/glyphAtlas.js",
+	"js/three-rain/glyphs.js",
+	"js/p5-rain/main.js",
 	// Libraries
 	"lib/regl.min.js",
-	"lib/twgl-full.module.js",
+	"lib/three.module.js",
+	"lib/p5.min.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
 	"lib/holoplaycore.module.js",

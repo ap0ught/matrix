@@ -4,6 +4,8 @@ _"You have to let it all go, Neo. Fear, doubt, and disbelief. Free your mind."_ 
 
 Thank you for your interest in contributing to the Matrix Digital Rain project! This document provides guidelines for contributing code, documentation, and CLI workflows.
 
+**Third-party and npm policy:** read **[DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md)** before adding or upgrading dependencies. Looking Glass / Holoplay: **[HOLOPLAY.md](HOLOPLAY.md)**.
+
 ## 🎯 Ways to Contribute
 
 ### 1. Code Contributions
@@ -39,6 +41,10 @@ cd matrix
 # Initialize submodules (if not using --recursive)
 git submodule update --init --recursive
 
+# Install dev dependencies and vendored regl (→ lib/regl.min.js)
+npm ci
+npx playwright install chromium
+
 # Start a local development server
 python3 -m http.server 8000
 # or
@@ -46,6 +52,9 @@ npx http-server -p 8000
 
 # Open in browser
 # http://localhost:8000/?suppressWarnings=true
+
+# Run automated tests (same as CI smoke suite)
+npm test
 ```
 
 ### Making Changes
@@ -54,8 +63,9 @@ npx http-server -p 8000
 2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
 3. **Make your changes** with clear, focused commits
 4. **Test thoroughly** across different Matrix versions and browsers
-5. **Format your code**: `npx prettier --write --use-tabs --print-width 160 "js/**/*.js"`
-6. **Submit a pull request** with a clear description
+5. **Format your code** (match CI): `npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"`
+6. **Run tests**: `npm test` (and `npm run test:regression` if you change shaders or renderers). See **[tests/README.md](tests/README.md)** for suite layout; regression includes **`matrix-experimental-renderers.spec.js`** for **`three-rain`** / **`p5-rain`** in addition to the WebGL mode×effect matrix.
+7. **Submit a pull request** with a clear description
 
 ## 📋 Code Style Guidelines
 
@@ -126,6 +136,7 @@ http://localhost:8000/?fps=30&resolution=0.5&suppressWarnings=true
 ### Browser Testing
 
 Test on at least:
+
 - **Chrome/Edge** (latest version)
 - **Firefox** (latest version)
 - **Safari** (latest version, if available)
@@ -236,10 +247,13 @@ Types:
 
 ```markdown
 ## Changes
+
 Brief description of what changed and why
 
 ## Testing
+
 How the changes were tested:
+
 - [ ] Tested on Chrome
 - [ ] Tested on Firefox
 - [ ] Tested classic variant
@@ -248,13 +262,16 @@ How the changes were tested:
 - [ ] Performance validated
 
 ## Screenshots
+
 If visual changes, include before/after screenshots
 
 ## Related Issues
+
 Closes #123
 Related to #456
 
 ## Matrix Quote (Optional)
+
 _"Your mind makes it real."_ - Morpheus
 ```
 
@@ -297,6 +314,7 @@ yourvariant: {
 ## 🏆 Recognition
 
 Contributors are recognized in:
+
 - GitHub contributors list
 - Project documentation (for significant contributions)
 - Release notes (for features in releases)
@@ -304,12 +322,14 @@ Contributors are recognized in:
 ## 📚 Resources
 
 ### Project Documentation
+
 - [README.md](README.md) - User guide and customization options
 - [DEV_README.md](DEV_README.md) - Developer guide and architecture
 - [CLI_INTEGRATION.md](CLI_INTEGRATION.md) - CodeMachine-CLI integration guide
 - [CLI_SETUP.md](CLI_SETUP.md) - CLI installation and usage
 
 ### External Resources
+
 - [REGL Documentation](https://regl.party/)
 - [WebGPU Specification](https://gpuweb.github.io/gpuweb/)
 - [MSDF Generator](https://github.com/Chlumsky/msdfgen)
@@ -337,6 +357,7 @@ In the spirit of The Matrix's themes of freedom and choice, we pledge to make pa
 ### Our Standards
 
 **Positive behaviors:**
+
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints
 - Gracefully accepting constructive criticism
@@ -344,6 +365,7 @@ In the spirit of The Matrix's themes of freedom and choice, we pledge to make pa
 - Showing empathy towards other community members
 
 **Unacceptable behaviors:**
+
 - Trolling, insulting/derogatory comments, personal attacks
 - Public or private harassment
 - Publishing others' private information without permission

@@ -1,5 +1,8 @@
 # Multi-Monitor Fullscreen - Testing Summary
 
+> **Automated Playwright layout** (default smoke vs regression, `three-rain` / `p5-rain`): see **[tests/README.md](tests/README.md)**.
+
+
 ## Test Date
 December 16, 2024
 

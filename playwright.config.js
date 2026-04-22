@@ -9,6 +9,8 @@ export default defineConfig({
 	testDir: "./tests",
 	// Node's `node --test` uses `*.test.mjs`; Playwright only runs `*.spec.js`.
 	testMatch: "**/*.spec.js",
+	// Full version×effect matrix: `npm run test:regression` (see tests/regression/).
+	testIgnore: ["tests/regression/**"],
 	timeout: 60_000,
 	expect: { timeout: 10_000 },
 	fullyParallel: true,

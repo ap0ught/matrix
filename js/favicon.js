@@ -28,6 +28,9 @@ const FONT_CHARS = {
 	// Paradise / Coptic — Coptic alphabet characters
 	coptic: [..."ϢϣϤϥϦϧϨϩϪϫϬϭϮϯⲀⲁⲂⲃⲄⲅⲆⲇⲈⲉⲊⲋⲌⲍⲎⲏⲐⲑⲒⲓ"],
 
+	// Latin A–Za–z (matches `fonts.alphabet` / alphabet version)
+	alphabet: [...("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")],
+
 	// Mathcode — mathematical symbols, Greek letters, set notation, arrows, stars
 	mathcode: [
 		"∑",
@@ -158,7 +161,10 @@ function generateFaviconDataURL(chars) {
  */
 export function updateFavicon(config) {
 	const font = config.font || "matrixcode";
-	const chars = FONT_CHARS[font] || DEFAULT_CHARS;
+	let chars = FONT_CHARS[font] || DEFAULT_CHARS;
+	if (config.version === "mathcode_alphabet_three") {
+		chars = [...FONT_CHARS.mathcode, ...FONT_CHARS.alphabet];
+	}
 
 	const dataURL = generateFaviconDataURL(chars);
 

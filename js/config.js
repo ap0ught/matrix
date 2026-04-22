@@ -13,7 +13,6 @@
  */
 
 /*
-=======
  * Random Version Selection Utility
  *
  * Sometimes the best way to experience the Matrix is to let the system
@@ -44,6 +43,12 @@ function parseRenderer(s) {
 	const x = String(s).toLowerCase();
 	if (x === "webgpu") {
 		return "webgpu";
+	}
+	if (x === "three" || x === "three.js") {
+		return "three";
+	}
+	if (x === "p5" || x === "p5js" || x === "p5.js") {
+		return "p5";
 	}
 	if (x === "regl" || x === "webgl") {
 		return "webgl";
@@ -348,7 +353,7 @@ const defaults = {
 	slant: 0, // The angle at which rain falls; the orientation of the glyph grid
 	resolution: 0.75, // An overall scale multiplier
 	useHalfFloat: false,
-	renderer: "webgl", // webgpu | webgl (URL may still use legacy alias regl)
+	renderer: "webgl", // webgpu | webgl | three | p5 (URL may still use legacy alias regl)
 	suppressWarnings: false, // Whether to show warnings to visitors on a load
 	isometric: false,
 	useHoloplay: false,
@@ -699,6 +704,55 @@ export const versions = {
 		],
 
 		glyphRandomFlip: true,
+	},
+
+	mathcode_alphabet_three: {
+		/*
+		 * Mathcode + alphabet via Three.js (experimental): even columns sample the mathcode
+		 * glyph set, odd columns the Latin A–Za–z set. Not MSDF / bloom / effects — see RENDERING_PIPELINE.md.
+		 */
+		font: "mathcode",
+		renderer: "three",
+		numColumns: 44,
+		animationSpeed: 0.75,
+		cycleSpeed: 0.05,
+		fallSpeed: 0.45,
+		baseBrightness: -0.45,
+		baseContrast: 1.15,
+		cursorColor: hsl(0.45, 1, 0.85),
+		cursorIntensity: 2,
+		palette: [
+			{ color: hsl(0.52, 0.9, 0.0), at: 0.0 },
+			{ color: hsl(0.52, 1.0, 0.45), at: 0.55 },
+			{ color: hsl(0.36, 1.0, 0.5), at: 0.85 },
+			{ color: hsl(0.36, 1.0, 0.95), at: 1.0 },
+		],
+		raindropLength: 1.0,
+		resolution: 0.8,
+	},
+
+	mathcode_p5: {
+		/*
+		 * Mathcode via p5.js (experimental): 2D canvas text columns using the same glyph list as
+		 * `fonts.mathcode`. Not MSDF / bloom / effects — see RENDERING_PIPELINE.md.
+		 */
+		font: "mathcode",
+		renderer: "p5",
+		numColumns: 48,
+		animationSpeed: 0.75,
+		cycleSpeed: 0.05,
+		fallSpeed: 0.5,
+		baseBrightness: -0.45,
+		baseContrast: 1.1,
+		cursorColor: hsl(0.55, 1, 0.88),
+		cursorIntensity: 2,
+		palette: [
+			{ color: hsl(0.55, 0.9, 0.0), at: 0.0 },
+			{ color: hsl(0.55, 1.0, 0.45), at: 0.55 },
+			{ color: hsl(0.56, 1.0, 0.85), at: 0.95 },
+		],
+		raindropLength: 1.0,
+		resolution: 0.8,
 	},
 
 	alphabet: {

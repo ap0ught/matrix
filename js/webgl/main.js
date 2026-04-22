@@ -14,6 +14,35 @@ import { createEffectsMapping, getEffectPass } from "../effects.js";
 
 const dimensions = { width: 1, height: 1 };
 
+/**
+ * Surface the first shader compile / program link failure (otherwise the browser only shows
+ * INVALID_OPERATION: useProgram: program not valid and then suppresses further errors).
+ */
+function installWebGLShaderDebugHooks() {
+	if (typeof WebGLRenderingContext === "undefined") {
+		return;
+	}
+	const proto = WebGLRenderingContext.prototype;
+	if (proto.__matrixShaderDebugHooked) {
+		return;
+	}
+	proto.__matrixShaderDebugHooked = true;
+	const compileShader = proto.compileShader;
+	proto.compileShader = function (shader) {
+		compileShader.call(this, shader);
+		if (!this.getShaderParameter(shader, this.COMPILE_STATUS)) {
+			console.error("[Matrix][WebGL] shader compile failed:\n", this.getShaderInfoLog(shader));
+		}
+	};
+	const linkProgram = proto.linkProgram;
+	proto.linkProgram = function (program) {
+		linkProgram.call(this, program);
+		if (!this.getProgramParameter(program, this.LINK_STATUS)) {
+			console.error("[Matrix][WebGL] program link failed:\n", this.getProgramInfoLog(program));
+		}
+	};
+}
+
 const loadJS = (src) =>
 	new Promise((resolve, reject) => {
 		const tag = document.createElement("script");
@@ -25,6 +54,7 @@ const loadJS = (src) =>
 
 export default async (canvas, config) => {
 	await Promise.all([loadJS("lib/regl.min.js"), loadJS("lib/gl-matrix.js")]);
+	installWebGLShaderDebugHooks();
 
 	const resize = () => {
 		const devicePixelRatio = window.devicePixelRatio ?? 1;
@@ -42,9 +72,16 @@ export default async (canvas, config) => {
 		await setupCamera();
 	}
 
-	const extensions = ["OES_texture_half_float", "OES_texture_half_float_linear"];
-	// These extensions are also needed, but Safari misreports that they are missing
-	const optionalExtensions = ["EXT_color_buffer_half_float", "WEBGL_color_buffer_float", "OES_standard_derivatives"];
+	const extensions = [
+		"OES_texture_half_float",
+		"OES_texture_half_float_linear",
+		"OES_standard_derivatives",
+		// Required to render into half-float FBOs (compute passes + rain); without it, framebuffer attachments can be incomplete.
+		"EXT_color_buffer_half_float",
+	];
+	// rainPass.frag.glsl uses fwidth() for MSDF anti-aliasing (OES_standard_derivatives).
+	// Some older stacks only expose float renderbuffers under a different name — regl may still enable it.
+	const optionalExtensions = ["WEBGL_color_buffer_float"];
 
 	switch (config.testFix) {
 		case "fwidth_10_1_2022_A":
@@ -56,13 +93,15 @@ export default async (canvas, config) => {
 			break;
 	}
 
-	const regl = createREGL({ canvas, pixelRatio: 1, extensions, optionalExtensions });
+	const regl = createREGL({
+		canvas,
+		pixelRatio: 1,
+		extensions,
+		optionalExtensions,
+	});
 
 	const cameraTex = regl.texture(cameraCanvas);
 	const lkg = await getLKG(config.useHoloplay, true);
-
-	// All this takes place in a full screen quad.
-	const fullScreenQuad = makeFullScreenQuad(regl);
 
 	// Create dynamic effects mapping
 	const passModules = {
@@ -76,7 +115,9 @@ export default async (canvas, config) => {
 	const context = { regl, canvas, config, lkg, cameraTex, cameraAspectRatio };
 	const pipeline = makePipeline(context, [makeRain, makeBloomPass, effectPass, makeQuiltPass]);
 	const screenUniforms = { tex: pipeline[pipeline.length - 1].outputs.primary };
-	const drawToScreen = regl({ uniforms: screenUniforms });
+	// Blit the final texture to the canvas. A nested `regl({ uniforms })` inside another draw can
+	// inherit the last pass's framebuffer binding, so the screen never gets the composed image.
+	const blitToCanvas = makeFullScreenQuad(regl, screenUniforms);
 	await Promise.all(pipeline.map((step) => step.ready));
 
 	const targetFrameTimeMilliseconds = 1000 / config.fps;
@@ -111,11 +152,9 @@ export default async (canvas, config) => {
 				step.setSize(viewportWidth, viewportHeight);
 			}
 		}
-		fullScreenQuad(() => {
-			for (const step of pipeline) {
-				step.execute(shouldRender);
-			}
-			drawToScreen();
-		});
+		for (const step of pipeline) {
+			step.execute(shouldRender);
+		}
+		blitToCanvas();
 	});
 };

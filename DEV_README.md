@@ -46,8 +46,8 @@ The brilliance? **Sawtooth waves** create natural-looking randomness while ensur
 // Converting human-intuitive colors to machine-readable values
 // Like translating between the Matrix's perception layer and reality
 const f = (n) => {
-	const k = (n + hue * 12) % 12;
-	return lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  const k = (n + hue * 12) % 12;
+  return lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
 };
 ```
 
@@ -74,8 +74,10 @@ float alpha = smoothstep(0.5 - fwidth(distance), 0.5 + fwidth(distance), distanc
 
 ### WebGL path (`js/webgl/`) and regl
 
-- 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — the WebGL renderer loads the package output from `lib/regl.min.js` (refreshed by `npm install`).
-- 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL, Holoplay constraints, and twgl for future glue code.
+- 🔗 [regl on npm](https://www.npmjs.com/package/regl) / [regl docs](https://regl.party/) — **temporary** WebGL runtime (`lib/regl.min.js`); see [DEPENDENCY_POLICY.md](DEPENDENCY_POLICY.md) and [migration_repl.md](migration_repl.md).
+- 🔗 [RENDERING.md](RENDERING.md) — WebGPU vs WebGL and Holoplay constraints.
+- 🔗 [RENDERING_PIPELINE.md](RENDERING_PIPELINE.md) — pass-based rain vs experimental `renderer=three` / `renderer=p5` demos.
+- 🔗 [HOLOPLAY.md](HOLOPLAY.md) — Looking Glass HoloPlay Service client, vendored `holoplay-core`, code map, and upgrade notes.
 - 💡 **Philosophy**: Treat graphics as pure functions — given the same inputs, always produce the same output. Very Matrix-like in its deterministic perfection.
 
 ### Signed Distance Fields in Graphics
@@ -137,8 +139,19 @@ python3 -m http.server 8000    # Python approach
 npx http-server -p 8000        # Node.js approach
 php -S localhost:8000          # PHP approach
 
-# Code formatting with Prettier
-prettier --write --use-tabs --print-width 160 "js/**/*.js"
+# Install tooling and vendored regl (→ lib/regl.min.js)
+npm ci
+
+# Code formatting with Prettier (match CI globs)
+npx prettier --write --use-tabs --print-width 160 "index.html" "./js/**/*.js" "./lib/gpu-buffer.js" "./scripts/**/*.mjs" "./tests/**/*.js"
+
+# Automated tests (Node unit tests + Playwright smoke tests)
+npx playwright install   # once per machine
+npm test
+
+# Optional: full regression (slow): WebGL mode×effect matrix + three-rain / p5-rain
+npm run test:regression
+# See tests/README.md for what each suite covers.
 
 # Performance testing with URL parameters
 localhost:8000/?fps=30&resolution=0.5&effect=none

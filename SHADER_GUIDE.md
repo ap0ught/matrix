@@ -8,7 +8,7 @@ Welcome to the Matrix shader development guide. This document will help you unde
 
 The Matrix Digital Rain effect uses GPU shaders to achieve its iconic look. Shaders are small programs that run on the GPU, processing graphics data at incredible speeds. This project supports two shader languages:
 
-- **GLSL (OpenGL Shading Language)** - Used with WebGL 2.0 via REGL
+- **GLSL (OpenGL Shading Language)** - Used with **WebGL 1** (GLSL ES 1.00) via **regl** in the browser
 - **WGSL (WebGPU Shading Language)** - Used with WebGPU for next-generation performance
 
 ## 🗂️ Shader Directory Structure
@@ -29,7 +29,7 @@ shaders/
 │   ├── stripePass.frag.glsl       # Stripe effect rendering
 │   ├── mirrorPass.frag.glsl       # Mirror/camera effect
 │   ├── imagePass.frag.glsl        # Custom image overlay
-│   └── quiltPass.frag.glsl        # Looking Glass holographic display
+│   └── quiltPass.frag.glsl        # Looking Glass holographic display (see HOLOPLAY.md)
 │
 └── wgsl/                           # WebGPU shaders
     ├── rainPass.wgsl              # Main rain rendering (compute + render)
@@ -43,6 +43,14 @@ shaders/
 ```
 
 ## 🎯 Understanding the Rendering Pipeline
+
+### WebGL GLSL ES 1.00 precision (shared uniforms)
+
+The WebGL path uses **GLSL ES 1.00** (with extensions). Some stacks (e.g. Chrome/ANGLE) **fail program link** with:
+
+`Precisions of uniform '…' differ between VERTEX and FRAGMENT shaders`
+
+when the same `float` uniform is declared in both stages without an explicit shared precision. **Fix**: use the same qualifier in both files, e.g. `uniform mediump float glyphHeightToWidth` in `rainPass.vert.glsl`, `rainPass.frag.glsl`, and `rainPass.effect.frag.glsl` (effect pass pairs with the fullscreen quad vertex in `js/webgl/utils.js`, which uses `precision mediump float`).
 
 ### The Rain Pass
 
