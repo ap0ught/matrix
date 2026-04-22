@@ -78,6 +78,7 @@ const STATIC_ASSETS = [
 	// Libraries
 	"lib/regl.min.js",
 	"lib/three.module.js",
+	"lib/three.core.js",
 	"lib/p5.min.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
