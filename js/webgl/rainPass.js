@@ -1,4 +1,4 @@
-import { loadImage, loadText, makePassFBO, makeDoubleBuffer, makePass } from "./utils.js";
+import { loadImage, loadText, makePassFBO, makePassTexture, makeDoubleBuffer, makePass } from "./utils.js";
 
 const extractEntries = (src, keys) => Object.fromEntries(Array.from(Object.entries(src)).filter(([key]) => keys.includes(key)));
 
@@ -144,7 +144,14 @@ export default ({ regl, config, lkg }) => {
 	const glintTexture = loadImage(regl, config.glintTextureURL, true);
 	const rainPassVert = loadText("shaders/glsl/rainPass.vert.glsl");
 	const rainPassFrag = loadText("shaders/glsl/rainPass.frag.glsl");
-	const output = makePassFBO(regl, config.useHalfFloat);
+	// Volumetric rendering benefits from a depth buffer so nearer glyphs can occlude
+	// farther ones. In 2D mode we keep the lighter-weight color-only FBO.
+	const output = volumetric
+		? regl.framebuffer({
+				color: makePassTexture(regl, config.useHalfFloat),
+				depth: true,
+			})
+		: makePassFBO(regl, config.useHalfFloat);
 	const renderUniforms = {
 		...commonUniforms,
 		...extractEntries(config, [
@@ -183,6 +190,15 @@ export default ({ regl, config, lkg }) => {
 				dst: "one",
 			},
 		},
+		depth: volumetric
+			? {
+					enable: true,
+					mask: true,
+					func: "less",
+				}
+			: {
+					enable: false,
+				},
 		vert: regl.prop("vert"),
 		frag: regl.prop("frag"),
 

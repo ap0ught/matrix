@@ -664,6 +664,43 @@ export const versions = {
 		glyphRandomFlip: true,
 	},
 
+	["mathcode-3d"]: {
+		font: "mathcode",
+		volumetric: true,
+
+		// Favor readability in depth: fewer columns than 2D mathcode,
+		// higher density, and a moderate forward motion.
+		numColumns: 44,
+		density: 1.35,
+		forwardSpeed: 0.22,
+
+		animationSpeed: 0.75,
+		cycleSpeed: 0.045,
+		fallSpeed: 0.55,
+		raindropLength: 0.55,
+
+		// Keep 3D "tunnel" clean.
+		isPolar: false,
+		slant: 0,
+
+		baseBrightness: -0.85,
+		baseContrast: 1.6,
+		bloomStrength: 0.8,
+		bloomSize: 0.45,
+		highPassThreshold: 0,
+
+		cursorColor: hsl(0.55, 1, 0.95),
+		cursorIntensity: 2.2,
+		palette: [
+			{ color: hsl(0.55, 0.9, 0.0), at: 0.0 },
+			{ color: hsl(0.55, 1.0, 0.35), at: 0.55 },
+			{ color: hsl(0.56, 1.0, 0.8), at: 0.9 },
+			{ color: hsl(0.57, 1.0, 1.0), at: 1.0 },
+		],
+
+		glyphRandomFlip: true,
+	},
+
 	alphabet: {
 		/*
 		 * Alphabet — The Human Language
