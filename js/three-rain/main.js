@@ -5,12 +5,7 @@
 import * as THREE from "../../lib/three.module.js";
 import { setupFullscreenToggle } from "../fullscreen.js";
 import { buildGlyphAtlas } from "./glyphAtlas.js";
-import {
-	MATHCODE_GLYPHS,
-	ALPHABET_GLYPHS,
-	GLYPH_COUNT_MATH,
-	GLYPH_ID_ALPHA_START,
-} from "./glyphs.js";
+import { MATHCODE_GLYPHS, ALPHABET_GLYPHS, GLYPH_COUNT_MATH, GLYPH_ID_ALPHA_START } from "./glyphs.js";
 
 const vertexShader = /* glsl */ `
 precision highp float;
@@ -84,11 +79,7 @@ export default async function main(canvas, config) {
 	const dropsPerColumn = 32;
 	const count = numColumns * dropsPerColumn;
 
-	const { texture, cols: atlasCols, rows: atlasRows, totalGlyphs } = buildGlyphAtlas(
-		THREE,
-		MATHCODE_GLYPHS,
-		ALPHABET_GLYPHS,
-	);
+	const { texture, cols: atlasCols, rows: atlasRows, totalGlyphs } = buildGlyphAtlas(THREE, MATHCODE_GLYPHS, ALPHABET_GLYPHS);
 
 	const geometry = new THREE.PlaneGeometry((2 / numColumns) * 0.92, 0.11, 1, 1);
 	const phase = new Float32Array(count);
@@ -179,5 +170,4 @@ export default async function main(canvas, config) {
 		}
 		glyphAttr.needsUpdate = true;
 	}, cycleMs);
-
 }

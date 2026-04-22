@@ -11,33 +11,29 @@ import { expect } from "@playwright/test";
  * @returns {{ assertNoIssues: (context?: string) => void }}
  */
 export function attachMatrixRenderingWatchers(page) {
-  const issues = [];
+	const issues = [];
 
-  page.on("pageerror", (err) => {
-    issues.push({ source: "pageerror", text: String(err) });
-  });
+	page.on("pageerror", (err) => {
+		issues.push({ source: "pageerror", text: String(err) });
+	});
 
-  page.on("console", (msg) => {
-    const text = msg.text();
-    if (!isFailingWebglConsoleMessage(msg.type(), text)) {
-      return;
-    }
-    issues.push({ source: `console.${msg.type()}`, text });
-  });
+	page.on("console", (msg) => {
+		const text = msg.text();
+		if (!isFailingWebglConsoleMessage(msg.type(), text)) {
+			return;
+		}
+		issues.push({ source: `console.${msg.type()}`, text });
+	});
 
-  return {
-    assertNoIssues(context = "") {
-      if (issues.length === 0) {
-        return;
-      }
-      const detail = issues
-        .map((i) => `  - [${i.source}] ${i.text}`)
-        .join("\n");
-      throw new Error(
-        `Expected no Matrix/WebGL bootstrap failures${context ? ` (${context})` : ""}.\n${detail}`,
-      );
-    },
-  };
+	return {
+		assertNoIssues(context = "") {
+			if (issues.length === 0) {
+				return;
+			}
+			const detail = issues.map((i) => `  - [${i.source}] ${i.text}`).join("\n");
+			throw new Error(`Expected no Matrix/WebGL bootstrap failures${context ? ` (${context})` : ""}.\n${detail}`);
+		},
+	};
 }
 
 /**
@@ -45,36 +41,36 @@ export function attachMatrixRenderingWatchers(page) {
  * @param {string} text
  */
 function isFailingWebglConsoleMessage(type, text) {
-  // Injected hooks in js/webgl/main.js (installWebGLShaderDebugHooks)
-  if (/\[Matrix\]\[WebGL\]/.test(text)) {
-    return true;
-  }
-  // Chrome / ANGLE when program never linked
-  if (/useProgram:\s*program not valid/i.test(text)) {
-    return true;
-  }
-  // Same family: invalid program bound for draw
-  if (
-    (type === "error" || type === "warning") &&
-    /^WebGL:/i.test(text.trim()) &&
-    /INVALID_OPERATION/i.test(text) &&
-    /\b(useProgram|drawArrays|drawElements)\b/i.test(text)
-  ) {
-    return true;
-  }
-  return false;
+	// Injected hooks in js/webgl/main.js (installWebGLShaderDebugHooks)
+	if (/\[Matrix\]\[WebGL\]/.test(text)) {
+		return true;
+	}
+	// Chrome / ANGLE when program never linked
+	if (/useProgram:\s*program not valid/i.test(text)) {
+		return true;
+	}
+	// Same family: invalid program bound for draw
+	if (
+		(type === "error" || type === "warning") &&
+		/^WebGL:/i.test(text.trim()) &&
+		/INVALID_OPERATION/i.test(text) &&
+		/\b(useProgram|drawArrays|drawElements)\b/i.test(text)
+	) {
+		return true;
+	}
+	return false;
 }
 
 /** Two animation frames so regl has a chance to compile/link and run a draw after paint. */
 export async function settleAfterPaint(page) {
-  await page.evaluate(
-    () =>
-      new Promise((resolve) => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(resolve);
-        });
-      }),
-  );
+	await page.evaluate(
+		() =>
+			new Promise((resolve) => {
+				requestAnimationFrame(() => {
+					requestAnimationFrame(resolve);
+				});
+			}),
+	);
 }
 
 /**
@@ -83,7 +79,7 @@ export async function settleAfterPaint(page) {
  * @param {import("@playwright/test").Page} page
  */
 export function rainSurfaceCanvas(page) {
-  return page.locator("canvas").filter({ visible: true }).first();
+	return page.locator("canvas").filter({ visible: true }).first();
 }
 
 /**
@@ -92,19 +88,19 @@ export function rainSurfaceCanvas(page) {
  * @param {string} query - URL query string (without leading ?/) or absolute http(s) URL
  */
 export async function assertMatrixBootsClean(page, query) {
-  const watchers = attachMatrixRenderingWatchers(page);
-  const path = query.startsWith("http") ? query : `/?${query}`;
-  await page.goto(path, { waitUntil: "networkidle" });
-  const canvas = rainSurfaceCanvas(page);
-  await expect(canvas).toBeVisible({ timeout: 30_000 });
-  await settleAfterPaint(page);
-  const { w, h } = await canvas.evaluate((el) => ({
-    w: el.width,
-    h: el.height,
-  }));
-  watchers.assertNoIssues(query);
-  expect(w, `canvas width for ${query}`).toBeGreaterThan(0);
-  expect(h, `canvas height for ${query}`).toBeGreaterThan(0);
+	const watchers = attachMatrixRenderingWatchers(page);
+	const path = query.startsWith("http") ? query : `/?${query}`;
+	await page.goto(path, { waitUntil: "networkidle" });
+	const canvas = rainSurfaceCanvas(page);
+	await expect(canvas).toBeVisible({ timeout: 30_000 });
+	await settleAfterPaint(page);
+	const { w, h } = await canvas.evaluate((el) => ({
+		w: el.width,
+		h: el.height,
+	}));
+	watchers.assertNoIssues(query);
+	expect(w, `canvas width for ${query}`).toBeGreaterThan(0);
+	expect(h, `canvas height for ${query}`).toBeGreaterThan(0);
 }
 
 /**
@@ -113,10 +109,10 @@ export async function assertMatrixBootsClean(page, query) {
  * @param {string} query - URL query string (without leading ?/) or absolute http(s) URL
  */
 export async function assertGalleryBootsClean(page, query) {
-  const watchers = attachMatrixRenderingWatchers(page);
-  const path = query.startsWith("http") ? query : `/?${query}`;
-  await page.goto(path, { waitUntil: "networkidle" });
-  await expect(page.locator("#gallery-info")).toBeVisible({ timeout: 30_000 });
-  await settleAfterPaint(page);
-  watchers.assertNoIssues(query);
+	const watchers = attachMatrixRenderingWatchers(page);
+	const path = query.startsWith("http") ? query : `/?${query}`;
+	await page.goto(path, { waitUntil: "networkidle" });
+	await expect(page.locator("#gallery-info")).toBeVisible({ timeout: 30_000 });
+	await settleAfterPaint(page);
+	watchers.assertNoIssues(query);
 }
