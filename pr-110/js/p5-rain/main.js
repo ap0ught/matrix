@@ -44,8 +44,11 @@ export default async function main(canvas, config) {
 
 	function canvasCssSize() {
 		const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
-		const w = Math.ceil(canvas.clientWidth * dpr * res);
-		const h = Math.ceil(canvas.clientHeight * dpr * res);
+		// The app's primary Matrix canvas can be hidden in experimental p5 mode; do not
+		// size off its client rect. Use viewport size so Playwright (and users) always
+		// get a non-zero drawable surface.
+		const w = Math.ceil(window.innerWidth * dpr * res);
+		const h = Math.ceil(window.innerHeight * dpr * res);
 		return { w, h };
 	}
 

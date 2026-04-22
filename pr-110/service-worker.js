@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-pr-110-178-a7252ca";
+const VER = "matrix-pwa-pr-110-179-f09c6ca";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
@@ -78,6 +78,7 @@ const STATIC_ASSETS = [
 	// Libraries
 	"lib/regl.min.js",
 	"lib/three.module.js",
+	"lib/three.core.js",
 	"lib/p5.min.js",
 	"lib/gl-matrix.js",
 	"lib/gpu-buffer.js",
