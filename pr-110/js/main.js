@@ -31,9 +31,7 @@ function enforceHoloplayRenderer(config) {
 		config.renderer = "webgl";
 	}
 	if (r === "three" || r === "p5") {
-		console.warn(
-			"[Matrix] Looking Glass (Holoplay) requires the regl/WebGL rain path; ignoring experimental renderer for this session.",
-		);
+		console.warn("[Matrix] Looking Glass (Holoplay) requires the regl/WebGL rain path; ignoring experimental renderer for this session.");
 		config.renderer = "webgl";
 	}
 }
@@ -695,9 +693,7 @@ async function initializeGalleryMode() {
 					? await import("./three-rain/main.js")
 					: rendererName === "p5"
 						? await import("./p5-rain/main.js")
-						: await import(
-								`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`,
-							);
+						: await import(`./${(await supportsWebGPU()) && rendererName === "webgpu" ? "webgpu" : "webgl"}/main.js`);
 			currentMatrixRenderer = solution;
 			await startMatrix(currentMatrixRenderer, canvas, newConfig);
 		} else {
