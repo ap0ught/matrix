@@ -157,6 +157,7 @@ export default ({ regl, config, lkg }) => {
 	let raindrop;
 	let symbol;
 	let effect;
+	let renderDepth;
 	let render;
 	// Bind all rain GLSL as static strings after fetch. `regl.prop("frag")` with a
 	// missing/undefined source becomes shaderSource(undefined) → GLSL `undefined` at line 0.
@@ -240,23 +241,7 @@ export default ({ regl, config, lkg }) => {
 			},
 			framebuffer: effectDoubleBuffer.front,
 		});
-		render = regl({
-			blend: {
-				enable: true,
-				func: {
-					src: "one",
-					dst: "one",
-				},
-			},
-			depth: volumetric
-				? {
-						enable: true,
-						mask: true,
-						func: "less",
-					}
-				: {
-						enable: false,
-					},
+		const renderOptions = {
 			vert: vertSource,
 			frag: fragSource,
 
@@ -290,6 +275,38 @@ export default ({ regl, config, lkg }) => {
 			count: numQuads * numVerticesPerQuad,
 
 			framebuffer: output,
+		};
+
+		if (volumetric) {
+			renderDepth = regl({
+				...renderOptions,
+				colorMask: [false, false, false, false],
+				depth: {
+					enable: true,
+					mask: true,
+					func: "less",
+				},
+			});
+		}
+
+		render = regl({
+			...renderOptions,
+			blend: {
+				enable: true,
+				func: {
+					src: "one",
+					dst: "one",
+				},
+			},
+			depth: volumetric
+				? {
+						enable: true,
+						mask: false,
+						func: "equal",
+					}
+				: {
+						enable: false,
+					},
 		});
 	});
 
@@ -379,6 +396,9 @@ export default ({ regl, config, lkg }) => {
 				});
 
 				for (const vantagePoint of vantagePoints) {
+					if (volumetric) {
+						renderDepth({ ...vantagePoint, transform, screenSize });
+					}
 					render({ ...vantagePoint, transform, screenSize });
 				}
 			}
