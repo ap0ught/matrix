@@ -29,7 +29,7 @@ const FONT_CHARS = {
 	coptic: [..."ϢϣϤϥϦϧϨϩϪϫϬϭϮϯⲀⲁⲂⲃⲄⲅⲆⲇⲈⲉⲊⲋⲌⲍⲎⲏⲐⲑⲒⲓ"],
 
 	// Latin A–Za–z (matches `fonts.alphabet` / alphabet version)
-	alphabet: [...("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")],
+	alphabet: [..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"],
 
 	// Mathcode — mathematical symbols, Greek letters, set notation, arrows, stars
 	mathcode: [

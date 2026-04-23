@@ -47,7 +47,7 @@ export const MATHCODE_GLYPHS = [
 	"𝝿",
 ];
 
-export const ALPHABET_GLYPHS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")];
+export const ALPHABET_GLYPHS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"];
 
 export const GLYPH_COUNT_MATH = MATHCODE_GLYPHS.length;
 export const GLYPH_COUNT_ALPHA = ALPHABET_GLYPHS.length;
