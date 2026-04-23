@@ -13,7 +13,7 @@ const baseQuery = "suppressWarnings=true&skipIntro=true&version=classic";
 /** Effects from getAvailableEffects() except gallery and image (image needs a reachable bg; tested separately). */
 const EFFECTS = ["none", "plain", "palette", "customStripes", "stripes", "rainbow", "spectrum", "mirror"];
 
-const VERSION_SAMPLES = ["classic", "mathcode", "resurrections"];
+const VERSION_SAMPLES = ["classic", "mathcode", "mathcode-3d", "resurrections"];
 
 test.describe("Matrix WebGL effects smoke", () => {
 	for (const effect of EFFECTS) {

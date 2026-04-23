@@ -257,11 +257,15 @@ export default ({ config, device, timeBuffer }) => {
 					module: rainShader.module,
 					entryPoint: "vertMain",
 				},
-				depthStencil: {
-					format: "depth24plus",
-					depthWriteEnabled: true,
-					depthCompare: "less",
-				},
+				...(config.volumetric
+					? {
+							depthStencil: {
+								format: "depth24plus",
+								depthWriteEnabled: true,
+								depthCompare: "less",
+							},
+						}
+					: {}),
 				fragment: {
 					module: rainShader.module,
 					entryPoint: "fragMain",
@@ -323,11 +327,13 @@ export default ({ config, device, timeBuffer }) => {
 		highPassOutput = makeRenderTarget(device, size, renderFormat);
 
 		depthTexture?.destroy();
-		depthTexture = device.createTexture({
-			size,
-			format: "depth24plus",
-			usage: GPUTextureUsage.RENDER_ATTACHMENT,
-		});
+		depthTexture = config.volumetric
+			? device.createTexture({
+					size: [size[0], size[1], 1],
+					format: "depth24plus",
+					usage: GPUTextureUsage.RENDER_ATTACHMENT,
+				})
+			: null;
 
 		return {
 			primary: output,
@@ -353,12 +359,16 @@ export default ({ config, device, timeBuffer }) => {
 		if (shouldRender) {
 			renderPassConfig.colorAttachments[0].view = output.createView();
 			renderPassConfig.colorAttachments[1].view = highPassOutput.createView();
-			renderPassConfig.depthStencilAttachment = {
-				view: depthTexture.createView(),
-				depthLoadOp: "clear",
-				depthStoreOp: "store",
-				depthClearValue: 1.0,
-			};
+			if (config.volumetric && depthTexture != null) {
+				renderPassConfig.depthStencilAttachment = {
+					view: depthTexture.createView(),
+					depthLoadOp: "clear",
+					depthStoreOp: "store",
+					depthClearValue: 1.0,
+				};
+			} else {
+				delete renderPassConfig.depthStencilAttachment;
+			}
 			const renderPass = encoder.beginRenderPass(renderPassConfig);
 			renderPass.setPipeline(renderPipeline);
 			renderPass.setBindGroup(0, renderBindGroup);
