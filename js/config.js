@@ -684,8 +684,9 @@ export const versions = {
 		animationSpeed: 0.75,
 		cycleSpeed: 0.045,
 		fallSpeed: 0.55,
-		// Match classic 3d raindropLength so dark gaps are always visible
-		// (numColumns * 0.01 / raindropLength = 1.47 cycles, consistent with trinity/bugs).
+		// Match classic 3d raindropLength so dark gaps are always visible.
+		// For this preset's numColumns: 44, numColumns * 0.01 / raindropLength = 1.47 cycles;
+		// trinity/bugs share raindropLength: 0.3, but use different numColumns.
 		raindropLength: 0.3,
 
 		// Keep 3D "tunnel" clean.
