@@ -665,7 +665,9 @@ export const versions = {
 			{ color: hsl(0.56, 1.0, 0.8), at: 0.9 },
 			{ color: hsl(0.57, 1.0, 1.0), at: 1.0 },
 		],
-		raindropLength: 1.2,
+		// Short enough that one full brightness cycle is always visible across the column
+		// (numColumns * 0.01 / raindropLength > 1), ensuring dark gaps between glyphs.
+		raindropLength: 0.45,
 		glyphRandomFlip: true,
 	},
 
@@ -682,7 +684,10 @@ export const versions = {
 		animationSpeed: 0.75,
 		cycleSpeed: 0.045,
 		fallSpeed: 0.55,
-		raindropLength: 0.55,
+		// Match classic 3d raindropLength so dark gaps are always visible.
+		// For this preset's numColumns: 44, numColumns * 0.01 / raindropLength = 1.47 cycles;
+		// trinity/bugs share raindropLength: 0.3, but use different numColumns.
+		raindropLength: 0.3,
 
 		// Keep 3D "tunnel" clean.
 		isPolar: false,
