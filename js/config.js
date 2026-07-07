@@ -920,6 +920,11 @@ const paramMapping = {
 	switchInterval: { key: "modeSwitchInterval", parser: (s) => nullNaN(Math.max(60000, parseInt(s))) }, // Minimum 1 minute
 	showModeInfo: { key: "showModeInfo", parser: isTrue },
 
+	// Gallery screensaver timing
+	shaderDisplayDuration: { key: "shaderDisplayDuration", parser: (s) => nullNaN(parseInt(s)) },
+	fortuneDuration: { key: "fortuneDuration", parser: (s) => nullNaN(parseInt(s)) },
+	screenshotCaptureDuration: { key: "screenshotCaptureDuration", parser: (s) => nullNaN(parseInt(s)) },
+
 	// Multi-monitor fullscreen parameters
 	fullscreenMultiple: { key: "fullscreenMultiple", parser: isTrue },
 	fullscreenUniform: { key: "fullscreenUniform", parser: isTrue },
