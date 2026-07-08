@@ -66,6 +66,18 @@ export default async (canvas, config) => {
 	// Setup fullscreen toggle with proper cleanup
 	const cleanupFullscreen = setupFullscreenToggle(canvas);
 
+	// Recalculate canvas size when entering/exiting fullscreen.
+	// Chrome does not always fire window resize with updated clientWidth/clientHeight
+	// when entering/exiting fullscreen, so the render canvas keeps its pre-fullscreen
+	// bitmap size and looks badly scaled in fullscreen only.
+	const recalcOnFullscreenChange = () => {
+		resize();
+	};
+	document.addEventListener("fullscreenchange", recalcOnFullscreenChange);
+	document.addEventListener("webkitfullscreenchange", recalcOnFullscreenChange);
+	document.addEventListener("mozfullscreenchange", recalcOnFullscreenChange);
+	document.addEventListener("MSFullscreenChange", recalcOnFullscreenChange);
+
 	resize();
 
 	if (config.useCamera) {
