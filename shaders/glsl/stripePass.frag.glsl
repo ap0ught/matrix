@@ -24,10 +24,13 @@ uniform float cursorIntensity, glintIntensity;
 varying vec2 vUV;
 
 // Pseudo-random noise function for dithering
+// The coordinate is folded into a small range first: gl_FragCoord is mediump (16-bit on
+// some drivers), so the dot product overflows to Inf past ~1300x800, and Inf -> NaN through
+// mod()/fract() turns into a solid white wedge once min(NaN, 1.0) resolves to 1.0 below.
 highp float rand( const in vec2 uv, const in float t ) {
 	const highp float a = 12.9898, b = 78.233, c = 43758.5453;
-	highp float dt = dot( uv.xy, vec2( a,b ) ), sn = mod( dt, PI );
-	return fract(sin(sn) * c + t);
+	highp float dt = dot( mod( uv.xy, 256.0 ), vec2( a,b ) ), sn = mod( dt, PI );
+	return fract( sin(sn) * c + fract( t ) );
 }
 
 // Combine base rain rendering with bloom glow
