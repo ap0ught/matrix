@@ -2,13 +2,17 @@
  * Date/time drop smoke tests (js/clock.js).
  *
  * The overlay is pinned to a fixed second of the minute so both phases are deterministic:
- *   - hold: the date/time sits at the top and nothing is painted below it
- *   - fall: the string has peeled off and glyphs are painted far down the screen
+ *   - hold (seconds 0-9): the date and time sit stacked at the top, nothing painted below
+ *   - fall: characters have peeled off and are dropping at the rain's speed. They fall *fast* —
+ *     the slowest column clears a tall screen in a few seconds — so the fall has to be sampled
+ *     early, not halfway down the minute.
  *
- * The phase maths itself is unit tested in tests/clock-phase.test.mjs.
+ * The phase maths and the rain-derived fall speed are unit tested in tests/clock-phase.test.mjs.
  */
 import { expect, test } from "@playwright/test";
 import { attachMatrixRenderingWatchers, rainSurfaceCanvas } from "./matrix-playwright-helpers.js";
+
+import { CLOCK_HOLD_SECONDS } from "../js/clock.js";
 
 const VIEWPORT = { width: 420, height: 860 };
 
@@ -113,11 +117,13 @@ test.describe("Date/time drop", () => {
 		const heldHeader = await headerBandBrightness(page);
 
 		const falling = await page.context().newPage();
-		await openWithClock(falling, "dateTimeOverlay=true", 32);
+		// Three seconds into the fall: the first characters are mid-screen.
+		await openWithClock(falling, "dateTimeOverlay=true", CLOCK_HOLD_SECONDS + 3);
 
 		const extent = await paintedExtent(falling);
 		expect(extent.pixels, "the clock should paint something").toBeGreaterThan(100);
-		// Characters peel off in order, so glyphs are well down the screen by mid-fall...
+		// Characters peel off in order and fall at rain speed, so they are well down the screen
+		// seconds after the hold ends...
 		expect(extent.bottom).toBeGreaterThan(VIEWPORT.height * 0.4);
 		// ...and the header no longer holds the date/time, it holds scrambled glyphs and trails.
 		const fallingHeader = await headerBandBrightness(falling);
