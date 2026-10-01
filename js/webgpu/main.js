@@ -21,8 +21,26 @@ const loadJS = (src) =>
 		document.body.appendChild(tag);
 	});
 
-export default async (canvas, config) => {
-	await loadJS("lib/gl-matrix.js");
+/*
+ * gl-matrix installs a page global, so it only needs injecting once — even when the renderer is
+ * rebuilt for a new config (see `updateConfig` below).
+ */
+const scriptLoads = new Map();
+const loadScriptOnce = (src) => {
+	if (!scriptLoads.has(src)) {
+		scriptLoads.set(src, loadJS(src));
+	}
+	return scriptLoads.get(src);
+};
+
+/*
+ * The renderer currently attached to a canvas, so `updateConfig` can tear it down and build a new
+ * pipeline on the same canvas (gallery item picks, screensaver mode switches).
+ */
+let activeSession = null;
+
+const startWebGPUMatrix = async (canvas, config) => {
+	await loadScriptOnce("lib/gl-matrix.js");
 
 	// Setup fullscreen toggle with proper cleanup
 	const cleanupFullscreen = setupFullscreenToggle(canvas);
@@ -125,37 +143,73 @@ export default async (canvas, config) => {
 		device.queue.submit([encoder.finish()]);
 
 		if (!config.once) {
-			requestAnimationFrame(renderLoop);
+			raf = requestAnimationFrame(renderLoop);
 		}
 	};
 
-	requestAnimationFrame(renderLoop);
+	// Chrome can enter/exit fullscreen without firing window resize with updated
+	// clientWidth/clientHeight, so the render target stays at the old bitmap size
+	// and looks scaled only in fullscreen.
+	const recalcOutputs = () => {
+		const devicePixelRatio = window.devicePixelRatio ?? 1;
+		const canvasWidth = Math.ceil(canvas.clientWidth * devicePixelRatio * config.resolution);
+		const canvasHeight = Math.ceil(canvas.clientHeight * devicePixelRatio * config.resolution);
+		const canvasSize = [canvasWidth, canvasHeight];
+		if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
+			canvas.width = canvasWidth;
+			canvas.height = canvasHeight;
+			outputs = pipeline.build(canvasSize);
+		}
+	};
+
+	const recalcFullscreenChange = () => {
+		recalcOutputs();
+		if (config.useCamera) {
+			device.queue.copyExternalImageToTexture({ source: cameraCanvas }, { texture: cameraTex }, cameraSize);
+		}
+	};
+
+	document.addEventListener("fullscreenchange", recalcFullscreenChange);
+	document.addEventListener("webkitfullscreenchange", recalcFullscreenChange);
+	document.addEventListener("mozfullscreenchange", recalcFullscreenChange);
+	document.addEventListener("MSFullscreenChange", recalcFullscreenChange);
+	window.addEventListener("resize", recalcOutputs);
+
+	let raf = requestAnimationFrame(renderLoop);
+
+	activeSession = {
+		canvas,
+		dispose: () => {
+			cancelAnimationFrame(raf);
+			document.removeEventListener("fullscreenchange", recalcFullscreenChange);
+			document.removeEventListener("webkitfullscreenchange", recalcFullscreenChange);
+			document.removeEventListener("mozfullscreenchange", recalcFullscreenChange);
+			document.removeEventListener("MSFullscreenChange", recalcFullscreenChange);
+			window.removeEventListener("resize", recalcOutputs);
+			cleanupFullscreen();
+			device.destroy();
+			if (activeSession?.canvas === canvas) {
+				activeSession = null;
+			}
+		},
+	};
 };
 
-// Chrome can enter/exit fullscreen without firing window resize with updated
-// clientWidth/clientHeight, so the render target stays at the old bitmap size
-// and looks scaled only in fullscreen.
-const recalcOutputs = () => {
-	const devicePixelRatio = window.devicePixelRatio ?? 1;
-	const canvasWidth = Math.ceil(canvas.clientWidth * devicePixelRatio * config.resolution);
-	const canvasHeight = Math.ceil(canvas.clientHeight * devicePixelRatio * config.resolution);
-	const canvasSize = [canvasWidth, canvasHeight];
-	if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
-		canvas.width = canvasWidth;
-		canvas.height = canvasHeight;
-		outputs = pipeline.build(canvasSize);
+export default startWebGPUMatrix;
+
+/**
+ * Rebuild the renderer with a new config on the same canvas, so gallery item picks and
+ * screensaver mode switches actually change what is on screen.
+ *
+ * @param {import("../config.js").MatrixConfig} config
+ * @returns {Promise<void>}
+ */
+export const updateConfig = (config) => {
+	const session = activeSession;
+	if (!session) {
+		console.warn("[Matrix][WebGPU] updateConfig() called before the renderer started");
+		return Promise.resolve();
 	}
+	session.dispose();
+	return startWebGPUMatrix(session.canvas, config);
 };
-
-const recalcFullscreenChange = () => {
-	recalcOutputs();
-	if (config.useCamera) {
-		device.queue.copyExternalImageToTexture({ source: cameraCanvas }, { texture: cameraTex }, cameraSize);
-	}
-};
-
-document.addEventListener("fullscreenchange", recalcFullscreenChange);
-document.addEventListener("webkitfullscreenchange", recalcFullscreenChange);
-document.addEventListener("mozfullscreenchange", recalcFullscreenChange);
-document.addEventListener("MSFullscreenChange", recalcFullscreenChange);
-window.addEventListener("resize", recalcOutputs);

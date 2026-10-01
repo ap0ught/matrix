@@ -14,6 +14,21 @@ const loadJS = (src) =>
 		document.body.appendChild(tag);
 	});
 
+/* p5 installs a page global, so it only needs injecting once — even across renderer rebuilds. */
+const scriptLoads = new Map();
+const loadScriptOnce = (src) => {
+	if (!scriptLoads.has(src)) {
+		scriptLoads.set(src, loadJS(src));
+	}
+	return scriptLoads.get(src);
+};
+
+/*
+ * The renderer currently attached to a canvas, so `updateConfig` can tear it down and build a new
+ * sketch on the same canvas (gallery item picks, screensaver mode switches).
+ */
+let activeSession = null;
+
 function randomGlyph() {
 	return MATHCODE_GLYPHS[Math.floor(Math.random() * MATHCODE_GLYPHS.length)] ?? "?";
 }
@@ -22,8 +37,8 @@ function randomGlyph() {
  * @param {HTMLCanvasElement} canvas
  * @param {import("../config.js").MatrixConfig} config
  */
-export default async function main(canvas, config) {
-	await loadJS("lib/p5.min.js");
+const startP5Rain = async (canvas, config) => {
+	await loadScriptOnce("lib/p5.min.js");
 	const P5 = globalThis.p5;
 	if (typeof P5 !== "function") {
 		throw new Error("[p5-rain] global p5 not found after loading lib/p5.min.js");
@@ -129,10 +144,10 @@ export default async function main(canvas, config) {
 		};
 	};
 
-	new P5(sketch, document.body);
+	const sketchInstance = new P5(sketch, document.body);
 
 	const cycleMs = Math.max(200, Math.min(2500, (1 / (config.cycleSpeed ?? 0.05)) * 45));
-	window.setInterval(() => {
+	const cycleTimer = window.setInterval(() => {
 		for (const col of columns) {
 			for (const g of col) {
 				if (Math.random() < 0.2) {
@@ -141,4 +156,35 @@ export default async function main(canvas, config) {
 			}
 		}
 	}, cycleMs);
-}
+
+	activeSession = {
+		canvas,
+		dispose: () => {
+			window.clearInterval(cycleTimer);
+			cleanupFullscreen();
+			// Drops the sketch's canvas and draw loop so a rebuild does not stack two of them.
+			sketchInstance.remove();
+			if (activeSession?.canvas === canvas) {
+				activeSession = null;
+			}
+		},
+	};
+};
+
+export default startP5Rain;
+
+/**
+ * Rebuild the renderer with a new config on the same canvas.
+ *
+ * @param {import("../config.js").MatrixConfig} config
+ * @returns {Promise<void>}
+ */
+export const updateConfig = (config) => {
+	const session = activeSession;
+	if (!session) {
+		console.warn("[Matrix][p5-rain] updateConfig() called before the renderer started");
+		return Promise.resolve();
+	}
+	session.dispose();
+	return startP5Rain(session.canvas, config);
+};

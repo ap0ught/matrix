@@ -335,18 +335,34 @@ export default class GalleryManager {
 		}
 
 		const item = this.currentPlaylist[this.currentIndex];
-		const screenshotPath = this.getScreenshotPath(item);
 
-		// Check if screenshot exists
-		const exists = await this.checkScreenshotExists(screenshotPath);
-		if (!exists) {
-			// Need to capture screenshot
-			this.captureScreenshot(item, () => {
+		/*
+		 * Whatever happens while displaying an item, the slideshow keeps moving: a thrown
+		 * callback (renderer restart, missing screenshot) must not leave the timer unset and
+		 * freeze the gallery on one entry forever.
+		 */
+		try {
+			const screenshotPath = this.getScreenshotPath(item);
+
+			// Check if screenshot exists
+			const exists = await this.checkScreenshotExists(screenshotPath);
+			if (!exists) {
+				// Need to capture screenshot
+				this.captureScreenshot(item, () => {
+					this.scheduleNextItem();
+				});
+			} else {
+				// Screenshot exists, just display
+				this.displayItem(item);
 				this.scheduleNextItem();
-			});
-		} else {
-			// Screenshot exists, just display
-			this.displayItem(item);
+			}
+		} catch (error) {
+			console.error("[Matrix] Gallery item failed:", item?.title, error);
+			try {
+				this.displayItem(item);
+			} catch (displayError) {
+				console.error("[Matrix] Gallery could not display:", item?.title, displayError);
+			}
 			this.scheduleNextItem();
 		}
 	}

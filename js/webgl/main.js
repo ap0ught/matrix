@@ -12,8 +12,6 @@ import getLKG from "./lkgHelper.js";
 import { setupFullscreenToggle } from "../fullscreen.js";
 import { createEffectsMapping, getEffectPass } from "../effects.js";
 
-const dimensions = { width: 1, height: 1 };
-
 /**
  * Surface the first shader compile / program link failure (otherwise the browser only shows
  * INVALID_OPERATION: useProgram: program not valid and then suppresses further errors).
@@ -52,8 +50,27 @@ const loadJS = (src) =>
 		document.body.appendChild(tag);
 	});
 
-export default async (canvas, config) => {
-	await Promise.all([loadJS("lib/regl.min.js"), loadJS("lib/gl-matrix.js")]);
+/*
+ * regl and gl-matrix install page globals, so each script only needs to be injected once —
+ * even when the renderer is rebuilt for a new config (see `updateConfig` below).
+ */
+const scriptLoads = new Map();
+const loadScriptOnce = (src) => {
+	if (!scriptLoads.has(src)) {
+		scriptLoads.set(src, loadJS(src));
+	}
+	return scriptLoads.get(src);
+};
+
+/*
+ * The renderer currently attached to a canvas. `updateConfig` tears it down and builds a new
+ * pipeline on the same canvas, which is how gallery item picks and screensaver mode switches
+ * change what is on screen (see `restartMatrixWithNewConfig` in js/main.js).
+ */
+let activeSession = null;
+
+const startWebGLMatrix = async (canvas, config) => {
+	await Promise.all([loadScriptOnce("lib/regl.min.js"), loadScriptOnce("lib/gl-matrix.js")]);
 	installWebGLShaderDebugHooks();
 
 	const resize = () => {
@@ -134,6 +151,9 @@ export default async (canvas, config) => {
 
 	const targetFrameTimeMilliseconds = 1000 / config.fps;
 	let last = NaN;
+	// Per-pipeline size bookkeeping: a fresh pipeline must resize its passes even when the
+	// viewport matches the previous one, so this cannot be shared across restarts.
+	const dimensions = { width: 1, height: 1 };
 
 	const tick = regl.frame(({ viewportWidth, viewportHeight }) => {
 		if (config.once) {
@@ -169,4 +189,42 @@ export default async (canvas, config) => {
 		}
 		blitToCanvas();
 	});
+
+	activeSession = {
+		canvas,
+		dispose: () => {
+			tick.cancel();
+			regl.destroy();
+			document.removeEventListener("fullscreenchange", recalcOnFullscreenChange);
+			document.removeEventListener("webkitfullscreenchange", recalcOnFullscreenChange);
+			document.removeEventListener("mozfullscreenchange", recalcOnFullscreenChange);
+			document.removeEventListener("MSFullscreenChange", recalcOnFullscreenChange);
+			cleanupFullscreen();
+			if (activeSession?.canvas === canvas) {
+				activeSession = null;
+			}
+		},
+	};
+};
+
+export default startWebGLMatrix;
+
+/**
+ * Rebuild the renderer with a new config on the same canvas.
+ *
+ * regl frees its GPU resources on `destroy()` without losing the WebGL context, so the canvas
+ * can be handed straight to a new regl instance — that is what makes gallery item picks and
+ * screensaver mode switches actually change what is on screen.
+ *
+ * @param {import("../config.js").MatrixConfig} config
+ * @returns {Promise<void>}
+ */
+export const updateConfig = (config) => {
+	const session = activeSession;
+	if (!session) {
+		console.warn("[Matrix][WebGL] updateConfig() called before the renderer started");
+		return Promise.resolve();
+	}
+	session.dispose();
+	return startWebGLMatrix(session.canvas, config);
 };
