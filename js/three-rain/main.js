@@ -68,11 +68,17 @@ function pickGlyphId(column) {
 	return GLYPH_ID_ALPHA_START + randomInt(ALPHABET_GLYPHS.length);
 }
 
+/*
+ * The renderer currently attached to a canvas, so `updateConfig` can tear it down and build a new
+ * scene on the same canvas (gallery item picks, screensaver mode switches).
+ */
+let activeSession = null;
+
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {import("../config.js").MatrixConfig} config
  */
-export default async function main(canvas, config) {
+const startThreeRain = async (canvas, config) => {
 	const cleanupFullscreen = setupFullscreenToggle(canvas);
 
 	const numColumns = Math.max(16, Math.min(80, Number(config.numColumns) || 40));
@@ -170,4 +176,39 @@ export default async function main(canvas, config) {
 		}
 		glyphAttr.needsUpdate = true;
 	}, cycleMs);
-}
+
+	activeSession = {
+		canvas,
+		dispose: () => {
+			cancelAnimationFrame(raf);
+			window.clearInterval(cycleTimer);
+			window.removeEventListener("resize", resize);
+			cleanupFullscreen();
+			geometry.dispose();
+			material.dispose();
+			texture.dispose();
+			renderer.dispose();
+			if (activeSession?.canvas === canvas) {
+				activeSession = null;
+			}
+		},
+	};
+};
+
+export default startThreeRain;
+
+/**
+ * Rebuild the renderer with a new config on the same canvas.
+ *
+ * @param {import("../config.js").MatrixConfig} config
+ * @returns {Promise<void>}
+ */
+export const updateConfig = (config) => {
+	const session = activeSession;
+	if (!session) {
+		console.warn("[Matrix][three-rain] updateConfig() called before the renderer started");
+		return Promise.resolve();
+	}
+	session.dispose();
+	return startThreeRain(session.canvas, config);
+};

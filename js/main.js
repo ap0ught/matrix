@@ -578,28 +578,42 @@ function initializeMultiMonitorManager(config) {
 	});
 }
 
+/*
+ * Restarts are serialized: the gallery can advance (or the user can pick an item) while a
+ * previous switch is still building its pipeline, and two overlapping teardown/init pairs
+ * would leave a half-torn-down renderer attached to the canvas.
+ */
+let restartChain = Promise.resolve();
+
 /**
  * Restart the Matrix renderer with new configuration
  */
-async function restartMatrixWithNewConfig(newConfig) {
-	if (!currentMatrixRenderer) return;
+function restartMatrixWithNewConfig(newConfig) {
+	restartChain = restartChain
+		.then(async () => {
+			if (!currentMatrixRenderer) return;
 
-	// Update the global config
-	Object.assign(matrixConfig, newConfig);
+			// Update the global config
+			Object.assign(matrixConfig, newConfig);
 
-	// The Matrix renderer should automatically pick up the config changes
-	// Most Matrix implementations are designed to be reactive to config changes
-	// Try to update the renderer's config directly, if supported
-	if (typeof currentMatrixRenderer.updateConfig === "function") {
-		currentMatrixRenderer.updateConfig(newConfig);
-	}
-	// Note: Fallback path removed as Matrix renderers are reactive to config changes
-	// Note: Fallback path removed as Matrix renderers are reactive to config changes.
-	// If the renderer does not support updateConfig(), it is assumed to automatically
-	// pick up changes from the global config object (matrixConfig). If this is not the case,
-	// you may need to implement additional logic to handle config updates for such renderers.
+			/*
+			 * Config lives inside each renderer's pipeline (passes read it when they are built),
+			 * so a config change only takes effect if the renderer rebuilds. Each entry point in
+			 * js/webgl, js/webgpu, js/three-rain and js/p5-rain exports `updateConfig` for this.
+			 */
+			if (typeof currentMatrixRenderer.updateConfig === "function") {
+				await currentMatrixRenderer.updateConfig(newConfig);
+			} else {
+				console.error("[Matrix] Renderer cannot restart with a new config — nothing on screen will change");
+			}
 
-	console.log(`Matrix restarted with: ${newConfig.version || "default"} + ${newConfig.effect || "default"}`);
+			console.log(`Matrix restarted with: ${newConfig.version || "default"} + ${newConfig.effect || "default"}`);
+		})
+		.catch((error) => {
+			console.error("[Matrix] Failed to switch renderer config:", error);
+		});
+
+	return restartChain;
 }
 
 /**

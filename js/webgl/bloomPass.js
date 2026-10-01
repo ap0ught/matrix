@@ -21,9 +21,14 @@ export default ({ regl, config }, inputs) => {
 
 	// If there's no bloom to apply, return a no-op pass with an empty bloom texture
 	if (!enabled) {
+		const bloom = makePassFBO(regl);
+		// Texture storage is uninitialised, so this 1x1 sample can read back as recycled GPU
+		// memory instead of black — which the palette pass adds to every pixel and shows as a
+		// flat grey wash over the whole screen. Zero it once; nothing ever resizes it.
+		regl.clear({ framebuffer: bloom, color: [0, 0, 0, 0], depth: 1 });
 		return makePass({
 			primary: inputs.primary,
-			bloom: makePassFBO(regl),
+			bloom,
 		});
 	}
 
