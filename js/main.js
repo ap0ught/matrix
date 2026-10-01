@@ -9,6 +9,7 @@ import { formatModeName } from "./utils.js";
 import MultiMonitorManager from "./multi-monitor.js";
 import { setMultiMonitorManager, setMatrixConfig } from "./fullscreen.js";
 import { updateFavicon } from "./favicon.js";
+import DateTimeOverlay from "./clock.js";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -231,6 +232,17 @@ let modeDisplay = null;
 let currentMatrixRenderer = null;
 let galleryManager = null;
 let multiMonitorManager = null;
+let dateTimeOverlay = null;
+
+/**
+ * Attach the Matrix date/time drop, once, if the config asks for it.
+ * It stays up across mode switches: it reads the wall clock, not the renderer config.
+ * @param {Object} config - Matrix config
+ */
+function startDateTimeOverlay(config) {
+	if (dateTimeOverlay) return;
+	dateTimeOverlay = DateTimeOverlay.createIfEnabled(config);
+}
 
 const supportsWebGPU = async () => {
 	return window.GPUQueue != null && navigator.gpu != null && navigator.gpu.getPreferredCanvasFormat != null;
@@ -675,6 +687,9 @@ async function startMatrix(matrixRenderer, canvas, config) {
 	// Note: setupFullscreenToggle is called within the renderer implementations
 	// (webgl/main.js and webgpu/main.js) to avoid duplicate event listeners
 	await matrixRenderer.default(canvas, config);
+
+	// The date/time drop rides above whichever renderer started; no-op unless enabled.
+	startDateTimeOverlay(config);
 }
 
 /**

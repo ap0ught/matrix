@@ -365,6 +365,9 @@ const defaults = {
 	spotifyClientId: null, // Spotify application client ID
 	spotifyControlsVisible: false, // Whether Spotify controls UI is visible by default
 
+	// Date/time clock overlay: "auto" shows it on a phone-sized installed/fullscreen PWA
+	dateTimeOverlay: "auto",
+
 	// Screensaver mode settings
 	screensaverMode: true, // Whether to enable automatic mode switching
 	modeDisplayEnabled: true, // Whether to show current mode information
@@ -913,6 +916,9 @@ const paramMapping = {
 	spotifyEnabled: { key: "spotifyEnabled", parser: isTrue },
 	spotifyClientId: { key: "spotifyClientId", parser: (s) => s },
 	spotifyControls: { key: "spotifyControlsVisible", parser: isTrue },
+
+	// Date/time clock overlay: "auto" | "true" | "false"
+	dateTimeOverlay: { key: "dateTimeOverlay", parser: (s) => s },
 
 	// Screensaver mode parameters
 	screensaver: { key: "screensaverMode", parser: isTrue },
