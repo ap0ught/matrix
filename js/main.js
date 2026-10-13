@@ -10,6 +10,7 @@ import MultiMonitorManager from "./multi-monitor.js";
 import { setMultiMonitorManager, setMatrixConfig } from "./fullscreen.js";
 import { updateFavicon } from "./favicon.js";
 import DateTimeOverlay from "./clock.js";
+import { inject } from "@vercel/analytics";
 
 /*
  * Matrix Digital Rain - Main Entry Point
@@ -283,6 +284,12 @@ document.body.onload = async () => {
 	 */
 	await Promise.all([loadVersion(), loadServiceWorkerVerStamp()]);
 	displayVersionInfo();
+
+	/*
+	 * Initialize Vercel Web Analytics
+	 * Tracks page views and visitor data when deployed
+	 */
+	inject();
 
 	/*
 	 * Configuration Parsing
