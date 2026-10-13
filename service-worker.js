@@ -10,7 +10,7 @@
 
 // Unique per GitHub Actions deploy so the browser fetches a new service worker and cache.
 // Remains "local" for development; workflows replace this string before publishing.
-const VER = "matrix-pwa-34-7c751d5";
+const VER = "matrix-pwa-35-735b201";
 
 // Determine the base path for this service worker
 // This allows the app to work in subdirectories (e.g., GitHub Pages PR previews)
