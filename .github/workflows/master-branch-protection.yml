@@ -148,6 +148,25 @@ jobs:
         
         echo "✅ HTML structure is valid"
         
+    - name: Validate Vercel deploy config
+      run: |
+        echo "Validating Vercel deploy config..."
+        node -e '
+        const fs = require("node:fs");
+        const path = require("node:path");
+        if (!fs.existsSync("vercel.json")) {
+          console.error("❌ vercel.json is missing; the Vercel deploy has no output directory");
+          process.exit(1);
+        }
+        const cfg = JSON.parse(fs.readFileSync("vercel.json", "utf8"));
+        const dir = cfg.outputDirectory == null ? "." : String(cfg.outputDirectory);
+        const indexFile = path.join(dir, "index.html");
+        if (!fs.existsSync(indexFile)) {
+          console.error("❌ vercel.json outputDirectory (" + dir + ") does not contain index.html; Vercel would deploy a broken site");
+          process.exit(1);
+        }
+        console.log("✅ Vercel outputDirectory " + dir + " contains index.html");
+        '
     - name: Cleanup
       if: always()
       run: |
